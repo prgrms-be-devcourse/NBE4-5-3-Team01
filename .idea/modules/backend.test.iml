@@ -2,7 +2,6 @@
 <module external.linked.project.id="backend:test" external.linked.project.path="$MODULE_DIR$/../../backend" external.root.project.path="$MODULE_DIR$/../../backend" external.system.id="GRADLE" external.system.module.group="org.example" external.system.module.type="sourceSet" external.system.module.version="1.0-SNAPSHOT" type="JAVA_MODULE" version="4">
   <component name="AdditionalModuleElements">
     <content url="file://$MODULE_DIR$/../../backend/src/test" dumb="true">
-      <sourceFolder url="file://$MODULE_DIR$/../../backend/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../backend/src/test/resources" type="java-test-resource" />
     </content>
   </component>
