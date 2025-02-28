@@ -32,8 +32,6 @@
 <br/>
 
 ## 4. 작업 및 역할 분담
-   |     |                                                                                         |                                                                                                  |
-   |-----|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
 
 
 <br/>
@@ -63,14 +61,14 @@
 - Slack
 - Notion
 
-## UML
-![image]()
+## Usecase Diagram
+![Image](https://github.com/user-attachments/assets/25027dd8-1c86-45eb-920f-16332de7f1d3)
 
 ## ERD
-![Blue White Illustration Group Project Presentation ]()
+![Image](https://github.com/user-attachments/assets/2e062774-1ff5-4c1d-a8e1-a6511256fb52)
 
 ## System Architecture
-![image]()
+![Image](https://github.com/user-attachments/assets/35a28ea7-5171-4cb2-a51e-e576b62c6f2f)
 
 ## Flow Chart
 [🗃️ Flow Chart]()
