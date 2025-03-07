@@ -1,0 +1,208 @@
+/* 전체 컨테이너 */
+.page {
+  width: 100%;
+  background-color: #121212;
+  box-sizing: border-box;
+}
+
+.container {
+  margin: 0 auto;
+  padding: 32px 8px;
+  font-family: "Proxima Nova", sans-serif;
+  color: #ffffff;
+  background-color: #121212;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 800px;
+  min-height: 800px;
+}
+
+.content {
+  width: 100%;
+}
+
+.wrapper {
+  display: grid;
+  row-gap: 24px;
+}
+
+.btn1 {
+  margin-bottom: -24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.btn2 {
+  align-self: center;
+  min-inline-size: 0;
+  padding: 0;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+}
+
+.baseline {
+  align-items: center;
+  background-color: #333333;
+  border-radius: 9999px;
+  color: #fff;
+  display: flex;
+  font-size: inherit;
+  justify-content: center;
+  position: relative;
+  transition-duration: inherit;
+  transition-property: background-color, transform, -webkit-transform;
+  block-size: 48px;
+  inline-size: 48px;
+  overflow-wrap: anywhere;
+}
+
+.baseline:hover {
+  background-color: #262626;
+}
+
+/* Active 상태 (클릭 시) */
+.baseline:active {
+  background-color: #1a1a1a; /* 클릭 시 배경색 */
+}
+
+.btn_icon {
+  position: static;
+  display: flex;
+}
+
+/* 헤더 스타일 */
+.header {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.menu {
+  padding-bottom: 12px;
+  border-radius: 5px;
+  width: 100%;
+  background-color: #282828;
+}
+
+.linkb {
+  display: grid;
+  gap: 8px 12px;
+  grid-template-columns: auto 1fr;
+  grid-auto-rows: auto 1fr auto;
+}
+
+.kaxeyf {
+  position: relative;
+  z-index: 0;
+  min-block-size: 56px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #fff;
+  padding-block: 8px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  cursor: pointer;
+  transition: transform var(--animation-speed, 300ms)
+    var(--animation-ease, ease);
+}
+
+.kaxeyf:hover {
+  transform: translateY(var(--bg-inset-change-press, -4px));
+  background-color: #1f1f1f;
+}
+
+/* Active 상태 (클릭 시) */
+.kaxeyf:active {
+  transform: translateY(var(--bg-inset-change-press, -4px));
+  background-color: #3393aa; /* 클릭 시 배경색 */
+}
+
+/* Elevated 상태 (Focus 또는 다른 상태) */
+.kaxeyf:focus {
+  background-color: #000; /* Elevated 상태 배경색 */
+}
+
+.kMKjYE {
+  position: absolute;
+  z-index: 0;
+  inset: 0px;
+  cursor: pointer;
+}
+
+.jnpRBv {
+  grid-column: 1;
+}
+
+.hWEpdM {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  height: 100%;
+}
+
+.hThHw {
+  display: inline-block;
+  position: relative;
+}
+
+.eRugSY {
+  background: hsla(0, 0%, 100%, 0.1);
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  color: #b3b3b3;
+}
+
+.jJychV {
+  grid-column-end: -1;
+  gap: 12px;
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.lbPUPJ {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+
+.cmcLAf {
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  fill: rgb(179, 179, 179);
+  height: 16px;
+  width: 16px;
+}
+
+/* 버튼 스타일 */
+.btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #ffffff;
+  background-color: #1db954;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn:hover {
+  background-color: #14833b;
+}
