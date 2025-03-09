@@ -39,6 +39,13 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
   testImplementation 'io.rest-assured:rest-assured'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'	// WebClient 사용
+
+    //OAuth, security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.security:spring-security-oauth2-client'
+    //jwt
+    implementation 'io.jsonwebtoken:jjwt:0.12.6'
 }
 
 tasks.named('test') {
