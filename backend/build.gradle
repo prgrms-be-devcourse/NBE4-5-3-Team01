@@ -46,6 +46,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-oauth2-client'
     //jwt
     implementation 'io.jsonwebtoken:jjwt:0.12.6'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'  // email
 }
 
 tasks.named('test') {

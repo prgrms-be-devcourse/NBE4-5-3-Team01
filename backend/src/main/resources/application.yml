@@ -41,3 +41,12 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: update
+
+  mail:
+    username: ${example@email.com}
+    password: ${password}
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
