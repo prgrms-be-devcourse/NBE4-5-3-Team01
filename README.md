@@ -69,7 +69,7 @@
 ![Image](https://github.com/user-attachments/assets/25027dd8-1c86-45eb-920f-16332de7f1d3)
 
 ## ERD
-![Image](https://github.com/user-attachments/assets/2e062774-1ff5-4c1d-a8e1-a6511256fb52)
+![Image](https://github.com/user-attachments/assets/ae8b6e49-b743-4100-9571-ab21ba38e336)
 
 ## System Architecture
 ![Image](https://github.com/user-attachments/assets/35a28ea7-5171-4cb2-a51e-e576b62c6f2f)
