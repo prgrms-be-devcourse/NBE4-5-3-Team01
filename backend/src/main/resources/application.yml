@@ -34,6 +34,8 @@ spring:
         hibernate:
           SQL: debug
       org.springframework.security: DEBUG
+      org.springframework.security.oauth2: DEBUG
+      org.springframework.web: DEBUG
 
   jpa:
     database: mysql

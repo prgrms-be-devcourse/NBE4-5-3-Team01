@@ -26,7 +26,7 @@ public class UserDto {
 
 	//엔티티 -> DTO 변환
 
-	public static UserDto of(User user) {
+	public static UserDto from(User user) {
 		return UserDto.builder()
 			.id(user.getId())
 			.email(user.getEmail())

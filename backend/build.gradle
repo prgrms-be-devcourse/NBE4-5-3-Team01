@@ -47,6 +47,9 @@ dependencies {
     //jwt
     implementation 'io.jsonwebtoken:jjwt:0.12.6'
     implementation 'org.springframework.boot:spring-boot-starter-mail'  // email
+
+    //logging
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
 }
 
 tasks.named('test') {
