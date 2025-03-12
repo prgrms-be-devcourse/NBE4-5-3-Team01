@@ -1,16 +1,20 @@
 package com.team01.project.domain.notification.service;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.team01.project.domain.notification.constants.NotificationMessages;
 import com.team01.project.domain.notification.dto.NotificationUpdateDto;
 import com.team01.project.domain.notification.entity.Notification;
+import com.team01.project.domain.notification.event.NotificationInitEvent;
 import com.team01.project.domain.notification.event.NotificationUpdatedEvent;
 import com.team01.project.domain.notification.repository.NotificationRepository;
 import com.team01.project.domain.user.entity.User;
@@ -42,27 +46,40 @@ public class NotificationService {
 				.orElseThrow(() -> new IllegalArgumentException("Notification not found with ID: " + notificationId));
 	}
 
-	@Transactional
-	public void createNotification(String userId, String message, LocalTime notificationTime) {
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+	@Transactional(readOnly = true)
+	public List<Notification> getModifiableNotification(String userId) {
+		List<Notification> notifications = notificationRepository.findByUserId(userId);
+		List<Notification> modifiableNotifications = new ArrayList<>();
 
-		notificationRepository.save(Notification.builder()
-				.user(user).notificationTime(notificationTime).message(message).build());
+		for (Notification notification : notifications) {
+			if (notification.getTitle().equals("DAILY_CHALLENGE")
+					|| notification.getTitle().equals("BUILD_PLAYLIST")
+					|| notification.getTitle().equals("YEAR_HISTORY")) {
+				modifiableNotifications.add(notification);
+			}
+		}
 
-		// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록)
-		eventPublisher.publishEvent(new NotificationUpdatedEvent(this, notificationTime));
+
+		return modifiableNotifications;
 	}
 
 	@Transactional
-	public void updateNotification(Long notificationId, LocalTime notificationTime) {
+	public void updateNotification(String userId, Long notificationId, LocalTime notificationTime) {
 		Notification notification = notificationRepository.findById(notificationId)
 				.orElseThrow(() -> new IllegalArgumentException("Notification not found with ID: " + notificationId));
+
+		if (!notification.getUser().getId().equals(userId)) { // 유저가 동일한지 확인
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"You do not have permission to update this notification.");
+		}
+
 		notification.updateNotificationTime(notificationTime);
 		notificationRepository.save(notification);
 
-		// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록)
-		eventPublisher.publishEvent(new NotificationUpdatedEvent(this, notification.getNotificationTime()));
+		if (notification.getNotificationTime().isBefore(LocalTime.now().plusMinutes(30))) {
+			// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록) 설정한 시각이 30분 이내라면
+			eventPublisher.publishEvent(new NotificationUpdatedEvent(this, notification.getNotificationTime()));
+		}
 	}
 
 	@Transactional(readOnly = true)
@@ -103,13 +120,28 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void updateNotifications(List<NotificationUpdateDto> notifications) {
+	public void updateNotifications(List<NotificationUpdateDto> notifications, String userId) {
 		for (NotificationUpdateDto dto : notifications) {
-			notificationRepository.findById(dto.notificationId())
-					.ifPresent(notification -> notification.updateNotificationSettings(
-							dto.isEmailNotificationEnabled(),
-							dto.isPushNotificationEnabled()
-					));
+			Notification notification = notificationRepository.findById(dto.notificationId())
+					.orElseThrow(() ->
+							new IllegalArgumentException("Notification not found with ID: " + dto.notificationId()));
+
+			if (!notification.getUser().getId().equals(userId)) {    // 유저가 동일한지 확인
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+						"You do not have permission to update this notification.");
+			}
+
+			notification.updateNotificationSettings(
+					dto.isEmailNotificationEnabled(),
+					dto.isPushNotificationEnabled()
+			);
 		}
+	}
+
+	// 최초 로그인 시 보낼 알림 설정
+	@Transactional
+	public void initLoginNotifications(LocalTime time, User user) {
+		// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록)
+		eventPublisher.publishEvent(new NotificationInitEvent(this, time, user));
 	}
 }

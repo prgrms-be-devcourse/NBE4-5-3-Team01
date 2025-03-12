@@ -46,12 +46,6 @@ public class NotificationList {
 	@Builder.Default
 	private boolean isRead = false;
 
-	public NotificationList(User user, String message) {
-		this.user = user;
-		this.message = message;
-		this.notificationTime = LocalDateTime.now();
-	}
-
 	public void markAsRead() {
 		this.isRead = true;
 	}

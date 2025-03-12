@@ -1,6 +1,7 @@
 package com.team01.project.domain.user.service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -86,6 +87,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
 			notificationService.createDefaultNotifications(foundUser);
 			System.out.println(foundUser.getName() + "님의 알림이 생성되었습니다.");
+
+			notificationService.initLoginNotifications(LocalTime.now(), foundUser);
 		}
 
 		Optional<User> matchId = userRepository.findById(userId);
