@@ -31,7 +31,6 @@ public class UserRepositoryTest {
 			.name("name")
 			.nickName("nickName")
 			.birthDay(localDate)
-			.followId(1L)
 			.field("사용자")
 			.build();
 

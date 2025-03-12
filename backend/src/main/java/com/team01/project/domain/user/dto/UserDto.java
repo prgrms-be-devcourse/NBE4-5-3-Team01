@@ -22,7 +22,6 @@ public class UserDto {
 	private LocalDate birthDay;
 	private LocalDateTime createdDate;
 	private String field;
-	private long followId;
 
 	//엔티티 -> DTO 변환
 
@@ -35,7 +34,6 @@ public class UserDto {
 			.birthDay(user.getBirthDay())
 			.createdDate(user.getCreatedDate())
 			.field(user.getField())
-			.followId(user.getFollowId())
 			.build();
 	}
 }

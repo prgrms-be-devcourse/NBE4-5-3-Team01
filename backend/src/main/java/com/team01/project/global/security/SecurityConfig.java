@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -30,7 +31,7 @@ public class SecurityConfig {
 		System.out.println("======= START SeCurityFilterChain =======");
 		http
 			.securityMatcher("/**") // 모든 요청에 대해 보안 적용
-			.csrf(csrf -> csrf.disable())
+			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(
 				authorizeRequests -> authorizeRequests.requestMatchers("/api/v1/user/login", "/api/v1/logout",
 						"/api/v1/user/refresh", "/api/v1/error", "/login", "/")

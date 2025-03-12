@@ -27,34 +27,27 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Table(name = "USER")
+@Table(name = "user_tbl")
 public class User {
 	@Id
-	@Column(name = "USER_ID")
+	@Column(name = "user_id")
 	private String id;
 
 	@Email
-	@Column(name = "USER_EMAIL")
 	private String email;
 
-	@Column(name = "NAME")
 	private String name;
 
-	@Column(name = "Nickname")
 	private String nickName;
 
 	@Column(name = "birthday")
 	private LocalDate birthDay;
 
 	@CreatedDate
-	@Column(name = "CREATED_AT")
+	@Column(name = "create_at")
 	private LocalDateTime createdDate;
 
-	@Column(name = "Field")
 	private String field;
-
-	@Column(name = "follow_id")
-	private long followId;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<RefreshToken> refreshTokens;

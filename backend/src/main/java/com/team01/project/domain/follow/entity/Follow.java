@@ -1,10 +1,14 @@
-package com.team01.project.domain.follow.domain;
+package com.team01.project.domain.follow.entity;
+
+import com.team01.project.domain.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,12 +25,16 @@ public class Follow {
 	@Column(name = "follow_id")
 	private Long id;
 
-	private Long toUserId;
+	@ManyToOne
+	@JoinColumn(name = "to_user_id")
+	private User toUser;
 
-	private Long fromUserId;
+	@ManyToOne
+	@JoinColumn(name = "from_user_id")
+	private User fromUser;
 
-	public Follow(Long toUserId, Long fromUserId) {
-		this.toUserId = toUserId;
-		this.fromUserId = fromUserId;
+	public Follow(User toUser, User fromUser) {
+		this.toUser = toUser;
+		this.fromUser = fromUser;
 	}
 }

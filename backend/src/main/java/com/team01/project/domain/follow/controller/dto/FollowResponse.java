@@ -1,13 +1,18 @@
 package com.team01.project.domain.follow.controller.dto;
 
-import com.team01.project.domain.follow.domain.Follow;
+import com.team01.project.domain.follow.entity.Follow;
+import com.team01.project.domain.user.dto.SimpleUserResponse;
+import com.team01.project.domain.user.entity.User;
 
 public record FollowResponse(
-	Long toUserId,
-	Long fromUserId
+	SimpleUserResponse user,
+	Boolean followState
 ) {
 
-	public static FollowResponse from(Follow follow) {
-		return new FollowResponse(follow.getToUserId(), follow.getFromUserId());
+	public static FollowResponse of(User user, Boolean followState) {
+		return new FollowResponse(
+			SimpleUserResponse.from(user),
+			followState
+		);
 	}
 }
