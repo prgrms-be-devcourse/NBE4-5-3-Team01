@@ -1,6 +1,7 @@
 package com.team01.project.domain.user.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.team01.project.domain.user.dto.SimpleUserResponse;
 import com.team01.project.domain.user.repository.RefreshTokenRepository;
+import com.team01.project.domain.user.service.UserService;
 import com.team01.project.global.security.JwtTokenProvider;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +36,7 @@ public class UserController {
 
 	private final RefreshTokenRepository refreshTokenRepository;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final UserService userService;
 
 	@GetMapping("/login")
 	public String loginPage(Authentication authentication) {
@@ -112,6 +117,14 @@ public class UserController {
 		resMap.put("res", "테스트 api 입니다.");
 		resMap.put("userId", userId);
 		return resMap;
+	}
+
+	@ResponseBody
+	@GetMapping("/search")
+	public List<SimpleUserResponse> search(@RequestParam(name = "q") String name) {
+		return userService.search(name).stream()
+			.map(SimpleUserResponse::from)
+			.toList();
 	}
 }
 

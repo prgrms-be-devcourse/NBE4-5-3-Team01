@@ -2,13 +2,16 @@ package com.team01.project.follow.service;
 
 import static com.team01.project.user.entity.UserFixture.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.team01.project.common.service.ServiceTest;
+import com.team01.project.domain.follow.controller.dto.CountFollowResponse;
 import com.team01.project.domain.follow.controller.dto.FollowResponse;
 import com.team01.project.domain.follow.entity.Follow;
 import com.team01.project.domain.follow.repository.FollowRepository;
@@ -53,6 +56,37 @@ public class QueryFollowServiceTest extends ServiceTest {
 
 		// then
 		assertThat(followers.size()).isEqualTo(2);
+	}
+
+	@Test
+	void 팔로잉_팔로워_수를_조회한다() {
+		// given
+		User 메인_유저 = userRepository.save(유저("asdfasdf"));
+		List<User> 유저들 = 유저_전체_생성();
+		팔로우_전체_생성(메인_유저, 유저들);
+
+		// when
+		CountFollowResponse count = queryFollowService.findCount(메인_유저.getId());
+
+		// then
+		assertAll(
+			() -> assertThat(count.followerCount()).isEqualTo(2),
+			() -> assertThat(count.followingCount()).isEqualTo(2)
+		);
+	}
+
+	@Test
+	void 맞팔로우_여부를_확인한다() {
+		// given
+		User 메인_유저 = userRepository.save(유저("asdfasdf"));
+		User 서브_유저 = userRepository.save(유저_이메일("qwerqewr", "test@gamil.com"));
+		팔로우_전체_생성(메인_유저, List.of(서브_유저));
+
+		// when
+		Boolean response = queryFollowService.checkMutualFollow(메인_유저.getId(), 서브_유저.getId());
+
+		// then
+		assertThat(response).isTrue();
 	}
 
 	private void 팔로우_전체_생성(User mainUser, List<User> users) {

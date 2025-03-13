@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.team01.project.domain.follow.controller.dto.CountFollowResponse;
 import com.team01.project.domain.follow.controller.dto.FollowResponse;
 import com.team01.project.domain.follow.service.CommandFollowService;
 import com.team01.project.domain.follow.service.QueryFollowService;
@@ -60,5 +61,18 @@ public class FollowController {
 		@AuthenticationPrincipal OAuth2User user
 	) {
 		return queryFollowService.findFollower(user.getName(), userId);
+	}
+
+	@GetMapping("/count/{user-id}")
+	public CountFollowResponse getCount(@PathVariable(name = "user-id") String userId) {
+		return queryFollowService.findCount(userId);
+	}
+
+	@GetMapping("/check/{user-id}")
+	public Boolean checkMutualFollow(
+		@PathVariable(name = "user-id") String userId,
+		@AuthenticationPrincipal OAuth2User user
+	) {
+		return queryFollowService.checkMutualFollow(user.getName(), userId);
 	}
 }
