@@ -10,4 +10,5 @@ import com.team01.project.domain.notification.entity.NotificationList;
 public interface NotificationListRepository extends JpaRepository<NotificationList, Long> {
 	List<NotificationList> findByUserId(String userId);
 
+	List<NotificationList> findByUserIdAndIsReadFalse(String userId);
 }

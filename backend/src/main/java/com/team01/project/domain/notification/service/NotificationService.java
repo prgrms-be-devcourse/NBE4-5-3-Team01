@@ -52,9 +52,9 @@ public class NotificationService {
 		List<Notification> modifiableNotifications = new ArrayList<>();
 
 		for (Notification notification : notifications) {
-			if (notification.getTitle().equals("DAILY_CHALLENGE")
-					|| notification.getTitle().equals("BUILD_PLAYLIST")
-					|| notification.getTitle().equals("YEAR_HISTORY")) {
+			if (notification.getTitle().equals("DAILY CHALLENGE")
+					|| notification.getTitle().equals("BUILD PLAYLIST")
+					|| notification.getTitle().equals("YEAR HISTORY")) {
 				modifiableNotifications.add(notification);
 			}
 		}
@@ -99,11 +99,11 @@ public class NotificationService {
 				.map(entry -> {
 					// 메시지 타입에 따라 알림 시간 설정
 					LocalTime notificationTime = null;
-					if ("DAILY_CHALLENGE".equals(entry.getKey())) {
+					if ("DAILY CHALLENGE".equals(entry.getKey())) {
 						notificationTime = LocalTime.of(21, 0);
-					} else if ("YEAR_HISTORY".equals(entry.getKey())) {
+					} else if ("YEAR HISTORY".equals(entry.getKey())) {
 						notificationTime = LocalTime.of(9, 0);
-					} else if ("BUILD_PLAYLIST".equals(entry.getKey())) {
+					} else if ("BUILD PLAYLIST".equals(entry.getKey())) {
 						notificationTime = LocalTime.of(18, 0);
 					}
 

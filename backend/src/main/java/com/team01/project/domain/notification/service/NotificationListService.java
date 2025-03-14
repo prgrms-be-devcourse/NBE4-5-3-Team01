@@ -42,6 +42,20 @@ public class NotificationListService {
 	}
 
 	@Transactional
+	public void markAllAsRead(String userId) {
+
+		List<NotificationList> notifications = notificationListRepository.findByUserIdAndIsReadFalse(userId);
+
+		if (notifications.isEmpty()) {
+			return; // 읽지 않은 알림이 없다면 처리하지 않음
+		}
+
+		notifications.forEach(notification -> notification.markAsRead()); // 모든 알림 읽음 처리
+		notificationListRepository.saveAll(notifications); // 변경된 알림 상태 저장
+	}
+
+
+	@Transactional
 	public void deleteNotification(Long notificationListId, String userId) {
 		NotificationList notificationList = notificationListRepository.findById(notificationListId)
 				.orElseThrow(() ->

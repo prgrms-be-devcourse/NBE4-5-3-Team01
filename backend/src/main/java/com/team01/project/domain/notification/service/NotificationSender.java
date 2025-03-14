@@ -26,13 +26,14 @@ public class NotificationSender {
 
 			// 이메일 설정
 			helper.setTo(user.getEmail());  // User의 이메일 주소 사용
-			helper.setSubject(title);
+			helper.setSubject("Music Calendar 📅 " + title);
 			helper.setText(message);
 
 			// 이메일 전송
 			javaMailSender.send(mimeMessage);
 
-			System.out.println(user.getName() + "님의 " + user.getEmail() + "로 " + title + " 알림이 전송되었습니다.");
+			System.out.println(
+					user.getName() + "님의 " + user.getEmail() + "로 " + title + " 알림이 전송되었습니다. 내용: " + message);
 		} catch (Exception e) {
 			// 예외 처리
 			e.printStackTrace();
@@ -43,7 +44,7 @@ public class NotificationSender {
 		try {
 			notificationListService.addNotification(user, title, message, notificationTime);
 
-			System.out.println(user.getName() + "님에게 " + title + " 푸시알림이 전송되었습니다.");
+			System.out.println(user.getName() + "님에게 " + title + " 푸시알림이 전송되었습니다. 내용: " + message);
 		} catch (Exception e) {
 			// 예외 처리
 			e.printStackTrace();

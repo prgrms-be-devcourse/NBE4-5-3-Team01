@@ -9,8 +9,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,14 +40,24 @@ public class NotificationListController {
 	}
 
 	// 알림 읽음 처리
-	@PutMapping("/{notificationList-id}")
+	@PatchMapping("/{notificationList-id}")
 	public ResponseEntity<String> markNotificationAsRead(
 			@PathVariable(name = "notificationList-id") Long notificationListId,
 			@AuthenticationPrincipal OAuth2User user) {
 		String userId = user.getName();
+
 		notificationListService.markAsRead(notificationListId, userId);
 		return ResponseEntity.ok("Notification marked as read");
 	}
+
+	// 안읽은 알람 모두 읽음 처리
+	@PatchMapping("/mark-all-read")
+	public ResponseEntity<Void> markAllNotificationAsRead(@AuthenticationPrincipal OAuth2User user) {
+		String userId = user.getName();
+		notificationListService.markAllAsRead(userId);
+		return ResponseEntity.ok().build();
+	}
+
 
 	// 알림 리스트에서 알림 삭제
 	@DeleteMapping("/{notificationList-id}")
