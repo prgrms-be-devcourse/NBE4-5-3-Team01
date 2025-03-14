@@ -1,13 +1,118 @@
 "use client";
 
 import "@/components/style/global.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import styles from "@/components/style/notificationSettingConfigure.module.css";
 import Checkbox from "./checkbox";
 import Link from "next/link";
 
+interface NotificationDto {
+  id: number;
+  userId: string;
+  title: string;
+  message: string;
+  notificationTime: string;
+  isEmailEnabled: boolean;
+  isPushEnabled: boolean;
+}
+
 const NotificationCreate = () => {
+  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          alert("로그인이 필요합니다.");
+          window.location.href = "/login";
+          return;
+        }
+
+        const response = await axios.get(
+          "http://localhost:8080/api/v1/notifications/lists",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setNotifications(response.data);
+      } catch (error) {
+        console.error("Failed to fetch notifications", error);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  const handleCheckboxChange = (id: number, type: "email" | "push") => {
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.id === id
+          ? {
+              ...n,
+              isEmailEnabled:
+                type === "email" ? !n.isEmailEnabled : n.isEmailEnabled,
+              isPushEnabled:
+                type === "push" ? !n.isPushEnabled : n.isPushEnabled,
+            }
+          : n
+      )
+    );
+  };
+
+  const handleSave = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      window.location.href = "/login";
+      return;
+    }
+
+    // 각 알림의 이메일/푸시 알림 활성화 상태
+    const updatedNotifications = notifications.map((notification) => ({
+      notificationId: notification.id,
+      isEmailNotificationEnabled: notification.isEmailEnabled, // 이메일 활성화 여부
+      isPushNotificationEnabled: notification.isPushEnabled, // 푸시 알림 활성화 여부
+    }));
+
+    try {
+      await axios.patch(
+        "http://localhost:8080/api/v1/notifications/update",
+        updatedNotifications, // 서버에 보낼 데이터
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      alert("알림 설정이 저장되었습니다!");
+    } catch (error) {
+      console.error("알림 설정 저장 실패", error);
+    }
+  };
+
+  const titleMap: Record<string, string> = {
+    "DAILY CHALLENGE": "음악 기록",
+    "SHARE MUSIC": "음악 공유",
+    "BUILD PLAYLIST": "나만의 플레이리스트",
+    "YEAR HISTORY": "1년 전 음악",
+    FOLLOWING: "팔로워",
+  };
+
+  const messageMap: Record<string, string> = {
+    "DAILY CHALLENGE": "매일 정해진 시간에 음악을 기록하라고 알려주는 알림",
+    "SHARE MUSIC": "음악을 캘린더에 기록했을 때 알림",
+    "BUILD PLAYLIST": "플레이리스트를 만들어보길 추천하는 알림",
+    "YEAR HISTORY": "작년 오늘 기록한 음악 알림",
+    FOLLOWING: "다른 사용자가 나를 팔로우하기 시작할 때 알림",
+  };
+
   return (
     <div className="encore-dark-theme">
       <div className={styles.page}>
@@ -74,107 +179,48 @@ const NotificationCreate = () => {
                   <p>푸시</p>
                 </div>
               </div>
-              <div className={styles.d4}>
-                <div className={styles.d5}>
-                  <div className={styles.d51}>
-                    <span style={{ fontWeight: "700", fontSize: "20px" }}>
-                      음악 기록
-                    </span>
-                  </div>
-                  <div className={styles.d52}>
-                    <span style={{ fontWeight: "700", color: "#b3b3b3" }}>
-                      매일 정해진 시간에 음악을 기록하라고 알려주는 알림
-                    </span>
-                  </div>
-                  <div className={styles.d53}>
-                    <div className={styles.d6}>
-                      <Checkbox />
+              {notifications.map((notification) => (
+                <div className={styles.d4} key={notification.id}>
+                  <div className={styles.d5}>
+                    <div className={styles.d51}>
+                      <span style={{ fontWeight: "700", fontSize: "20px" }}>
+                        {titleMap[notification.title] || "알림"}{" "}
+                      </span>
                     </div>
-                  </div>
-                  <div className={styles.d54}>
-                    <div className={styles.d6}>
-                      <Checkbox />
+                    <div className={styles.d52}>
+                      <span style={{ fontWeight: "700", color: "#b3b3b3" }}>
+                        {messageMap[notification.title] || notification.message}{" "}
+                      </span>
                     </div>
-                  </div>
-                </div>
-              </div>
-              <div className={styles.d4}>
-                <div className={styles.d5}>
-                  <div className={styles.d51}>
-                    <span style={{ fontWeight: "700", fontSize: "20px" }}>
-                      팔로워
-                    </span>
-                  </div>
-                  <div className={styles.d52}>
-                    <span style={{ fontWeight: "700", color: "#b3b3b3" }}>
-                      다른 이가 나를 팔로우 했을 때 관련 알림
-                    </span>
-                  </div>
-                  <div className={styles.d53}>
-                    <div className={styles.d6}>
-                      <Checkbox />
+                    <div className={styles.d53}>
+                      <div className={styles.d6}>
+                        <Checkbox
+                          checked={notification.isEmailEnabled}
+                          onChange={() =>
+                            handleCheckboxChange(notification.id, "email")
+                          }
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className={styles.d54}>
-                    <div className={styles.d6}>
-                      <Checkbox />
+                    <div className={styles.d54}>
+                      <div className={styles.d6}>
+                        <Checkbox
+                          checked={notification.isPushEnabled}
+                          onChange={() =>
+                            handleCheckboxChange(notification.id, "push")
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className={styles.d4}>
-                <div className={styles.d5}>
-                  <div className={styles.d51}>
-                    <span style={{ fontWeight: "700", fontSize: "20px" }}>
-                      음악 추천
-                    </span>
-                  </div>
-                  <div className={styles.d52}>
-                    <span style={{ fontWeight: "700", color: "#b3b3b3" }}>
-                      오늘 내가 들은 많이 들은 음악 추천
-                    </span>
-                  </div>
-                  <div className={styles.d53}>
-                    <div className={styles.d6}>
-                      <Checkbox />
-                    </div>
-                  </div>
-                  <div className={styles.d54}>
-                    <div className={styles.d6}>
-                      <Checkbox />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className={styles.d4}>
-                <div className={styles.d5}>
-                  <div className={styles.d51}>
-                    <span style={{ fontWeight: "700", fontSize: "20px" }}>
-                      설문 조사
-                    </span>
-                  </div>
-                  <div className={styles.d52}>
-                    <span style={{ fontWeight: "700", color: "#b3b3b3" }}>
-                      플랫폼 개선에 도움이 되는 피드백 설문조사
-                    </span>
-                  </div>
-                  <div className={styles.d53}>
-                    <div className={styles.d6}>
-                      <Checkbox />
-                    </div>
-                  </div>
-                  <div className={styles.d54}>
-                    <div className={styles.d6}>
-                      <Checkbox />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              ))}
+
               <div className={styles.d7}>
                 <Link href="/notifications/settings" className={styles.cancel}>
                   취소하기
                 </Link>
-                <button className={styles.saved}>
+                <button className={styles.saved} onClick={handleSave}>
                   <span className={styles.s2}>저장하기</span>
                 </button>
               </div>

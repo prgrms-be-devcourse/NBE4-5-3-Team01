@@ -8,14 +8,16 @@ public record NotificationListDto(
 		Long id,
 		String userId,
 		String message,
-		LocalDateTime notificationTime
+		LocalDateTime notificationTime,
+		boolean isRead
 ) {
 	public NotificationListDto(NotificationList notificationList) {
 		this(
 				notificationList.getId(),
 				notificationList.getUser().getId(),
 				notificationList.getMessage(),
-				notificationList.getNotificationTime()
+				notificationList.getNotificationTime(),
+				notificationList.isRead()
 		);
 	}
 }

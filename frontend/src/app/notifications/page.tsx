@@ -5,6 +5,8 @@ import axios from "axios";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "@/components/style/notification.module.css";
+import { format, differenceInDays, isToday, isYesterday } from "date-fns";
+import { ko } from "date-fns/locale";
 
 interface NotificationDto {
   id: number;
@@ -23,8 +25,19 @@ const Notifications = () => {
 
   const fetchNotifications = async () => {
     try {
+      const token = localStorage.getItem("accessToken"); // 저장된 JWT 토큰 가져오기
+      if (!token) {
+        console.error("JWT 토큰이 없습니다!");
+        return;
+      }
+
       const response = await axios.get(
-        "http://localhost:8080/api/v1/notifications"
+        "http://localhost:8080/api/v1/notification-lists",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // JWT 토큰을 Authorization 헤더에 추가
+          },
+        }
       );
       setNotifications(
         Array.isArray(response.data)
@@ -42,7 +55,23 @@ const Notifications = () => {
 
   const markAsRead = async (id: number) => {
     try {
-      await axios.put(`http://localhost:8080/api/v1/notifications/${id}/read`);
+      const token = localStorage.getItem("accessToken"); // 저장된 JWT 토큰 가져오기
+      if (!token) {
+        console.error("JWT 토큰이 없습니다!");
+        return;
+      }
+
+      await axios.patch(
+        `http://localhost:8080/api/v1/notification-lists/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       setNotifications((prev) =>
         prev.map((notification) =>
           notification.id === id
@@ -57,12 +86,30 @@ const Notifications = () => {
 
   const markAllAsRead = async () => {
     try {
-      await axios.put(
-        "http://localhost:8080/api/v1/notifications/mark-all-read"
+      const token = localStorage.getItem("accessToken"); // JWT 토큰 가져오기
+      if (!token) {
+        console.error("JWT 토큰이 없습니다!");
+        return;
+      }
+
+      // 서버에 한 번의 요청으로 모든 알림 읽음 처리
+      await axios.patch(
+        "http://localhost:8080/api/v1/notification-lists/mark-all-read",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // JWT 토큰 추가
+            "Content-Type": "application/json",
+          },
+        }
       );
+
+      // 상태 업데이트: 모든 읽지 않은 알림을 읽음 처리
       setNotifications((prev) =>
         prev.map((notification) => ({ ...notification, isRead: true }))
       );
+
+      console.log("모든 알림을 읽음 처리했습니다!");
     } catch (error) {
       console.error("Failed to mark all notifications as read", error);
     }
@@ -73,14 +120,32 @@ const Notifications = () => {
     return true;
   });
 
+  // 날짜 변환 함수
+  const formatNotificationTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const daysDiff = differenceInDays(new Date(), date);
+
+    if (isToday(date)) {
+      return `오늘 ${format(date, "HH:mm", { locale: ko })}`;
+    }
+    if (isYesterday(date)) {
+      return `어제 ${format(date, "HH:mm", { locale: ko })}`;
+    }
+    if (daysDiff < 7) {
+      return `${daysDiff}일 전`;
+    }
+    return format(date, "yyyy년 MM월 dd일");
+  };
+
   return (
-    <div className="w-[800px] mx-auto p-5 bg-gray-100 rounded-lg">
+    <div className="w-[800px] min-h-[800px] mx-auto p-5 bg-gray-100 rounded-lg">
       <div
         style={{
           padding: "10px",
           borderRadius: "10px",
           background: "white",
           boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // 부드러운 그림자 효과
+          minHeight: "760px",
         }}
       >
         <div className="flex justify-between text-center items-center pb-[10px]">
@@ -171,7 +236,7 @@ const Notifications = () => {
                     {notification.message}
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {notification.notificationTime}
+                    {formatNotificationTime(notification.notificationTime)}
                   </p>
                 </div>
                 {/* 읽지 않은 알림에만 체크박스 표시 */}

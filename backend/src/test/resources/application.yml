@@ -43,10 +43,15 @@ spring:
       enabled: true
 
   mail:
-    username: asdfasdf
-    password: asdfasdf
+    username: ${HOST_EMAIL}
+    password: ${EMAIL_PASSWORD}
     host: smtp.gmail.com
     port: 587
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+
+push:
+  vapid:
+    publicKey: "BJSowR6aDh89tu-QupRzNmwjVrr63q2Wbstv536bFya4emx8YigwBkd4Ogbusg6X6uzeNzOkY678PlY9U66xSIU"
+    privateKey: "YdObw6wJN_UkDASF6mAMcRkZuT6eGCmBuoU54xH5sa0"

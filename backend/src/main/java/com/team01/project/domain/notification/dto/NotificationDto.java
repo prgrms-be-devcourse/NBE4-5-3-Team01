@@ -9,7 +9,9 @@ public record NotificationDto(
 		String userId,
 		String title,
 		String message,
-		LocalTime notificationTime
+		LocalTime notificationTime,
+		boolean isEmailEnabled,
+		boolean isPushEnabled
 ) {
 	public NotificationDto(Notification notification) {
 		this(
@@ -17,7 +19,9 @@ public record NotificationDto(
 				notification.getUser().getId(),
 				notification.getTitle(),
 				notification.getMessage(),
-				notification.getNotificationTime()
+				notification.getNotificationTime(),
+				notification.isEmailEnabled(),
+				notification.isPushEnabled()
 		);
 	}
 }

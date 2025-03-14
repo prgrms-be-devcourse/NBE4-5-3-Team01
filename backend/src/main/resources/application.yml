@@ -52,3 +52,8 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+
+push:
+  vapid:
+    publicKey: "BJSowR6aDh89tu-QupRzNmwjVrr63q2Wbstv536bFya4emx8YigwBkd4Ogbusg6X6uzeNzOkY678PlY9U66xSIU"
+    privateKey: "YdObw6wJN_UkDASF6mAMcRkZuT6eGCmBuoU54xH5sa0"

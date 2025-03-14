@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.team01.project.domain.notification.dto.ModifyNotificationReqBody;
 import com.team01.project.domain.notification.dto.NotificationDto;
-import com.team01.project.domain.notification.dto.NotificationUpdateRequest;
+import com.team01.project.domain.notification.dto.NotificationUpdateDto;
 import com.team01.project.domain.notification.entity.Notification;
 import com.team01.project.domain.notification.service.NotificationService;
 
@@ -28,7 +28,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/notifications")
-@CrossOrigin(origins = "http://localhost:3000")  // 클라이언트 URL을 지정
 public class NotificationController {
 	private final NotificationService notificationService;
 
@@ -85,12 +84,12 @@ public class NotificationController {
 	}
 
 	// 알림 설정 업데이트 (이메일, 푸시알림)
-	@PutMapping("/update")
+	@PatchMapping("/update")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateNotifications(
-			@RequestBody NotificationUpdateRequest request,
+			@RequestBody List<NotificationUpdateDto> updateRequests,  // 여러 개의 업데이트를 받을 수 있도록
 			@AuthenticationPrincipal OAuth2User user) {
 		String userId = user.getName();
-		notificationService.updateNotifications(request.notifications(), userId);
+		notificationService.updateNotifications(updateRequests, userId);
 	}
 }

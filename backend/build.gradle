@@ -25,20 +25,20 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'com.h2database:h2'
-	testRuntimeOnly 'com.h2database:h2'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-  testImplementation 'io.rest-assured:rest-assured'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'	// WebClient 사용
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'com.h2database:h2'
+    testRuntimeOnly 'com.h2database:h2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'io.rest-assured:rest-assured'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'    // WebClient 사용
 
     //OAuth, security
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -50,6 +50,12 @@ dependencies {
 
     //logging
     implementation 'org.springframework.boot:spring-boot-starter-logging'
+
+    //web-push
+    implementation 'nl.martijndwars:web-push:5.1.0'
+    //Bouncy Castle Provider
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
 }
 
 tasks.named('test') {

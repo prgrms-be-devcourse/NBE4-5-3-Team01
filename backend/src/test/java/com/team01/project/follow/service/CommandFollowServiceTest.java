@@ -1,7 +1,8 @@
 package com.team01.project.follow.service;
 
-import static com.team01.project.user.entity.UserFixture.*;
-import static org.assertj.core.api.Assertions.*;
+import static com.team01.project.user.entity.UserFixture.유저;
+import static com.team01.project.user.entity.UserFixture.유저_이메일;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
@@ -12,8 +13,11 @@ import com.team01.project.common.service.ServiceTest;
 import com.team01.project.domain.follow.entity.Follow;
 import com.team01.project.domain.follow.repository.FollowRepository;
 import com.team01.project.domain.follow.service.CommandFollowService;
+import com.team01.project.domain.notification.entity.Subscription;
+import com.team01.project.domain.notification.repository.SubscriptionRepository;
 import com.team01.project.domain.user.entity.User;
 import com.team01.project.domain.user.repository.UserRepository;
+
 
 public class CommandFollowServiceTest extends ServiceTest {
 
@@ -26,11 +30,24 @@ public class CommandFollowServiceTest extends ServiceTest {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private SubscriptionRepository subscriptionRepository;
+
 	@Test
 	void 팔로우를_생성한다() {
 		// given
 		User 팔로우_보낼_유저 = 유저_저장(유저("asdfasdf"));
 		User 팔로우_받을_유저 = 유저_저장(유저_이메일("qwerqwer", "test1234@gamil.com"));
+
+		// Subscription 객체 생성
+		Subscription mockSubscription = Subscription.builder()
+				.user(팔로우_받을_유저)
+				.endpoint("endpoint")
+				.p256dh("p256dh")
+				.auth("auth")
+				.build();
+
+		subscriptionRepository.save(mockSubscription);
 
 		// when
 		commandFollowService.create(팔로우_보낼_유저.getId(), 팔로우_받을_유저.getId());
@@ -51,7 +68,7 @@ public class CommandFollowServiceTest extends ServiceTest {
 
 		// then
 		assertThat(팔로우_조회(팔로우_보낼_유저, 팔로우_받을_유저)
-			.isPresent()).isEqualTo(false);
+				.isPresent()).isEqualTo(false);
 	}
 
 	private Follow 팔로우_저장(Follow follow) {
