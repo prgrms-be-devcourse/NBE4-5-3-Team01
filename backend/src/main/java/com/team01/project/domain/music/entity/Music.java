@@ -1,6 +1,7 @@
 package com.team01.project.domain.music.entity;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,4 +37,20 @@ public class Music {
 
 	@Column(name = "genre")
 	private String genre;
+
+	public boolean isSameAs(Music other) {
+		return this.name.equals(other.getName())
+			&& this.singer.equals(other.getSinger())
+			&& this.releaseDate.equals(other.getReleaseDate())
+			&& this.albumImage.equals(other.getAlbumImage())
+			&& Objects.equals(this.genre, other.getGenre());
+	}
+
+	public void updateMusic(Music updatedMusic) {
+		this.name = updatedMusic.getName();
+		this.singer = updatedMusic.getSinger();
+		this.releaseDate = updatedMusic.getReleaseDate();
+		this.albumImage = updatedMusic.getAlbumImage();
+		this.genre = updatedMusic.getGenre();
+	}
 }

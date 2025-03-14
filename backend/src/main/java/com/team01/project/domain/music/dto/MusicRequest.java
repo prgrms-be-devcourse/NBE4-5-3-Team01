@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record MusicRequest(
+	@NotBlank String id,
 	@NotBlank String name,
 	@NotBlank String singer,
 
@@ -19,7 +20,7 @@ public record MusicRequest(
 	@NotBlank String albumImage,
 	String genre
 ) {
-	public Music toEntity(String id) {
+	public Music toEntity() {
 		return new Music(id, name, singer, releaseDate, albumImage, genre);
 	}
 }

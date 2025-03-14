@@ -19,6 +19,12 @@ public class MusicService {
 	@Transactional
 	public Music saveMusic(Music music) {
 		return musicRepository.findById(music.getId())
+			.map(existingMusic -> {
+				if (!existingMusic.isSameAs(music)) {
+					existingMusic.updateMusic(music);
+				}
+				return existingMusic;
+			})
 			.orElseGet(() -> musicRepository.save(music));
 	}
 

@@ -3,6 +3,7 @@ package com.team01.project.domain.music.dto;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SpotifyTrackResponse {
 	private String id;
 	private String name;
@@ -21,6 +23,7 @@ public class SpotifyTrackResponse {
 
 	@Getter
 	@Setter
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Album {
 		private String name;
 
@@ -33,6 +36,7 @@ public class SpotifyTrackResponse {
 
 	@Getter
 	@Setter
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Artist {
 		private String id;
 		private String name;
@@ -40,6 +44,7 @@ public class SpotifyTrackResponse {
 
 	@Getter
 	@Setter
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Image {
 		private String url;
 	}
