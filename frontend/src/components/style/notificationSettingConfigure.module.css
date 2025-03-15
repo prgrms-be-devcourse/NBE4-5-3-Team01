@@ -1,16 +1,15 @@
 /* 전체 컨테이너 */
 .page {
   width: 100%;
-  background-color: #121212;
+  background-color: #f8f7ff;
   box-sizing: border-box;
 }
 
 .container {
   margin: 0 auto;
-  padding: 32px 8px;
+  padding: 22px 8px 32px 8px;
   font-family: "Proxima Nova", sans-serif;
-  color: #ffffff;
-  background-color: #121212;
+  color: #393d3f;
   display: flex;
   flex-flow: column;
   flex-direction: column;
@@ -19,13 +18,17 @@
   min-height: 800px;
 }
 
-.btn {
+.content {
+  width: 100%;
+}
+
+.btn1 {
   margin-bottom: 24px;
   display: flex;
   flex-direction: column;
 }
 
-.btn1 {
+.btn2 {
   align-self: center;
   min-inline-size: 0;
   padding: 0;
@@ -37,9 +40,9 @@
 
 .baseline {
   align-items: center;
-  background-color: #333333;
+  background-color: #dcd1ff;
   border-radius: 9999px;
-  color: #fff;
+  color: #393d3f;
   display: flex;
   font-size: inherit;
   justify-content: center;
@@ -52,21 +55,17 @@
 }
 
 .baseline:hover {
-  background-color: #262626;
+  background-color: #cdbfff;
 }
 
 /* Active 상태 (클릭 시) */
 .baseline:active {
-  background-color: #1a1a1a; /* 클릭 시 배경색 */
+  background-color: #ae96fd; /* 클릭 시 배경색 */
 }
 
 .btn_icon {
   position: static;
   display: flex;
-}
-
-.wrapper {
-  width: 100%;
 }
 
 .header {
@@ -77,6 +76,7 @@
 
 .s1 {
   margin-block: 0;
+  margin-left: 5px;
 }
 
 .menu {
@@ -84,7 +84,7 @@
   padding-bottom: 24px;
   border-radius: 5px;
   width: 100%;
-  background-color: #282828;
+  background-color: #dcd1ff;
 }
 
 .d3 {
@@ -217,6 +217,12 @@
 }
 
 .icon {
+  fill: #393d3f;
+  height: 24px;
+  width: 24px;
+}
+
+.icon_head {
   fill: rgb(255, 255, 255);
   height: 24px;
   width: 24px;
@@ -239,7 +245,7 @@
   user-select: none;
   vertical-align: middle;
   transform: translate3d(0px, 0px, 0px);
-  color: #b3b3b3;
+  color: #393d3f;
   min-inline-size: 0px;
   min-block-size: 48px;
   padding-block: 8px;
@@ -273,7 +279,7 @@
 
 .s2 {
   align-items: center;
-  background-color: #1ed760;
+  background-color: #ae96fd;
   border-radius: 9999px;
   color: #000;
   display: flex;
@@ -288,10 +294,10 @@
 }
 
 .s2:hover {
-  background-color: #3be477;
+  background-color: #d7e1f7;
 }
 
 /* Active 상태 (클릭 시) */
 .s2:active {
-  background-color: #1ed760; /* 클릭 시 배경색 */
+  background-color: #bbd0ff; /* 클릭 시 배경색 */
 }

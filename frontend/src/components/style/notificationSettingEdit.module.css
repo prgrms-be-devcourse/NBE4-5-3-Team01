@@ -1,16 +1,15 @@
 /* 전체 컨테이너 */
 .page {
   width: 100%;
-  background-color: #121212;
+  background-color: #f8f7ff;
   box-sizing: border-box;
 }
 
 .container {
   margin: 0 auto;
-  padding: 32px 8px;
+  padding: 22px 8px 32px 8px;
   font-family: "Proxima Nova", sans-serif;
-  color: #ffffff;
-  background-color: #121212;
+  color: #393d3f;
   display: flex;
   flex-flow: column;
   flex-direction: column;
@@ -19,13 +18,13 @@
   min-height: 800px;
 }
 
-.btn {
+.btn1 {
   margin-bottom: 24px;
   display: flex;
   flex-direction: column;
 }
 
-.btn1 {
+.btn2 {
   align-self: center;
   min-inline-size: 0;
   padding: 0;
@@ -37,9 +36,9 @@
 
 .baseline {
   align-items: center;
-  background-color: #333333;
+  background-color: #dcd1ff;
   border-radius: 9999px;
-  color: #fff;
+  color: #393d3f;
   display: flex;
   font-size: inherit;
   justify-content: center;
@@ -52,12 +51,12 @@
 }
 
 .baseline:hover {
-  background-color: #262626;
+  background-color: #cdbfff;
 }
 
 /* Active 상태 (클릭 시) */
 .baseline:active {
-  background-color: #1a1a1a; /* 클릭 시 배경색 */
+  background-color: #ae96fd; /* 클릭 시 배경색 */
 }
 
 .btn_icon {
@@ -84,7 +83,7 @@
   padding-bottom: 16px;
   border-radius: 5px;
   width: 100%;
-  background-color: #282828;
+  background-color: #e8e0ff;
 }
 
 .linkb {
@@ -99,7 +98,7 @@
   min-block-size: 56px;
   border-radius: 6px;
   text-decoration: none;
-  color: #fff;
+  color: #393d3f;
   padding-block: 8px;
   padding-inline-start: 12px;
   padding-inline-end: 12px;
@@ -110,18 +109,18 @@
 
 .kaxeyf:hover {
   transform: translateY(var(--bg-inset-change-press, -4px));
-  background-color: #1f1f1f;
+  background-color: #cdbfff;
 }
 
 /* Active 상태 (클릭 시) */
 .kaxeyf:active {
   transform: translateY(var(--bg-inset-change-press, -4px));
-  background-color: #121212; /* 클릭 시 배경색 */
+  background-color: #ae96fd; /* 클릭 시 배경색 */
 }
 
 /* Elevated 상태 (Focus 또는 다른 상태) */
 .kaxeyf:focus {
-  background-color: #000; /* Elevated 상태 배경색 */
+  background-color: #ae96fd; /* Elevated 상태 배경색 */
 }
 
 .kMKjYE {
@@ -133,7 +132,6 @@
 
 .jJychV {
   grid-column-end: -1;
-  gap: 12px;
   align-items: center;
   display: flex;
   justify-content: space-between;
@@ -203,6 +201,10 @@
 .saveButton {
   padding-left: 15px;
   padding-right: 15px;
+  border-radius: 10px;
+}
+.saveButton:hover {
+  background-color: #ae96fd;
 }
 
 .d62 {
@@ -219,7 +221,7 @@
   padding-right: 15px;
 }
 .d62:hover {
-  background-color: #121212;
+  background-color: #ae96fd;
 }
 
 .d7 {

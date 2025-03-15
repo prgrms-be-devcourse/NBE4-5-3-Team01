@@ -59,11 +59,13 @@
   font-size: 14px;
   font-weight: 700;
   padding: 10px;
-  background: white;
+  background: #d7e1f7;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
+  cursor: pointer;
 }
 
 .setting:hover {
   transform: translateY(var(--bg-inset-change-press, -4px));
+  background: #bbd0ff;
 }

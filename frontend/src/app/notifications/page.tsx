@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
-import Image from "next/image";
 import styles from "@/components/style/notification.module.css";
 import { format, differenceInDays, isToday, isYesterday } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -138,7 +137,7 @@ const Notifications = () => {
   };
 
   return (
-    <div className="w-[800px] min-h-[800px] mx-auto p-5 bg-gray-100 rounded-lg">
+    <div className="w-[800px] min-h-[800px] mx-auto p-5 rounded-lg">
       <div
         style={{
           padding: "10px",
@@ -152,21 +151,23 @@ const Notifications = () => {
           <h2 className="text-2xl font-semibold text-gray-800 px-4">
             All Notifications
           </h2>
-          <div className="flex justify-end">
-            <button className={styles.setting}>
-              <Link href="/notifications/settings">
+          <Link href="/setting">
+            <div className="flex justify-end">
+              <button className={styles.setting}>
                 <div className="flex flex-row gap-2">
                   <p style={{ fontWeight: "700", color: "#121212" }}>Setting</p>
-                  <Image
-                    src="/setting.svg"
-                    alt="설정 아이콘"
-                    width={24}
-                    height={24}
+                  <i
+                    className="fa-solid fa-gear fa-lg"
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
                   />
                 </div>
-              </Link>
-            </button>
-          </div>
+              </button>
+            </div>
+          </Link>
         </div>
         <hr
           style={{
@@ -221,8 +222,8 @@ const Notifications = () => {
               className={`relative px-6 mx-[-10px] py-6 transition-all duration-200 ease-in-out
         ${
           notification.isRead
-            ? "bg-white hover:bg-gray-200"
-            : "bg-gray-100 hover:bg-gray-200"
+            ? "bg-[#F8F7FF] hover:bg-[#BBD0FF]"
+            : "bg-[#d7e1f7] hover:bg-[#BBD0FF]"
         }`}
             >
               {/* 읽지 않은 알림에만 빨간 점 표시 */}

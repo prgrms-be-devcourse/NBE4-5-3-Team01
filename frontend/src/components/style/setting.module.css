@@ -1,16 +1,15 @@
 /* 전체 컨테이너 */
 .page {
   width: 100%;
-  background-color: #121212;
+  background-color: #f8f7ff;
   box-sizing: border-box;
 }
 
 .container {
   margin: 0 auto;
-  padding: 32px 8px;
+  padding: 22px 8px 32px 8px;
   font-family: "Proxima Nova", sans-serif;
-  color: #ffffff;
-  background-color: #121212;
+  color: #393d3f;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -45,9 +44,9 @@
 
 .baseline {
   align-items: center;
-  background-color: #333333;
+  background-color: #dcd1ff;
   border-radius: 9999px;
-  color: #fff;
+  color: #393d3f;
   display: flex;
   font-size: inherit;
   justify-content: center;
@@ -60,12 +59,12 @@
 }
 
 .baseline:hover {
-  background-color: #262626;
+  background-color: #cdbfff;
 }
 
 /* Active 상태 (클릭 시) */
 .baseline:active {
-  background-color: #1a1a1a; /* 클릭 시 배경색 */
+  background-color: #ae96fd; /* 클릭 시 배경색 */
 }
 
 .btn_icon {
@@ -78,7 +77,7 @@
   text-align: center;
   font-size: 28px;
   margin-bottom: 30px;
-  color: #ffffff;
+  color: #393d3f;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -88,7 +87,7 @@
   padding-bottom: 12px;
   border-radius: 5px;
   width: 100%;
-  background-color: #282828;
+  background-color: #e8e0ff;
 }
 
 .linkb {
@@ -104,7 +103,7 @@
   min-block-size: 56px;
   border-radius: 6px;
   text-decoration: none;
-  color: #fff;
+  color: #393d3f;
   padding-block: 8px;
   padding-inline-start: 12px;
   padding-inline-end: 12px;
@@ -115,18 +114,18 @@
 
 .kaxeyf:hover {
   transform: translateY(var(--bg-inset-change-press, -4px));
-  background-color: #1f1f1f;
+  background-color: #cdbfff;
 }
 
 /* Active 상태 (클릭 시) */
 .kaxeyf:active {
   transform: translateY(var(--bg-inset-change-press, -4px));
-  background-color: #3393aa; /* 클릭 시 배경색 */
+  background-color: #e7c6ff; /* 클릭 시 배경색 */
 }
 
 /* Elevated 상태 (Focus 또는 다른 상태) */
 .kaxeyf:focus {
-  background-color: #000; /* Elevated 상태 배경색 */
+  background-color: #ae96fd; /* Elevated 상태 배경색 */
 }
 
 .kMKjYE {
@@ -153,7 +152,7 @@
 }
 
 .eRugSY {
-  background: hsla(0, 0%, 100%, 0.1);
+  background: hsla(286, 90%, 36%, 0.1);
   width: 32px;
   height: 32px;
   border-radius: 4px;
@@ -186,23 +185,13 @@
 }
 
 .icon {
-  fill: rgb(179, 179, 179);
+  fill: #393d3f;
   height: 16px;
   width: 16px;
 }
 
-/* 버튼 스타일 */
-.btn {
-  padding: 10px 20px;
-  font-size: 16px;
-  color: #ffffff;
-  background-color: #1db954;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.btn:hover {
-  background-color: #14833b;
+.icon_head {
+  fill: rgb(255, 255, 255);
+  height: 24px;
+  width: 24px;
 }
