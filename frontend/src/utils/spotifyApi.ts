@@ -8,10 +8,10 @@ if (accessToken) {
 }
 
 export const searchSpotifyTracks = async (query: string) => {
+  if (!query) return [];
+
   try {
-    if (!query) return [];
-    
-    const response = await spotifyApi.searchTracks(query, { limit: 5 });
+    const response = await spotifyApi.searchTracks(query, { market: "KR", limit: 5 });
 
     return response.tracks.items.map((track) => ({
       id: track.id,
