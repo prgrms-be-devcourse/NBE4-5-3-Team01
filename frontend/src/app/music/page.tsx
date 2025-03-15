@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { Button } from "@/components/ui/button";
 
 export default function MusicRecommendation() {
   const API_URL = "http://localhost:8080/api/v1";
