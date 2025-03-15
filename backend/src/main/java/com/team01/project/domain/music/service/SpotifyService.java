@@ -106,6 +106,7 @@ public class SpotifyService {
 			track.getId(),
 			track.getName(),
 			track.getArtistsAsString(),
+			track.getArtistsIdAsString(),
 			LocalDate.parse(track.getAlbum().getReleaseDate(), DateTimeFormatter.ISO_DATE),
 			track.getAlbum().getImages().get(0).getUrl(),
 			String.join(", ", allGenres)
@@ -156,6 +157,8 @@ public class SpotifyService {
 	public List<MusicRequest> getTopTracksByArtist(String artistId, String accessToken) {
 		String url = "/artists/" + artistId + "/top-tracks?market=KR";
 		String token = extractToken(accessToken);
+
+		System.out.println("🔍 사용한 Access Token: " + token);
 
 		try {
 			String jsonResponse = webClient.get()

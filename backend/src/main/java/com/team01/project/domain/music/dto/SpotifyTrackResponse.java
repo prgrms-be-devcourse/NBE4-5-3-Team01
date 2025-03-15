@@ -54,4 +54,10 @@ public class SpotifyTrackResponse {
 			.map(Artist::getName)
 			.collect(Collectors.joining(", "));
 	}
+
+	public String getArtistsIdAsString() {
+		return artists.stream()
+			.map(Artist::getId)
+			.collect(Collectors.joining(", "));
+	}
 }

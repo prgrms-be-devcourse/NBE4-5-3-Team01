@@ -1,0 +1,76 @@
+/* 모든 텍스트 색상을 #393D3F로 설정 */
+body {
+  color: #393d3f;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default !important;
+}
+
+.point-color {
+  color: #845BFF;
+}
+
+/* 활성화된 버튼 스타일 */
+.mood-button-active {
+  background-color: #c8b6ff; /* 연한 보라색 */
+  color: white;
+  border: none;
+  transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+/* ✅ 활성화된 버튼 Hover 시 색상 변경 */
+.mood-button-active:hover {
+  background-color: #b197fc; /* 좀 더 진한 보라색 */
+}
+
+/* 기본 버튼 스타일 (비활성화된 버튼) */
+.mood-button {
+  border: 1px solid #c8b6ff; /* 연한 보라색 테두리 */
+  color: #393d3f; /* 짙은 회색 */
+  background-color: white;
+}
+
+/* 부드러운 전환 효과 */
+.mood-button,
+.mood-button-active {
+  transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+/* ✅ 기본 버튼 Hover 시 색상 변경 */
+.mood-button:hover {
+  background-color: #c8b6ff; /* 연한 보라색 */
+  color: white;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.track-title {
+  font-size: 0.875rem; /* ✅ 적절한 크기로 설정 */
+  font-weight: 500;
+  word-break: break-word; /* ✅ 단어가 길 경우 줄바꿈 허용 */
+  white-space: normal; /* ✅ 줄바꿈 허용 */
+  text-overflow: ellipsis; /* ✅ 넘치는 텍스트는 ... 표시 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* ✅ 최대 2줄까지만 표시 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.track-artist {
+  font-size: 0.75rem; /* ✅ 아티스트 이름 크기 조정 */
+  color: #6b7280; /* ✅ 회색 계열 */
+  word-break: break-word; /* ✅ 긴 이름 줄바꿈 허용 */
+  white-space: normal;
+}

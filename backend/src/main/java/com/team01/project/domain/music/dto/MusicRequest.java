@@ -12,6 +12,7 @@ public record MusicRequest(
 	@NotBlank String id,
 	@NotBlank String name,
 	@NotBlank String singer,
+	@NotBlank String singerId,
 
 	@NotNull
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -21,6 +22,6 @@ public record MusicRequest(
 	String genre
 ) {
 	public Music toEntity() {
-		return new Music(id, name, singer, releaseDate, albumImage, genre);
+		return new Music(id, name, singer, singerId, releaseDate, albumImage, genre);
 	}
 }

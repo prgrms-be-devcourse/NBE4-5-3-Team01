@@ -11,6 +11,7 @@ public record MusicResponse(
 	String id,
 	String name,
 	String singer,
+	String singerId,
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	@JsonDeserialize(using = LocalDateDeserializer.class)
@@ -24,6 +25,7 @@ public record MusicResponse(
 			music.getId(),
 			music.getName(),
 			music.getSinger(),
+			music.getSingerId(),
 			music.getReleaseDate(),
 			music.getAlbumImage(),
 			music.getGenre()

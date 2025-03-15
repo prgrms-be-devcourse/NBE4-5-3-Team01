@@ -29,6 +29,9 @@ public class Music {
 	@Column(name = "singer", nullable = false)
 	private String singer;
 
+	@Column(name = "singer_id", nullable = false)
+	private String singerId;
+
 	@Column(name = "release_date", nullable = false)
 	private LocalDate releaseDate;
 
@@ -41,6 +44,7 @@ public class Music {
 	public boolean isSameAs(Music other) {
 		return this.name.equals(other.getName())
 			&& this.singer.equals(other.getSinger())
+			&& this.singerId.equals(other.getSingerId())
 			&& this.releaseDate.equals(other.getReleaseDate())
 			&& this.albumImage.equals(other.getAlbumImage())
 			&& Objects.equals(this.genre, other.getGenre());
@@ -49,6 +53,7 @@ public class Music {
 	public void updateMusic(Music updatedMusic) {
 		this.name = updatedMusic.getName();
 		this.singer = updatedMusic.getSinger();
+		this.singerId = updatedMusic.getSingerId();
 		this.releaseDate = updatedMusic.getReleaseDate();
 		this.albumImage = updatedMusic.getAlbumImage();
 		this.genre = updatedMusic.getGenre();

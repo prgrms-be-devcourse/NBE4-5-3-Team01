@@ -100,4 +100,10 @@ public class MusicController {
 	public void deleteMusic(@PathVariable String id) {
 		musicService.deleteMusic(id);
 	}
+
+	@GetMapping("/recent/random/{userId}")
+	public MusicResponse getRandomRecentMusic(@PathVariable String userId) {
+		Music randomMusic = musicService.getRandomRecentMusic(userId);
+		return MusicResponse.fromEntity(randomMusic);
+	}
 }
