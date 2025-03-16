@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -68,7 +69,6 @@ public class UserController {
 	@Transactional
 	@GetMapping("/logout")
 	public String forceLogout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-		System.out.println("강제 로그아웃 요청 받음");
 
 		if (authentication == null) {
 			System.out.println("authentication 객체가 NULL입니다. SecurityContext에 인증 정보 없음.");
@@ -115,6 +115,16 @@ public class UserController {
 		resMap.put("res", "테스트 api 입니다.");
 		resMap.put("userId", userId);
 		return resMap;
+	}
+
+	@ResponseBody
+	@GetMapping("testApiCookie")
+	public ResponseEntity<?> logout(@CookieValue(name = "accessToken", required = false) String accessToken) {
+		System.out.println("쿠키" + accessToken);
+		// accessToken 값이 null이 아니라면 토큰 기반 로그아웃 로직 수행
+		// 예: 토큰 검증, 리프레시 토큰 삭제 등
+		// ...
+		return ResponseEntity.ok("Logged out");
 	}
 
 	@ResponseBody

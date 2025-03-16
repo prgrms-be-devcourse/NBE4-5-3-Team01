@@ -2,11 +2,16 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getCookie } from "@/app/utils/cookie";
+import axios from "axios";
 
 export default function ProfilePage() {
   const [imageError, setImageError] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isBioModalOpen, setIsBioModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const router = useRouter();
 
   // 모달이 열려있을 때 body 스크롤 방지
   useEffect(() => {
@@ -19,6 +24,41 @@ export default function ProfilePage() {
       document.body.style.overflow = "unset";
     };
   }, [isEditModalOpen, isBioModalOpen]);
+
+  // 컴포넌트 마운트 시 쿠키 확인
+  useEffect(() => {
+    console.log("현재 모든 쿠키:", document.cookie);
+    const token = getCookie("accessToken");
+    console.log("마운트 시 토큰:", token);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/v1/user/testApiCookie",
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        // 모든 관련 쿠키 삭제
+        document.cookie =
+          "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict";
+        document.cookie =
+          "refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict";
+        document.cookie =
+          "spotifyAccessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict";
+
+        router.push("/login");
+      } else {
+        throw new Error("로그아웃 실패");
+      }
+    } catch (error) {
+      console.error("로그아웃 중 오류 발생:", error);
+      alert("로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
+  };
 
   return (
     <div className="p-8">
@@ -103,8 +143,14 @@ export default function ProfilePage() {
         </section>
 
         {/* 연결된 서비스 섹션 */}
-        <section className="bg-purple-50 rounded-lg p-6">
+        <section className="bg-purple-50 rounded-lg p-6 relative">
           <h2 className="text-xl font-semibold mb-4">연결된 서비스</h2>
+          <button
+            onClick={() => setIsLogoutModalOpen(true)}
+            className="absolute top-6 right-6 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors"
+          >
+            로그아웃
+          </button>
           <div className="space-y-2">
             <div className="flex items-center justify-between p-4 bg-white rounded-lg transition-colors border border-purple-100 hover:bg-purple-100">
               <div className="flex items-center gap-3">
@@ -121,6 +167,38 @@ export default function ProfilePage() {
             </div>
           </div>
         </section>
+
+        {/* 로그아웃 확인 모달 */}
+        {isLogoutModalOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            onClick={() => setIsLogoutModalOpen(false)}
+          >
+            <div
+              className="bg-white rounded-lg p-6 w-full max-w-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-semibold mb-2">로그아웃</h3>
+                <p className="text-gray-600">정말 로그아웃 하시겠습니까?</p>
+              </div>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setIsLogoutModalOpen(false)}
+                  className="flex-1 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                >
+                  로그아웃
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 프로필 수정 모달 */}

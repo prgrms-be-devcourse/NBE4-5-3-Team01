@@ -1,27 +1,8 @@
 "use client"; // 클라이언트 컴포넌트로 설정 (필수)
 
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
 
 export default function LoginPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    // 쿠키에서 토큰 확인
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(";").shift();
-      return null;
-    };
-
-    const accessToken = getCookie("accessToken");
-    if (accessToken) {
-      // 토큰이 있으면 홈으로 리다이렉트
-      router.push("/");
-    }
-  }, [router]);
-
   const handleLogin = () => {
     window.location.href =
       "http://localhost:8080/api/v1/oauth2/authorization/spotify"; // Spring Boot의 OAuth2 로그인 엔드포인트

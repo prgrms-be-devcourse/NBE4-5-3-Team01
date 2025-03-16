@@ -28,28 +28,49 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	private UserDetailsService userDetailsService;
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws
-		ServletException, IOException {
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+		throws ServletException, IOException {
 
 		System.out.println("======= START JwtTokenFilter.doFilterInternal =======");
 
 		String header = request.getHeader("Authorization");
-		System.out.println("header값:" + header);
+		System.out.println("header값: " + header);
 
-		// Authorization 헤더 확인 (Bearer 토큰 여부)
-		if (header == null || !header.startsWith("Bearer ")) {
-			System.out.println("Authorization 헤더가 없거나 잘못됨");
+		String token = null;
+
+		// Authorization 헤더가 존재하고 "Bearer "로 시작하면, 그 토큰을 사용
+		if (header != null && header.startsWith("Bearer ")) {
+			token = header.substring(7); // "Bearer " 이후의 JWT 값 추출
+		}
+
+		// 헤더에 토큰이 없으면 쿠키에서 "access_token"을 찾아봅니다.
+		if (token == null) {
+			System.out.println("Authorization 헤더에 토큰이 없으므로 쿠키에서 토큰을 찾습니다.");
+			if (request.getCookies() != null) {
+
+				for (var cookie : request.getCookies()) {
+					if ("accessToken".equals(cookie.getName())) {
+						token = cookie.getValue();
+						System.out.println("쿠키 액세스 토큰: " + token);
+						break;
+					}
+				}
+			}
+		}
+
+		// 토큰이 여전히 없으면 필터 체인 계속 진행
+		if (token == null) {
+			System.out.println("토큰을 찾을 수 없습니다.");
 			chain.doFilter(request, response);
 			return;
 		}
 
-		String token = header.substring(7); //"Bearer" 이후의 JWT 값 추출
 		System.out.println("[JwtTokenFilter] 클라이언트에서 받은 JWT: " + token);
 
 		boolean isValid = jwtTokenProvider.validateToken(token);
 		System.out.println("JWT 검증 결과: " + isValid);
 
-		if (!jwtTokenProvider.validateToken(token)) {
+		if (!isValid) {
 			response.setContentType("application/json; charset=UTF-8");
 			response.setCharacterEncoding("UTF-8");
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -59,7 +80,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 		String spotifyToken = jwtTokenProvider.extractSpotifyToken(token);
 		spotifyToken = (spotifyToken != null) ? spotifyToken : "";
-
 		String userId = jwtTokenProvider.getUserIdFromToken(token);
 
 		// 사용자 정보를 가져와서 인증 객체 생성
