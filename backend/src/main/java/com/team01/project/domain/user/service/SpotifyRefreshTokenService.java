@@ -1,11 +1,12 @@
 package com.team01.project.domain.user.service;
 
-import java.util.Base64;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -23,33 +24,26 @@ public class SpotifyRefreshTokenService {
 
 	private static final String TOKEN_URL = "https://accounts.spotify.com/api/token";
 
+	private final RestTemplate restTemplate = new RestTemplate();
+
 	public String refreshAccessToken(String refreshToken) {
 		System.out.println("===== START SpotifyRefreshTokenService.refreshAccessToken =====");
 
-		// client_id와 client_secret을 ':'으로 구분하여 Basic 인증 헤더 준비
-		String credentials = clientId + ":" + clientSecret;
-		String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
-
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", "Basic " + encodedCredentials);
-		headers.set("Content-Type", "application/x-www-form-urlencoded");
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		headers.setBasicAuth(clientId, clientSecret); // 클라이언트 ID, 시크릿으로 인증
 
-		// 요청 본문 구성 (grant_type과 refresh_token을 사용)
 		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-		body.add("grant_type", "refresh_token");
-		body.add("refresh_token", refreshToken);
+		body.add("grant_type", "authorization_code");
+		body.add("code", refreshToken);
+		body.add("redirect_uri", "http://localhost:3000/login/callback");
 
-		// HttpEntity로 요청 본문과 헤더를 설정
-		HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+		ResponseEntity<Map> response = restTemplate.exchange(TOKEN_URL, HttpMethod.POST, requestEntity, Map.class);
 
-		// RestTemplate을 사용하여 POST 요청 전송
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> response = restTemplate.exchange(TOKEN_URL, HttpMethod.POST, entity, String.class);
-
-		// 응답 출력
-		System.out.println("리프레시 토큰 응답: " + response.getBody());
-
-		// 액세스 토큰을 반환하거나 처리
-		return response.getBody();
+		if (response.getBody() != null && response.getBody().containsKey("refresh_token")) {
+			return response.getBody().get("refresh_token").toString();
+		}
+		throw new RuntimeException("리프레시 토큰을 가져오지 못했습니다.");
 	}
 }

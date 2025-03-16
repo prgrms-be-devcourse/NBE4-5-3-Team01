@@ -19,7 +19,7 @@ public class JwtTokenProviderTest {
 		String userId = "asdf1234";
 		String spotifyAccessToken = "spotify-accesstoken";
 
-		String token = jwtTokenProvider.createToken(userId, spotifyAccessToken);
+		String token = jwtTokenProvider.generateJwtToken(userId, spotifyAccessToken);
 		String extractedUserId = jwtTokenProvider.getUserIdFromToken(token);
 
 		System.out.println("토큰:" + token);
@@ -32,7 +32,7 @@ public class JwtTokenProviderTest {
 	void testValidateTokenValid() {
 		String userId = "asdf1234";
 		String spotifyAccessToken = "spotify-accesstoken";
-		String token = jwtTokenProvider.createToken(userId, spotifyAccessToken);
+		String token = jwtTokenProvider.generateJwtToken(userId, spotifyAccessToken);
 		System.out.println("서버토큰:" + token);
 		boolean isValid = jwtTokenProvider.validateToken(token);
 

@@ -49,8 +49,8 @@ public class PermissionService {
 	}
 
 	private boolean isMutualFollowing(User user1, User user2) {
-		return followRepository.existsByToUserAndFromUser(user1, user2)
-			&& followRepository.existsByToUserAndFromUser(user2, user1);
+		return followRepository.existsByToUserAndFromUser(user1, user2) && followRepository.existsByToUserAndFromUser(
+			user2, user1);
 	}
 
 }

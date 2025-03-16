@@ -12,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Table(name = "REFRESH_TOKEN")
+// @Table(name = "REFRESH_TOKEN")
 public class RefreshToken {
 
 	@Id
@@ -38,6 +37,9 @@ public class RefreshToken {
 	@CreatedDate
 	@Column(name = "CREATED_AT")
 	private LocalDateTime createdAt;
+
+	@Column(name = "SPOTIFY_REFRESH_TOKEN")
+	private String spotifyRefreshToken;
 
 	@Column(name = "REFRESH_TOKEN")
 	private String refreshToken;

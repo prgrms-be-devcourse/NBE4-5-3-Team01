@@ -4,27 +4,39 @@ import { useRouter } from "next/navigation";
 
 export default function AuthCallback() {
   const router = useRouter();
-
   useEffect(() => {
     console.log("OAuth2 인증 후 URL:", window.location.href);
 
     const urlParams = new URLSearchParams(window.location.search);
     const jwtToken = urlParams.get("access_token");
-    const spotifyToken = urlParams.get("spotify_access_token");
+    const refreshToken = urlParams.get("refresh_token");
 
     console.log("JWT Token:", jwtToken);
-    console.log("Spotify Token:", spotifyToken);
+    console.log("refresh Token:", refreshToken);
 
-    if (jwtToken && spotifyToken) {
-      localStorage.setItem("accessToken", jwtToken);
-      localStorage.setItem("spotifyToken", spotifyToken);
-      console.log("🔹 토큰 저장 완료!");
-      router.push("/"); // ✅ 토큰 저장 후 대시보드로 이동
+    if (jwtToken && refreshToken) {
+      // 토큰들을 쿠키에만 저장
+      const cookieOptions = "; path=/; samesite=strict; secure";
+      document.cookie = `accessToken=${jwtToken}${cookieOptions}; max-age=10`; // 10초
+      document.cookie = `refreshToken=${refreshToken}${cookieOptions}; max-age=604800`; // 7일
+
+      console.log("토큰 저장 완료!");
+      // 홈으로 리다이렉트
+      window.location.href = "/";
     } else {
       console.log("토큰을 찾을 수 없습니다!");
-      router.push("/login"); // ✅ 토큰이 없으면 로그인 페이지로 이동
+      router.push("/login");
     }
-  }, []);
+  }, [router]);
 
-  return <p>로그인 처리 중...</p>;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
+      <div className="text-center">
+        <div className="mb-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+        </div>
+        <p className="text-lg font-medium text-gray-600">로그인 처리 중...</p>
+      </div>
+    </div>
+  );
 }
