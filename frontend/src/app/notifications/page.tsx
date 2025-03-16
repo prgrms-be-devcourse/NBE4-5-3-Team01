@@ -24,18 +24,10 @@ const Notifications = () => {
 
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem("accessToken"); // 저장된 JWT 토큰 가져오기
-      if (!token) {
-        console.error("JWT 토큰이 없습니다!");
-        return;
-      }
-
       const response = await axios.get(
         "http://localhost:8080/api/v1/notification-lists",
         {
-          headers: {
-            Authorization: `Bearer ${token}`, // JWT 토큰을 Authorization 헤더에 추가
-          },
+          withCredentials: true, // 쿠키 포함
         }
       );
       setNotifications(
@@ -54,18 +46,12 @@ const Notifications = () => {
 
   const markAsRead = async (id: number) => {
     try {
-      const token = localStorage.getItem("accessToken"); // 저장된 JWT 토큰 가져오기
-      if (!token) {
-        console.error("JWT 토큰이 없습니다!");
-        return;
-      }
-
       await axios.patch(
         `http://localhost:8080/api/v1/notification-lists/${id}`,
         {},
         {
+          withCredentials: true, // 쿠키 포함
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -85,19 +71,13 @@ const Notifications = () => {
 
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem("accessToken"); // JWT 토큰 가져오기
-      if (!token) {
-        console.error("JWT 토큰이 없습니다!");
-        return;
-      }
-
       // 서버에 한 번의 요청으로 모든 알림 읽음 처리
       await axios.patch(
         "http://localhost:8080/api/v1/notification-lists/mark-all-read",
         {},
         {
+          withCredentials: true, // 쿠키 포함
           headers: {
-            Authorization: `Bearer ${token}`, // JWT 토큰 추가
             "Content-Type": "application/json",
           },
         }

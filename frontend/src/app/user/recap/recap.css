@@ -1,0 +1,140 @@
+:root {
+  --background: #f8f7ff;
+  --recapbar-width: 256px;
+  --recapbar-width-min: 80px;
+  --recapbar-dark-primary: #a283ff;
+  --recapbar-dark-secondary: #e7c6ff;
+  --recapbar-light-primary: #333333;
+  --recapbar-light-secondary: #393d3f;
+}
+
+#recap-bar {
+  position: absolute;
+  top: 1vw;
+  width: calc(100vw - 16rem - 3vw);
+  min-height: calc(100% - 2vw);
+  background: linear-gradient(
+    135deg,
+    var(--recapbar-dark-primary) 0%,
+    var(--recapbar-dark-secondary) 100%
+  );
+  border-radius: 16px;
+
+  color: var(--recapbar-light-primary);
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  overflow: hidden;
+  user-select: none;
+  margin-left: 2vw;
+}
+
+#container {
+  margin: 0 auto;
+  padding: 32px;
+  color: #393d3f;
+  display: flex;
+  flex-direction: column;
+  /* align-items: flex-start; */
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+}
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+.explan {
+  font-size: 1.5rem;
+  padding: 10px 0px 10px 10px;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.recap-button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background-color: #e7c6ff;
+  color: #393d3f;
+  font-weight: bold;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.recap-button:hover {
+  background-color: #d1aaff; /* hover 시 더 어두운 색 */
+  color: white;
+}
+
+.recap-button.active {
+  background-color: #a283ff;
+  color: white;
+}
+
+.recap-button.active:hover {
+  background-color: #8a69e0;
+}
+
+.content1 {
+  padding: 10px;
+  width: 50%;
+  max-height: 400px;
+}
+
+.subject {
+  font-size: 2rem;
+  font-weight: 600;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
+
+#container span {
+  color: #ffeaff;
+}
+
+.content1 ul {
+  padding-left: 15px;
+  padding-top: 10px;
+}
+.content1 li {
+  padding-bottom: 10px;
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.artist {
+  font-weight: 400;
+}
+
+.content2 {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+}
+
+.genre {
+  width: 50%;
+  font-size: 2rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.date {
+  width: 50%;
+  font-size: 2rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.chart-container {
+  width: 80%;
+}

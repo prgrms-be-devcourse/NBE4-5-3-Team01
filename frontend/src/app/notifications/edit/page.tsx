@@ -26,19 +26,10 @@ const NotificationEdit = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          alert("로그인이 필요합니다.");
-          window.location.href = "/login";
-          return;
-        }
-
         const response = await axios.get(
           "http://localhost:8080/api/v1/notifications/modify",
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            withCredentials: true, // 쿠키 포함
           }
         );
         setNotifications(response.data);
@@ -57,21 +48,13 @@ const NotificationEdit = () => {
   const handleSaveClick = async (notificationId: number) => {
     setIsSaving(true);
     try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        alert("로그인이 필요합니다.");
-        return;
-      }
-
       await axios.put(
         `http://localhost:8080/api/v1/notifications/${notificationId}/modify`,
         {
           notificationTime: newNotificationTime,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true, // 쿠키 포함
         }
       );
       setIsSaving(false);

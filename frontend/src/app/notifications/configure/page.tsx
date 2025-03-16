@@ -23,19 +23,10 @@ const NotificationCreate = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          alert("로그인이 필요합니다.");
-          window.location.href = "/login";
-          return;
-        }
-
         const response = await axios.get(
           "http://localhost:8080/api/v1/notifications/lists",
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            withCredentials: true, // 쿠키 포함
           }
         );
 
@@ -65,13 +56,6 @@ const NotificationCreate = () => {
   };
 
   const handleSave = async () => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      alert("로그인이 필요합니다.");
-      window.location.href = "/login";
-      return;
-    }
-
     // 각 알림의 이메일/푸시 알림 활성화 상태
     const updatedNotifications = notifications.map((notification) => ({
       notificationId: notification.id,
@@ -84,8 +68,8 @@ const NotificationCreate = () => {
         "http://localhost:8080/api/v1/notifications/update",
         updatedNotifications, // 서버에 보낼 데이터
         {
+          withCredentials: true, // 쿠키 포함
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }

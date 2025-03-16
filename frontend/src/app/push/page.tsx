@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-export default function Home() {
+export default function Push() {
   useEffect(() => {
     // 브라우저 환경인지 확인
     if ("serviceWorker" in navigator && "PushManager" in window) {
@@ -26,17 +26,12 @@ export default function Home() {
                 })
                 .then((subscription) => {
                   console.log("푸시 구독 성공:", subscription);
-                  const token = localStorage.getItem("accessToken");
-                  if (!token) {
-                    alert("로그인이 필요합니다.");
-                    window.location.href = "/login";
-                    return;
-                  }
+
                   fetch("http://localhost:8080/api/v1/push/subscribe", {
                     method: "POST",
+                    credentials: "include", // 쿠키 포함
                     headers: {
-                      Authorization: `Bearer ${token}`,
-                      "Content-Type": "application/json",
+                      "Content-Type": "application/json", // JSON 요청임을 명시
                     },
                     body: JSON.stringify(subscription),
                   })
@@ -74,17 +69,12 @@ export default function Home() {
   // 알림 전송 API를 호출하는 함수 (예시)
   const sendNotification = () => {
     const payload = "테스트 알림 메시지입니다.";
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      alert("로그인이 필요합니다.");
-      window.location.href = "/login";
-      return;
-    }
+
     fetch("http://localhost:8080/api/v1/push/notify", {
       method: "POST",
+      credentials: "include",
       headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        "Content-Type": "application/json", // JSON 요청임을 명시
       },
       body: JSON.stringify({ payload }),
     })
