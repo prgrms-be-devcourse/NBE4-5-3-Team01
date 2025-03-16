@@ -33,12 +33,13 @@ public class QueryFollowServiceTest extends ServiceTest {
 	@Test
 	void 팔로잉_목록을_조회한다() {
 		// given
+		User 로그인_유저 = userRepository.save(유저("asdf"));
 		User 메인_유저 = userRepository.save(유저("asdfasdf"));
 		List<User> 유저들 = 유저_전체_생성();
 		팔로우_전체_생성(메인_유저, 유저들);
 
 		// when
-		List<FollowResponse> followings = queryFollowService.findFollowing("asdf", 메인_유저.getId());
+		List<FollowResponse> followings = queryFollowService.findFollowing(로그인_유저.getId(), 메인_유저.getId());
 
 		// then
 		assertThat(followings.size()).isEqualTo(2);
@@ -47,12 +48,13 @@ public class QueryFollowServiceTest extends ServiceTest {
 	@Test
 	void 팔로워_목록을_조회한다() {
 		// given
+		User 로그인_유저 = userRepository.save(유저("asdf"));
 		User 메인_유저 = userRepository.save(유저("asdfasdf"));
 		List<User> 유저들 = 유저_전체_생성();
 		팔로우_전체_생성(메인_유저, 유저들);
 
 		// when
-		List<FollowResponse> followers = queryFollowService.findFollower("asdf", 메인_유저.getId());
+		List<FollowResponse> followers = queryFollowService.findFollower(로그인_유저.getId(), 메인_유저.getId());
 
 		// then
 		assertThat(followers.size()).isEqualTo(2);

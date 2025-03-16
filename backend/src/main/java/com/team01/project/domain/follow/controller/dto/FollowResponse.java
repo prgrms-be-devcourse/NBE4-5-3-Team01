@@ -6,13 +6,15 @@ import com.team01.project.domain.user.entity.User;
 
 public record FollowResponse(
 	SimpleUserResponse user,
-	Boolean followState
+	Boolean isFollowing,
+	Boolean isFollower
 ) {
 
-	public static FollowResponse of(User user, Boolean followState) {
+	public static FollowResponse of(User user, Boolean isFollowing, Boolean isFollower) {
 		return new FollowResponse(
 			SimpleUserResponse.from(user),
-			followState
+			isFollowing,
+			isFollower
 		);
 	}
 }

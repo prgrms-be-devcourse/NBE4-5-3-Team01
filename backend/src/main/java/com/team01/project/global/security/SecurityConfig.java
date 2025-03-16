@@ -40,7 +40,7 @@ public class SecurityConfig {
 				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(
 						authorizeRequests -> authorizeRequests.requestMatchers("/api/v1/user/login", "/api/v1/logout",
-										"/api/v1/user/refresh", "/api/v1/error", "/login", "/")
+										"/api/v1/user/refresh", "/api/v1/error", "/login", "/", "/api/v1/follows")
 								.permitAll()
 								.anyRequest()
 								.authenticated()) // 모든 요청에 대해 인증 필요
