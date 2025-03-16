@@ -53,8 +53,9 @@ export default function CalendarRecordPage() {
 
       if (isEditing) {
         // 기존 기록 수정
+        console.log(selectedTracks);
         await axios.post(`${API_URL}/music/save-all`,
-          { musicList: selectedTracks },
+          selectedTracks,
           {
             headers: {
               Authorization: `Bearer ${jwt}`,
@@ -85,6 +86,7 @@ export default function CalendarRecordPage() {
         );
 
         alert("기록이 성공적으로 수정되었습니다!");
+        router.push("/calendar");
       } else {
         // 새 기록 추가
         const res = await axios.post(`${API_URL}/calendar/record`, {

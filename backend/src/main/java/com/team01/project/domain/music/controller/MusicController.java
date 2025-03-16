@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,12 +63,21 @@ public class MusicController {
 
 	@PostMapping("/save-all")
 	@ResponseStatus(HttpStatus.CREATED)
-	public List<MusicResponse> saveAllMusic(@RequestBody List<Music> musicList) {
-		List<Music> savedMusicList = musicService.saveAllMusic(musicList);
-
-		return savedMusicList.stream()
-			.map(MusicResponse::fromEntity)
+	public void saveAllMusic(
+		@RequestBody List<Music> musicList,
+		@AuthenticationPrincipal OAuth2User user
+	) {
+		String spotifyToken = user.getAttribute("spotifyToken");
+		List<Music> updatedMusicList = musicList.stream()
+			.map(music -> {
+				if (music.getGenre() == null || music.getGenre().isEmpty()) {
+					MusicRequest musicRequest = spotifyService.getTrackWithGenre(music.getId(), spotifyToken);
+					music.setGenre(musicRequest.genre());
+				}
+				return music;
+			})
 			.collect(Collectors.toList());
+		musicService.saveAllMusic(musicList);
 	}
 
 	@GetMapping("/spotify/search")
