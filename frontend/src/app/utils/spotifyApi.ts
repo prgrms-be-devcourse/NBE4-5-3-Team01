@@ -1,10 +1,12 @@
 import SpotifyWebApi from "spotify-web-api-js";
+import { getCookie } from "./cookie";
 
 const spotifyApi = new SpotifyWebApi();
-const accessToken = localStorage.getItem("spotifyToken");
+const refreshToken = getCookie("refreshToken");
 
-if (accessToken) {
-  spotifyApi.setAccessToken(accessToken);
+if (refreshToken) {
+  console.log(refreshToken);
+  spotifyApi.setAccessToken(refreshToken);
 }
 
 export const searchSpotifyTracks = async (query: string) => {
