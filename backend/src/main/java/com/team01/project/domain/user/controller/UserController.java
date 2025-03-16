@@ -66,7 +66,7 @@ public class UserController {
 	// }
 
 	@Transactional
-	@GetMapping("/spotify/logout")
+	@GetMapping("/logout")
 	public String forceLogout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 		System.out.println("강제 로그아웃 요청 받음");
 

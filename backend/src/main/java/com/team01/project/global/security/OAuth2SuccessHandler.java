@@ -95,7 +95,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		// 프론트엔드로 리다이렉트할 URL 생성
 		String redirectUrl =
 			"http://localhost:3000/login/callback" + "?access_token=" + jwtToken + "&refresh_token="
-				+ refreshTokenValue;
+				+ refreshTokenValue + "&spotify_access_token=" + spotifyAccessToken;
 
 		System.out.println("OAuth2 성공 후 프론트엔드로 리다이렉트: " + redirectUrl);
 

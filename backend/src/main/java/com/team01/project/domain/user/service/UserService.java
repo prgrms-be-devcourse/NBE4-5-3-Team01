@@ -116,6 +116,7 @@ public class UserService {
 		Map<String, Object> response = new HashMap<>();
 		response.put("status", 200);
 		response.put("accessToken", newAccessToken);
+		response.put("spotifyAccessToken", spotifyAccessToken);
 		return ResponseEntity.status(200).body(response);
 	}
 

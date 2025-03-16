@@ -22,7 +22,17 @@ const refreshAccessToken = async (refreshToken: string) => {
 
     const data = await response.json();
     console.log("Refresh token response data:", data);
-    return data.accessToken; // 새로운 액세스 토큰 반환
+    
+    // 명시적으로 토큰 존재 여부 확인
+    if (!data.accessToken) {
+      console.error("Server response missing access token");
+      return null;
+    }
+
+    return {
+      accessToken: data.accessToken,
+      spotifyAccessToken: data.spotifyAccessToken
+    };
   } catch (error) {
     console.error("Error refreshing token:", error);
     return null;
@@ -30,13 +40,35 @@ const refreshAccessToken = async (refreshToken: string) => {
 };
 
 // 액세스 토큰 만료 여부를 확인하는 함수
-const isAccessTokenExpired = (accessToken: string): boolean => {
+const isAccessTokenExpired = (accessToken: string | undefined | null): boolean => {
+  if (!accessToken) {
+    console.log("Access token is null or undefined");
+    return true;
+  }
+  
   try {
-    const payload = JSON.parse(atob(accessToken.split(".")[1])); // JWT payload 디코딩
-    const expiration = payload.exp * 1000; // 만료 시간 (초 -> 밀리초 변환)
+    const payload = JSON.parse(atob(accessToken.split(".")[1]));
+    const expiration = payload.exp * 1000;
     return Date.now() >= expiration;
   } catch (error) {
     console.error("Error decoding token:", error);
+    return true;
+  }
+};
+
+// 스포티파이 토큰 만료 여부를 확인하는 함수
+const isSpotifyTokenExpired = (spotifyToken: string | undefined | null): boolean => {
+  if (!spotifyToken) {
+    console.log("Spotify token is null or undefined");
+    return true;
+  }
+  
+  try {
+    const payload = JSON.parse(atob(spotifyToken.split(".")[1]));
+    const expiration = payload.exp * 1000;
+    return Date.now() >= expiration;
+  } catch (error) {
+    console.error("Error decoding Spotify token:", error);
     return true;
   }
 };
@@ -67,10 +99,12 @@ export default async function middleware(req: NextRequest) {
   // 쿠키에서 액세스 토큰과 리프레시 토큰 가져오기
   const accessToken = req.cookies.get("accessToken")?.value;
   const refreshToken = req.cookies.get("refreshToken")?.value;
+  const spotifyToken = req.cookies.get("spotifyAccessToken")?.value;
 
   console.log("Token check:", {
     access: accessToken ? "exists" : "none",
     refresh: refreshToken ? "exists" : "none",
+    spotify: spotifyToken ? "exists" : "none",
   });
 
   // 토큰이 없으면 로그인 페이지로 리디렉션
@@ -79,27 +113,39 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // 액세스 토큰이 만료되었으면 리프레시 토큰으로 갱신
-  if (isAccessTokenExpired(accessToken)) {
-    console.log("Access token expired, attempting refresh");
+  // 액세스 토큰이나 스포티파이 토큰이 만료되었으면 리프레시
+  if (isAccessTokenExpired(accessToken) || isSpotifyTokenExpired(spotifyToken)) {
+    console.log("Access token or Spotify token expired, attempting refresh");
     try {
-      const newAccessToken = await refreshAccessToken(refreshToken);
-      if (!newAccessToken) {
+      const tokens = await refreshAccessToken(refreshToken);
+      if (!tokens) {
         console.log("Token refresh failed, redirecting to /login");
         return NextResponse.redirect(new URL("/login", req.url));
       }
-      console.log("Token refreshed successfully:", newAccessToken);
+      console.log("Tokens refreshed successfully:", tokens);
 
-      // 새 액세스 토큰을 쿠키에 저장하고, Authorization 헤더 설정
       const response = NextResponse.next();
-      response.cookies.set("accessToken", newAccessToken, {
+      response.cookies.set("accessToken", tokens.accessToken, {
         path: "/",
-        maxAge: 3600, // 1시간
+        maxAge: 3600,
         httpOnly: true,
         secure: true,
         sameSite: "strict"
       });
-      response.headers.set("Authorization", `Bearer ${newAccessToken}`);
+      
+      if (tokens.spotifyAccessToken) {
+        response.cookies.set("spotifyAccessToken", tokens.spotifyAccessToken, {
+          path: "/",
+          maxAge: 3600,
+          httpOnly: true,
+          secure: true,
+          sameSite: "strict"
+        });
+      } else {
+        console.log("No Spotify token received in refresh response");
+      }
+      
+      response.headers.set("Authorization", `Bearer ${tokens.accessToken}`);
       return response;
     } catch (error) {
       console.error("Error refreshing token:", error);
@@ -107,9 +153,13 @@ export default async function middleware(req: NextRequest) {
     }
   }
 
-  // 액세스 토큰이 유효하면 Authorization 헤더 설정
+  // 토큰이 유효한 경우
   const response = NextResponse.next();
   response.headers.set("Authorization", `Bearer ${accessToken}`);
+  // 스포티파이 토큰이 있으면 헤더에 추가
+  if (spotifyToken) {
+    response.headers.set("Spotify-Authorization", `Bearer ${spotifyToken}`);
+  }
   return response;
 }
 
