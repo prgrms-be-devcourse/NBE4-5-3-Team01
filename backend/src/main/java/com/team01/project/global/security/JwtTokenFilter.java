@@ -57,16 +57,19 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 			return;
 		}
 
+		String spotifyToken = jwtTokenProvider.extractSpotifyToken(token);
+		spotifyToken = (spotifyToken != null) ? spotifyToken : "";
+
 		String userId = jwtTokenProvider.getUserIdFromToken(token);
 
 		// 사용자 정보를 가져와서 인증 객체 생성
 		OAuth2User oAuth2User = new DefaultOAuth2User(
 			Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
-			Map.of("id", userId), // OAuth2User의 속성
+			Map.of("id", userId, "spotifyToken", spotifyToken), // OAuth2User의 속성
 			"id" // 기본 속성 키
 		);
 
-		// ✅ OAuth2User 기반으로 SecurityContext에 저장
+		// OAuth2User 기반으로 SecurityContext에 저장
 		Authentication auth = new OAuth2AuthenticationToken(
 			oAuth2User,
 			oAuth2User.getAuthorities(),

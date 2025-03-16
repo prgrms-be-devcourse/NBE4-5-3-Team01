@@ -22,9 +22,10 @@ public class UserDto {
 	private LocalDate birthDay;
 	private LocalDateTime createdDate;
 	private String field;
+	private String userIntro;
+	private String image;
 
 	//엔티티 -> DTO 변환
-
 	public static UserDto from(User user) {
 		return UserDto.builder()
 			.id(user.getId())
@@ -34,6 +35,8 @@ public class UserDto {
 			.birthDay(user.getBirthDay())
 			.createdDate(user.getCreatedDate())
 			.field(user.getField())
+			.userIntro(user.getUserIntro())
+			.image(user.getImage())
 			.build();
 	}
 }

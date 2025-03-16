@@ -40,6 +40,10 @@ public class User {
 
 	private String nickName;
 
+	private String userIntro;
+
+	private String image;
+
 	@Column(name = "birthday")
 	private LocalDate birthDay;
 

@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.team01.project.domain.notification.service.NotificationService;
-import com.team01.project.domain.user.entity.RefreshToken;
 import com.team01.project.domain.user.entity.User;
 import com.team01.project.domain.user.repository.RefreshTokenRepository;
 import com.team01.project.domain.user.repository.UserRepository;
@@ -43,6 +42,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 	@Autowired
 	private SpotifyRefreshTokenService spotifyRefreshTokenService;
 
+
 	@Transactional
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -53,7 +53,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 		}
 
 		if (userRequest.getAccessToken() == null) {
-			throw new RuntimeException("OAuth2 Access Token이 null입니다.");
+			throw new RuntimeException("spotify Access Token이 null입니다.");
 		}
 
 		OAuth2User user = delegate.loadUser(userRequest);
@@ -62,9 +62,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 		System.out.println("spotify access token:" + spotifyAccessToken);
 		System.out.println("User Attributes: " + user.getAttributes()); // OAuth 사용자 정보 확인
 
-		//리프레시 토큰 받아오기
-		//spotifyRefreshTokenService.refreshAccessToken(accessToken);
-		//리프레시 토큰 저장 ( DB에 저장 )
 		String userId = user.getName();
 		if (userId == null) {
 			throw new RuntimeException("OAuth2 사용자 ID를 찾을 수 없습니다.");
@@ -92,31 +89,20 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 		}
 
 		Optional<User> matchId = userRepository.findById(userId);
+
 		if (!matchId.isEmpty()) {
 			System.out.println("리프레시 토큰 테이블에 동일한 유저 ID 있을 때 기존 리프레시 토큰 삭제");
 			refreshTokenRepository.deleteByUserId(userId);
 		}
 
-		RefreshToken refreshToken = RefreshToken.builder()
-			.user(foundUser)
-			.refreshToken(spotifyAccessToken)
-			.createdAt(LocalDateTime.now())
-			.build();
-
-		refreshTokenRepository.save(refreshToken);
-
 		//JWT 발급
-		String jwtToken = jwtTokenProvider.createToken(userId, spotifyAccessToken);
-
-		// ✅ 현재 요청의 세션에 Spotify Access Token 저장
-		// ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-		// HttpSession session = attr.getRequest().getSession();
-		// session.setAttribute("spotify_access_token", spotifyAccessToken);
-		// session.setAttribute("jwt_token", jwtToken);
+		String jwtToken = jwtTokenProvider.generateJwtToken(userId, spotifyAccessToken);
+		String refreshToken = jwtTokenProvider.generateRefreshToken(userId);
 
 		Map<String, Object> attributes = new HashMap<>(user.getAttributes());
 		attributes.put("spotifyToken", spotifyAccessToken);
 		attributes.put("jwtToken", jwtToken);
+		attributes.put("refreshToken", refreshToken);
 
 		System.out.println("유저서비스에서 생성된 jwt:" + jwtToken);
 

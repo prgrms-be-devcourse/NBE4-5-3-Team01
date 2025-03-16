@@ -70,7 +70,7 @@
 // 		given(oauth2User.getName()).willReturn(userId);
 // 		given(userRequest.getAccessToken().getTokenValue()).willReturn(accessToken);
 // 		given(userRepository.findById(userId)).willReturn(Optional.of(mockUser));
-// 		given(jwtTokenProvider.createToken(userId, accessToken)).willReturn("mockJwtToken");
+// 		given(jwtTokenProvider.generateJwtToken(userId, accessToken)).willReturn("mockJwtToken");
 //
 // 		// When (테스트 실행)
 // 		OAuth2User result = customOAuth2UserService.loadUser(userRequest);
@@ -79,6 +79,6 @@
 // 		assertNotNull(result);
 // 		assertEquals(userId, result.getName());
 // 		verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
-// 		verify(jwtTokenProvider, times(1)).createToken(userId, accessToken);
+// 		verify(jwtTokenProvider, times(1)).generateJwtToken(userId, accessToken);
 // 	}
 // }
