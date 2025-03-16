@@ -1,0 +1,131 @@
+body {
+    color: #393d3f;
+}
+
+/* 📌 기본 버튼 스타일 */
+.btn {
+    color: #393D3F;
+    cursor: pointer;
+    /* 텍스트 색상 */
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+}
+
+/* 📌 주요 버튼 (기본: 보라색) */
+.btn-primary {
+    background-color: #C8B6FF;
+    /* 메인 컬러 */
+}
+
+/* 📌 호버 효과: 부드러운 파스텔 느낌 */
+.btn-primary:hover {
+    background-color: #B5A1FF;
+    /* 약간 더 진한 보라색 */
+    box-shadow: 0px 4px 10px rgba(200, 182, 255, 0.5);
+    /* 부드러운 그림자 효과 */
+}
+
+/* 📌 클릭 (포커스) 효과 */
+.btn-primary:focus {
+    outline: none;
+    box-shadow: 0px 0px 8px #BBD0FF;
+}
+
+/* 검색창 스타일 */
+.search-container {
+    position: relative;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.search-results {
+    position: absolute;
+    width: 100%;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-top: 5px;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.search-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.search-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+}
+
+.search-item:hover,
+.search-item.selected {
+    background-color: #f0f0f0;
+}
+
+/* 음악 목록 스타일 */
+.music-list-container {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.music-item {
+    position: relative;
+    width: 150px;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.music-item img {
+    width: 130px;
+    height: 130px;
+    border-radius: 6px;
+}
+
+.music-item p {
+    font-size: 14px;
+}
+
+.remove-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* 메모 박스 스타일 */
+.memo-input {
+    width: 100%;
+    height: 150px;
+    resize: none;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: white;
+    padding: 10px;
+}

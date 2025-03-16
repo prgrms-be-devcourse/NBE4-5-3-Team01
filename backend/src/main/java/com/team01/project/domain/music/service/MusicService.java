@@ -2,6 +2,7 @@ package com.team01.project.domain.music.service;
 
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,13 @@ public class MusicService {
 				return existingMusic;
 			})
 			.orElseGet(() -> musicRepository.save(music));
+	}
+
+	@Transactional
+	public List<Music> saveAllMusic(List<Music> musicList) {
+		return musicList.stream()
+			.map(this::saveMusic)
+			.collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)

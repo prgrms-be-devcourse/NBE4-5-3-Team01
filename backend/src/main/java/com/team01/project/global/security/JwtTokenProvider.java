@@ -27,8 +27,8 @@ public class JwtTokenProvider {
 	private static final String SECRET_KEY_STRING =
 		"aXlvdXZvLWNvc2VjLXJhbmdvbGV" + "0LXNlY3JldC1rZXkta2V5LWZvci1qd3Q="; // Base64 인코딩된 값
 	private static final Key SECRET_KEY = Keys.hmacShaKeyFor(Base64.getDecoder().decode(SECRET_KEY_STRING));
-	// private static final long VALIDITY_IN_MS = 3600000L; // 1시간
-	private static final long VALIDITY_IN_MS = 10000L; // 10초
+	private static final long VALIDITY_IN_MS = 3600000L; // 1시간
+	// private static final long VALIDITY_IN_MS = 10000L; // 10초
 	private long refreshTokenValidity = 1000 * 60 * 60 * 24 * 7; // 7일
 	private User user;
 
