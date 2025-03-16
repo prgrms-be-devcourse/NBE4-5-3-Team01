@@ -41,6 +41,10 @@ public class Music {
 	@Column(name = "genre")
 	private String genre;
 
+	public void setGenre(String genre) {
+		this.genre = genre;
+	}
+
 	public boolean isSameAs(Music other) {
 		return this.name.equals(other.getName())
 			&& this.singer.equals(other.getSinger())
