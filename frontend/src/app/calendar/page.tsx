@@ -6,7 +6,7 @@ export default function CalendarMainPage() {
   const router = useRouter();
 
   const handleAddRecordClick = () => {
-    router.push("/calendar/record");
+    router.push("/calendar/record?year=2025&month=3&day=16");
   };
 
   const handleEditRecord = () => {

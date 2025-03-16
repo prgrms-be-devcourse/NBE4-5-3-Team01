@@ -14,7 +14,11 @@ export default function CalendarRecordPage() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const id = searchParams.get("id");
+  const year = searchParams.get("year");
+  const month = searchParams.get("month");
+  const day = searchParams.get("day");
 
   const [memo, setMemo] = useState("");
   const [selectedTracks, setSelectedTracks] = useState([]);
@@ -51,20 +55,34 @@ export default function CalendarRecordPage() {
     try {
       const jwt = getCookie("accessToken");
 
+      // 📌 음악이 하나도 선택되지 않았다면 알림 표시
+      if (selectedTracks.length === 0) {
+        alert("음악 기록을 추가해주세요!");
+        return;
+      }
+
+      // 📌 메모가 비어있다면 확인 요청
+      if (!memo.trim()) {
+        const confirmSave = window.confirm("메모를 작성하지 않으셨습니다. 그대로 저장하시겠습니까?");
+        if (!confirmSave) return;
+      }
+
+      let finalMemo = memo.trim() ? memo : null;
+
+      await axios.post(`${API_URL}/music/save-all`,
+        selectedTracks,
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      const musicIds = selectedTracks.map(track => track.id);
+
       if (isEditing) {
         // 기존 기록 수정
-        console.log(selectedTracks);
-        await axios.post(`${API_URL}/music/save-all`,
-          selectedTracks,
-          {
-            headers: {
-              Authorization: `Bearer ${jwt}`,
-              "Content-Type": "application/json"
-            }
-          }
-        );
-
-        const musicIds = selectedTracks.map(track => track.id);
         await axios.post(`${API_URL}/calendar/${id}/music`,
           { musicIds: musicIds },
           {
@@ -76,7 +94,7 @@ export default function CalendarRecordPage() {
         );
 
         await axios.post(`${API_URL}/calendar/${id}/memo`,
-          { memo: memo },
+          { memo: finalMemo },
           {
             headers: {
               Authorization: `Bearer ${jwt}`,
@@ -89,12 +107,16 @@ export default function CalendarRecordPage() {
         router.push("/calendar");
       } else {
         // 새 기록 추가
-        const res = await axios.post(`${API_URL}/calendar/record`, {
-          memo,
-          musicList: selectedTracks,
+        await axios.post(`${API_URL}/calendar`, { memo: finalMemo, musicIds }, {
+          params: { year, month, day },
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+            "Content-Type": "application/json",
+          },
         });
+
         alert("새로운 기록이 추가되었습니다!");
-        router.push(`/calendar/record?id=${res.data.id}`); // ✅ 새 id로 URL 변경
+        router.push("/calendar");
       }
     } catch (error) {
       console.error("기록 저장 실패:", error);
