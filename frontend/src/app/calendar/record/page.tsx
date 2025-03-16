@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
+import { getCookie } from "@/app/utils/cookie";
 import MemoInput from "./MemoInput";
 import MusicList from "./MusicList";
 import MusicSearch from "./MusicSearch";
@@ -28,7 +29,7 @@ export default function CalendarRecordPage() {
     try {
       if (id) {
         setIsEditing(true);
-        const jwt = localStorage.getItem("accessToken");
+        const jwt = getCookie("accessToken");
         const res = await axios.get(`${API_URL}/calendar/${id}`, {
           headers: {
             Authorization: `Bearer ${jwt}`,
@@ -48,13 +49,21 @@ export default function CalendarRecordPage() {
   // 📌 기록 저장 (신규 or 수정)
   const handleSaveRecord = async () => {
     try {
-      const jwt = localStorage.getItem("accessToken");
+      const jwt = getCookie("accessToken");
 
       if (isEditing) {
         // 기존 기록 수정
-        console.log(selectedTracks);
-        const musicIds = selectedTracks.map(track => track.id);
+        await axios.post(`${API_URL}/music/save-all`,
+          { musicList: selectedTracks },
+          {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
 
+        const musicIds = selectedTracks.map(track => track.id);
         await axios.post(`${API_URL}/calendar/${id}/music`,
           { musicIds: musicIds },
           {

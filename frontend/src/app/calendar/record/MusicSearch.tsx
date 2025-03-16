@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { searchSpotifyTracks } from "@/utils/spotifyApi";
+import { searchSpotifyTracks } from "@/app/utils/spotifyApi";
 import "./style.css";
 
 export default function MusicSearch({ onSelectTrack }) {
