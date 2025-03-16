@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -56,6 +57,16 @@ public class MusicController {
 			return MusicResponse.fromEntity(savedMusic);
 		}
 		throw new IllegalArgumentException("Invalid music data");
+	}
+
+	@PostMapping("/save-all")
+	@ResponseStatus(HttpStatus.CREATED)
+	public List<MusicResponse> saveAllMusic(@RequestBody List<Music> musicList) {
+		List<Music> savedMusicList = musicService.saveAllMusic(musicList);
+
+		return savedMusicList.stream()
+			.map(MusicResponse::fromEntity)
+			.collect(Collectors.toList());
 	}
 
 	@GetMapping("/spotify/search")
