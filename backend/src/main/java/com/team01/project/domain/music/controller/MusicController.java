@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -37,8 +36,9 @@ public class MusicController {
 	@ResponseStatus(HttpStatus.OK)
 	public MusicResponse getMusicFromSpotify(
 		@PathVariable String id,
-		@RequestHeader("Spotify-Token") String spotifyToken
+		@AuthenticationPrincipal OAuth2User user
 	) {
+		String spotifyToken = user.getAttribute("spotifyToken");
 		MusicRequest musicRequest = spotifyService.getTrackWithGenre(id, spotifyToken);
 		if (musicRequest != null) {
 			Music music = musicRequest.toEntity();
@@ -49,14 +49,14 @@ public class MusicController {
 
 	@PostMapping("/spotify/{id}")
 	@ResponseStatus(HttpStatus.CREATED)
-	public MusicResponse saveMusicFromSpotify(
+	public void saveMusicFromSpotify(
 		@PathVariable String id,
-		@RequestHeader("Spotify-Token") String spotifyToken
+		@AuthenticationPrincipal OAuth2User user
 	) {
+		String spotifyToken = user.getAttribute("spotifyToken");
 		MusicRequest musicRequest = spotifyService.getTrackWithGenre(id, spotifyToken);
 		if (musicRequest != null) {
 			Music savedMusic = musicService.saveMusic(musicRequest.toEntity());
-			return MusicResponse.fromEntity(savedMusic);
 		}
 		throw new IllegalArgumentException("Invalid music data");
 	}
@@ -72,20 +72,21 @@ public class MusicController {
 			.map(music -> {
 				if (music.getGenre() == null || music.getGenre().isEmpty()) {
 					MusicRequest musicRequest = spotifyService.getTrackWithGenre(music.getId(), spotifyToken);
-					music.setGenre(musicRequest.genre());
+					music.setGenre(musicRequest.getGenre());
 				}
 				return music;
 			})
 			.collect(Collectors.toList());
-		musicService.saveAllMusic(musicList);
+		musicService.saveAllMusic(updatedMusicList);
 	}
 
 	@GetMapping("/spotify/search")
 	@ResponseStatus(HttpStatus.OK)
 	public List<MusicResponse> searchTracks(
 		@RequestParam String keyword,
-		@RequestHeader("Spotify-Token") String spotifyToken
+		@AuthenticationPrincipal OAuth2User user
 	) {
+		String spotifyToken = user.getAttribute("spotifyToken");
 		List<MusicRequest> tracks = spotifyService.searchByKeyword(keyword, spotifyToken);
 		return tracks.stream()
 			.map(request -> MusicResponse.fromEntity(request.toEntity()))
@@ -95,8 +96,9 @@ public class MusicController {
 	@GetMapping("/spotify/artist/{artistId}/top-tracks")
 	public List<MusicResponse> getTopTracksByArtist(
 		@PathVariable String artistId,
-		@RequestHeader("Spotify-Token") String spotifyToken
+		@AuthenticationPrincipal OAuth2User user
 	) {
+		String spotifyToken = user.getAttribute("spotifyToken");
 		List<MusicRequest> topTracks = spotifyService.getTopTracksByArtist(artistId, spotifyToken);
 		return topTracks.stream()
 			.map(request -> MusicResponse.fromEntity(request.toEntity()))
