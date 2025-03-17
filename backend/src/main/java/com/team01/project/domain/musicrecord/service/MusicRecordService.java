@@ -19,7 +19,7 @@ import com.team01.project.domain.music.repository.MusicRepository;
 import com.team01.project.domain.musicrecord.entity.MusicRecord;
 import com.team01.project.domain.musicrecord.entity.MusicRecordId;
 import com.team01.project.domain.musicrecord.repository.MusicRecordRepository;
-import com.team01.project.domain.notification.event.NotificationUpdatedEvent;
+import com.team01.project.domain.notification.event.NotificationRecordEvent;
 import com.team01.project.domain.user.entity.User;
 import com.team01.project.domain.user.repository.UserRepository;
 import com.team01.project.global.permission.PermissionService;
@@ -89,7 +89,7 @@ public class MusicRecordService {
 
 		if (oldMusicRecords.isEmpty()) {
 			// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록) 설정한 시각이 30분 이내라면
-			eventPublisher.publishEvent(new NotificationUpdatedEvent(this, LocalTime.now()));
+			eventPublisher.publishEvent(new NotificationRecordEvent(this, LocalTime.now(), loggedInUser));
 		}
 
 		// 2. 기존 MusicId 목록 조회

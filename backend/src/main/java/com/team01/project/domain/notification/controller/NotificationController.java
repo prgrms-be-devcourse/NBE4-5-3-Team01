@@ -21,10 +21,12 @@ import com.team01.project.domain.notification.dto.NotificationUpdateDto;
 import com.team01.project.domain.notification.entity.Notification;
 import com.team01.project.domain.notification.service.NotificationService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-
+@Tag(name = "Notification", description = "알림 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/notifications")
@@ -32,6 +34,7 @@ public class NotificationController {
 	private final NotificationService notificationService;
 
 	// 전체 알림 목록 조회
+	@Operation(summary = "전체 알림 조회", description = "모든 사용자의 알림 목록 조회")
 	@GetMapping
 	public ResponseEntity<List<NotificationDto>> getNotifications() {
 		return ResponseEntity.ok(notificationService.getAllNotifications()
@@ -41,6 +44,7 @@ public class NotificationController {
 	}
 
 	// 사용자의 알림 목록 조회 (알림 설정 페이지에서 보여줄 목록)
+	@Operation(summary = "사용자의 알림 조회", description = "한 사용자의 알림 목록 조회")
 	@GetMapping("/lists")
 	public ResponseEntity<List<NotificationDto>> getUserNotifications(@AuthenticationPrincipal OAuth2User user) {
 		String userId = user.getName();
@@ -51,6 +55,7 @@ public class NotificationController {
 	}
 
 	// 알림 단건 조회
+	@Operation(summary = "알림 단건 조회", description = "알림 단건 조회")
 	@GetMapping("/{notification-id}")
 	public ResponseEntity<NotificationDto> getUserNotification(
 			@PathVariable(name = "notification-id") Long notificationId) {
@@ -59,6 +64,7 @@ public class NotificationController {
 	}
 
 	// 알림 시간 변경 가능한 목록만 조회
+	@Operation(summary = "변경할 알림 조회", description = "알림 시간을 변경 가능한 목록만 조회")
 	@GetMapping("/modify")
 	public ResponseEntity<List<NotificationDto>> getUserModifiableNotification(
 			@AuthenticationPrincipal OAuth2User user) {
@@ -71,6 +77,7 @@ public class NotificationController {
 
 
 	// 알림 변경 (시간만 변경 가능)
+	@Operation(summary = "알림 시간 변경", description = "알림 시간 변경")
 	@PutMapping("/{notification-id}/modify")
 	public ResponseEntity<String> modifyNotification(
 			@PathVariable(name = "notification-id") Long notificationId,
@@ -84,6 +91,7 @@ public class NotificationController {
 	}
 
 	// 알림 설정 업데이트 (이메일, 푸시알림)
+	@Operation(summary = "알림 설정", description = "이메일, 푸시알림 설정 업데이트")
 	@PatchMapping("/update")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void updateNotifications(

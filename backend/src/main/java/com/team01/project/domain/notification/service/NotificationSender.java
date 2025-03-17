@@ -1,6 +1,7 @@
 package com.team01.project.domain.notification.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -47,22 +48,30 @@ public class NotificationSender {
 
 	// 푸시 알림
 	public void sendPush(User user, String title, String message, LocalDateTime notificationTime) {
-		Subscription sub = subscriptionRepository.findByUserId(user.getId()).get();
-		try {
-			pushNotificationService.sendPush(
-					sub.getEndpoint(),
-					sub.getP256dh(),
-					sub.getAuth(),
-					title,
-					message
-			);
+		Optional<Subscription> subscriptionOpt = subscriptionRepository.findByUserId(user.getId());
 
-			notificationListService.addNotification(user, title, message, notificationTime);
-
-			System.out.println(user.getName() + "님에게 " + title + " 푸시알림이 전송되었습니다. 내용: " + message);
-		} catch (Exception e) {
-			// 예외 처리
-			e.printStackTrace();
+		if (subscriptionOpt.isPresent()) {
+			Subscription sub = subscriptionOpt.get();
+			try {
+				pushNotificationService.sendPush(
+						sub.getEndpoint(),
+						sub.getP256dh(),
+						sub.getAuth(),
+						title,
+						message
+				);
+				System.out.println(user.getName() + "님에게 " + title + " 푸시알림이 전송되었습니다. 내용: " + message);
+			} catch (Exception e) {
+				// 예외 처리
+				e.printStackTrace();
+			}
+		} else {
+			// subscription이 없을 경우 push 전송은 하지 않음
+			System.out.println(user.getName() + "님의 subscription 정보가 없어 푸시알림을 보내지 않습니다.");
 		}
+
+		// subscription 여부와 상관없이 notification 기록은 추가
+		notificationListService.addNotification(user, title, message, notificationTime);
 	}
+
 }

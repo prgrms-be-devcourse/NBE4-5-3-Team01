@@ -16,8 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.team01.project.domain.notification.dto.NotificationListDto;
 import com.team01.project.domain.notification.service.NotificationListService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "NotificationList", description = "알림리스트 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/notification-lists")
@@ -26,6 +29,7 @@ public class NotificationListController {
 	private final NotificationListService notificationListService;
 
 	// 현재 로그인한 사용자의 알림 목록 조회
+	@Operation(summary = "사용자의 알림리스트 조회", description = "현재 로그인한 사용자가 받은 알림리스트 조회")
 	@GetMapping
 	public ResponseEntity<List<NotificationListDto>> getUserNotifications(
 			@AuthenticationPrincipal OAuth2User user) {
@@ -38,6 +42,7 @@ public class NotificationListController {
 	}
 
 	// 알림 읽음 처리
+	@Operation(summary = "알림 읽음 처리 단건", description = "선택한 알림의 읽음 처리")
 	@PatchMapping("/{notificationList-id}")
 	public ResponseEntity<String> markNotificationAsRead(
 			@PathVariable(name = "notificationList-id") Long notificationListId,
@@ -49,6 +54,7 @@ public class NotificationListController {
 	}
 
 	// 안읽은 알람 모두 읽음 처리
+	@Operation(summary = "모든 알림 읽음 처리", description = "사용자의 모든 알림의 읽음 처리")
 	@PatchMapping("/mark-all-read")
 	public ResponseEntity<Void> markAllNotificationAsRead(@AuthenticationPrincipal OAuth2User user) {
 		String userId = user.getName();
@@ -58,6 +64,7 @@ public class NotificationListController {
 
 
 	// 알림 리스트에서 알림 삭제
+	@Operation(summary = "알림 삭제", description = "알림리스트에서 선택한 알림 삭제")
 	@DeleteMapping("/{notificationList-id}")
 	public ResponseEntity<String> deleteNotification(
 			@PathVariable(name = "notificationList-id") Long notificationListId,

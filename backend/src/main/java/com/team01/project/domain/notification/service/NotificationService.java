@@ -15,7 +15,6 @@ import com.team01.project.domain.notification.constants.NotificationMessages;
 import com.team01.project.domain.notification.dto.NotificationUpdateDto;
 import com.team01.project.domain.notification.entity.Notification;
 import com.team01.project.domain.notification.event.NotificationInitEvent;
-import com.team01.project.domain.notification.event.NotificationUpdatedEvent;
 import com.team01.project.domain.notification.repository.NotificationRepository;
 import com.team01.project.domain.user.entity.User;
 import com.team01.project.domain.user.repository.UserRepository;
@@ -76,10 +75,10 @@ public class NotificationService {
 		notification.updateNotificationTime(notificationTime);
 		notificationRepository.save(notification);
 
-		if (notification.getNotificationTime().isBefore(LocalTime.now().plusMinutes(30))) {
-			// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록) 설정한 시각이 30분 이내라면
-			eventPublisher.publishEvent(new NotificationUpdatedEvent(this, notification.getNotificationTime()));
-		}
+//		if (notification.getNotificationTime().isBefore(LocalTime.now().plusMinutes(30))) {
+//			// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록) 설정한 시각이 30분 이내라면
+//			eventPublisher.publishEvent(new NotificationUpdatedEvent(this, notification.getNotificationTime()));
+//		}
 	}
 
 	@Transactional(readOnly = true)

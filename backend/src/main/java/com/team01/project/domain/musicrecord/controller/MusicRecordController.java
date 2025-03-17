@@ -16,8 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.team01.project.domain.musicrecord.controller.dto.MusicRecordDto;
 import com.team01.project.domain.musicrecord.service.MusicRecordService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Recap", description = "통계 API")
 @RestController
 @RequestMapping("/recap")
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class MusicRecordController {
 	 * 통계 위해서 사용
 	 * 특정 연도와 월에 기록한 MusicRecord 리스트 조회
 	 */
+	@Operation(summary = "전체 기록 조회", description = "사용자의 음악 기록 목록 조회")
 	@GetMapping
 	public ResponseEntity<List<MusicRecordDto>> getMusicRecords(
 			@AuthenticationPrincipal OAuth2User user,

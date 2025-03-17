@@ -1,7 +1,5 @@
 package com.team01.project.domain.notification.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -17,10 +15,11 @@ import com.team01.project.domain.notification.service.PushNotificationService;
 import com.team01.project.domain.user.entity.User;
 import com.team01.project.domain.user.repository.UserRepository;
 
-import lombok.Getter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
+@Tag(name = "Subscription", description = "푸시 구독 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/push")
@@ -31,6 +30,7 @@ public class SubscriptionController {
 	private final UserRepository userRepository;
 
 	// 푸시 구독 정보 저장
+	@Operation(summary = "푸시 구독 정보 저장", description = "사용자의 푸시 구독 정보 저장")
 	@PostMapping("/subscribe")
 	public ResponseEntity<String> subscribe(
 			@RequestBody SubscriptionDto dto, @AuthenticationPrincipal OAuth2User user) {
@@ -49,33 +49,5 @@ public class SubscriptionController {
 				.build();
 		subscriptionRepository.save(subscription);
 		return ResponseEntity.ok("구독 저장 성공");
-	}
-
-	// 푸시 알림 테스트
-	@PostMapping("/notify")
-	public ResponseEntity<String> notifyAll(@RequestBody NotificationRequest request) {
-		List<Subscription> subscriptions = subscriptionRepository.findAll();
-		for (Subscription sub : subscriptions) {
-			try {
-				pushNotificationService.sendPush(
-						sub.getEndpoint(),
-						sub.getP256dh(),
-						sub.getAuth(),
-						request.getPayload()
-				);
-			} catch (Exception e) {
-				// 실패한 구독은 로그 기록 (실제 서비스에서는 재시도나 구독 삭제 로직 고려)
-				e.printStackTrace();
-			}
-		}
-		return ResponseEntity.ok("모든 구독자에게 알림 전송 시도");
-	}
-
-	// 요청 Body를 받을 DTO
-	@Setter
-	@Getter
-	public static class NotificationRequest {
-		private String payload;
-
 	}
 }

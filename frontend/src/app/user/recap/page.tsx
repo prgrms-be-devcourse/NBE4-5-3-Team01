@@ -342,7 +342,7 @@ const RecapPage = () => {
               <h1>Music Calendar Recap</h1>
             </div>
             <div className="explan">
-              <p>user님이 들었던 음악들의 Recap</p>
+              <p>회원님이 들었던 노래 Recap</p>
             </div>
           </div>
           <div className="button">
@@ -366,7 +366,14 @@ const RecapPage = () => {
         </div>
         {loading && <div>음악 기록을 불러오는 중...</div>}
         {error && <div>{error}</div>}
-        {!loading && !error && (
+        {/* 로딩과 에러가 없고, 데이터가 없는 경우 메시지 출력 */}
+        {!loading && !error && filteredData.length === 0 && (
+          <div className="no-records">
+            <p>음악 기록을 시작해보세요!!</p>
+          </div>
+        )}
+        {/* 로딩과 에러가 없고, 데이터가 있을 때 기존 통계 콘텐츠 렌더링 */}
+        {!loading && !error && filteredData.length > 0 && (
           <>
             <div className="content1">
               <section>
@@ -388,7 +395,7 @@ const RecapPage = () => {
                 <div>
                   내가 많이 들은 <span>장르</span>
                 </div>
-                <div className="chart-container">
+                <div className="chart-container" style={{ width: "600px" }}>
                   <Pie data={pieChartData} options={pieChartOptions} />
                 </div>
               </div>

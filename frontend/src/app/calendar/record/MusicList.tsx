@@ -7,12 +7,15 @@ import "./style.css";
 export default function MusicList({ selectedTracks, onRemoveTrack }) {
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-2">음악 목록</h3>
+      <h3 className="text-2xl font-semibold mb-2 ml-1">음악 목록</h3>
       <div className="music-list-container">
         {selectedTracks.map((track) => (
           <div key={track.id} className="music-item">
             <img src={track.albumImage} alt={track.name} />
-            <button className="remove-button" onClick={() => onRemoveTrack(track.id)}>
+            <button
+              className="remove-button"
+              onClick={() => onRemoveTrack(track.id)}
+            >
               <FontAwesomeIcon icon={faTimes} />
             </button>
             <p className="mt-2">{track.name}</p>

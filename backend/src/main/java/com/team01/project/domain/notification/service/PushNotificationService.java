@@ -42,16 +42,6 @@ public class PushNotificationService {
 	}
 
 	// 실제 푸시 메시지를 보내는 메서드
-	public void sendPush(String endpoint, String userPublicKey, String auth, String payload) throws Exception {
-		// JSON 형태로 감싸서 보내기
-		String jsonPayload = String.format("{\"message\": \"%s\"}", payload);
-
-		// Notification 객체 생성 (구독 정보와 payload를 바이트 배열로 변환)
-		Notification notification = new Notification(endpoint, userPublicKey, auth, jsonPayload.getBytes());
-		pushService.send(notification);
-	}
-
-	// 실제 푸시 메시지를 보내는 메서드
 	public void sendPush(
 			String endpoint, String userPublicKey, String auth, String title, String message) throws Exception {
 		String jsonPayload = String.format("{\"title\": \"%s\", \"message\": \"%s\"}", title, message);
