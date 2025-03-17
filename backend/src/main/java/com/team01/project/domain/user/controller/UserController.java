@@ -161,6 +161,7 @@ public class UserController {
 	// 	return ResponseEntity.ok("Logged out");
 	// }
 
+	@Operation(summary="유저 검색 api", description="이름과 닉네임으로 유저를 검색한다.")
 	@ResponseBody
 	@GetMapping("/search")
 	public List<FollowResponse> search(
@@ -170,6 +171,7 @@ public class UserController {
 		return userService.search(user.getName(), name);
 	}
 
+	@Operation(summary="유저 조회 api", description="현재 로그인한 유저의 정보를 조회한다.")
 	@ResponseBody
 	@GetMapping("/byToken")
 	public SimpleUserResponse getUserByToken(@RequestHeader("Authorization") String accessToken) {
@@ -226,12 +228,14 @@ public class UserController {
 
 	}
 
+	@Operation(summary="유저 조회 api", description="아이디가 user-id인 유저의 정보를 조회한다.")
 	@ResponseBody
 	@GetMapping("/{user-id}")
 	public SimpleUserResponse getUserByUserId(@PathVariable(name = "user-id") String userId) {
 		return SimpleUserResponse.from(userService.getUserById(userId));
 	}
 
+	@Operation(summary="유저 조회 api", description="현재 로그인한 유저의 정보를 조회한다.")
 	@ResponseBody
 	@GetMapping("/byCookie")
 	public SimpleUserResponse getUserByCookie(@CookieValue(name = "accessToken") String accessToken) {
@@ -239,6 +243,7 @@ public class UserController {
 		return SimpleUserResponse.from(userService.getUserById(userId));
 	}
 
+	@Operation(summary = "Spotify Token 반환", description = "쿠키에 존재하는 Spotify Token 반환한다.")
 	@GetMapping("/spotify-token")
 	public ResponseEntity<String> getSpotifyToken(@AuthenticationPrincipal OAuth2User user) {
 		String spotifyToken = user.getAttribute("spotifyToken");
