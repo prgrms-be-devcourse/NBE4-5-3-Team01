@@ -30,6 +30,7 @@ public class RefreshToken {
 	@Column(name = "id")
 	private Long id;
 
+	// @JsonBackReference
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", referencedColumnName = "USER_ID", nullable = false)
 	private User user;

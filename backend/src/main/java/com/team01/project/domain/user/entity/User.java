@@ -13,6 +13,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
@@ -23,7 +24,7 @@ import lombok.NoArgsConstructor;
 
 
 @Entity
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -42,6 +43,8 @@ public class User {
 
 	private String userIntro;
 
+	@Lob
+	@Column(columnDefinition = "LONGTEXT")
 	private String image;
 
 	@Column(name = "birthday")

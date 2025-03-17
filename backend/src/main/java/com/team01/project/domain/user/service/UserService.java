@@ -1,5 +1,6 @@
 package com.team01.project.domain.user.service;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +58,8 @@ public class UserService {
 
 	@Value("${spring.security.oauth2.client.provider.spotify.token-uri}")
 	private String spotifyTokenUrl;
+
+	private final String uploadDir = "uploads/profiles/";
 
 	@Transactional
 	public ResponseEntity<?> refreshToken(String refreshTokenValue) {
@@ -174,4 +178,97 @@ public class UserService {
 		return userRepository.findById(id)
 			.orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저 찾을 수 없습니다: " + id));
 	}
+
+	public User findByUserId(String userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new RuntimeException("유저의 ID를 찾을 수 없습니다. " + userId));
+	}
+
+	@Transactional
+	public void updateUserIntro(String userId, String userIntro) {
+		// 기존 엔티티를 조회
+		User existingUser = userRepository.findById(userId)
+			.orElseThrow(() -> new RuntimeException("User not found"));
+
+		// toBuilder()를 사용하여 기존 값을 복사한 뒤, userIntro 필드만 변경
+		User updatedUser = existingUser.toBuilder()
+			.userIntro(userIntro)
+			.build();
+
+		userRepository.save(updatedUser);
+	}
+
+	@Transactional
+	public void updateProfileName(String userId, String profileName) {
+		// 기존 엔티티를 조회
+		User existingUser = userRepository.findById(userId)
+			.orElseThrow(() -> new RuntimeException("User not found"));
+
+		// toBuilder()를 사용하여 기존 값을 복사한 뒤, userIntro 필드만 변경
+		User updatedUser = existingUser.toBuilder()
+			.name(profileName)
+			.build();
+
+		userRepository.save(updatedUser);
+	}
+
+	@Transactional
+	public String uploadImage(String userId, MultipartFile file) {
+		// 1. 기존 User 조회
+		User existingUser = userRepository.findById(userId)
+			.orElseThrow(() -> new RuntimeException("User not found"));
+
+		try {
+			// 2. MultipartFile -> byte[] -> Base64 인코딩
+			byte[] fileBytes = file.getBytes();
+			String base64Image = Base64.getEncoder().encodeToString(fileBytes);
+
+			// 3. toBuilder()로 기존 User 복사, image 필드만 교체
+			User updatedUser = existingUser.toBuilder()
+				.image(base64Image)
+				.build();
+
+			// 4. 저장
+			userRepository.save(updatedUser);
+
+			return "Image updated for user: " + userId;
+
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to read file bytes", e);
+		}
+	}
+
+	// @Transactional
+	// public String uploadImage(String userId, MultipartFile file) {
+	// 	User existingUser = userRepository.findById(userId)
+	// 		.orElseThrow(() -> new RuntimeException("User not found"));
+	//
+	// 	try {
+	// 		// 1. 파일 이름 생성 (충돌 방지를 위해 UUID 사용)
+	// 		String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+	// 		String filePath = uploadDir + fileName;
+	//
+	// 		// 2. 실제 파일 저장 경로 생성
+	// 		Path uploadPath = Paths.get(uploadDir);
+	// 		if (!Files.exists(uploadPath)) {
+	// 			Files.createDirectories(uploadPath);
+	// 		}
+	//
+	// 		// 3. 파일 저장
+	// 		Path targetLocation = uploadPath.resolve(fileName);
+	// 		Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+	//
+	// 		// 4. DB에는 파일 경로만 저장
+	// 		User updatedUser = existingUser.toBuilder()
+	// 			.image("/api/images/" + fileName) // 클라이언트에서 접근할 URL 경로
+	// 			.build();
+	//
+	// 		userRepository.save(updatedUser);
+	//
+	// 		return "Image updated for user: " + userId;
+	//
+	// 	} catch (IOException e) {
+	// 		throw new RuntimeException("Failed to store file", e);
+	// 	}
+	// }
 }

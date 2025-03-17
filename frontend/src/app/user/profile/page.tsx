@@ -6,12 +6,45 @@ import { useRouter } from "next/navigation";
 import { getCookie } from "@/app/utils/cookie";
 import axios from "axios";
 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  nickName: string | null;
+  userIntro: string | null;
+  image: string | null;
+  birthDay: string | null;
+  createdDate: string;
+  field: string | null;
+}
+
 export default function ProfilePage() {
-  const [imageError, setImageError] = useState(true);
+  const [imageError, setImageError] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isBioModalOpen, setIsBioModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
+  const [bioText, setBioText] = useState("");
+  const [nameText, setNameText] = useState("");
   const router = useRouter();
+
+  // bioText, nameText 초기값 설정
+  useEffect(() => {
+    if (userData?.userIntro) {
+      setBioText(userData.userIntro);
+    }
+    if (userData?.name) {
+      setNameText(userData.name);
+    }
+  }, [userData]);
+
+  // userData 상태가 변경될 때마다 로그 출력
+  useEffect(() => {
+    console.log("현재 userData 상태:", userData);
+  }, [userData]);
 
   // 모달이 열려있을 때 body 스크롤 방지
   useEffect(() => {
@@ -32,24 +65,59 @@ export default function ProfilePage() {
     console.log("마운트 시 토큰:", token);
   }, []);
 
+  // getUsers API 호출
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/v1/user/getUsers",
+          {
+            withCredentials: true,
+          }
+        );
+
+        console.log("API 응답 전체:", response);
+        console.log("response.data:", response.data);
+
+        // response.data.data에서 사용자 정보 추출
+        const userData = response.data;
+
+        console.log("처리할 userData:", userData);
+
+        const user = {
+          id: userData.id,
+          email: userData.email,
+          name: userData.name,
+          nickName: userData.nickName,
+          userIntro: userData.userIntro,
+          image: userData.image,
+          birthDay: userData.birthDay,
+          createdDate: userData.createdDate,
+          field: userData.field,
+        };
+
+        setUserData(user);
+        console.log("최종 처리된 사용자 정보:", user);
+      } catch (error) {
+        console.error("사용자 정보 조회 중 오류 발생:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
   const handleLogout = async () => {
     try {
+      // 백엔드에서 모든 로그아웃 처리 (로컬 + 스포티파이)
       const response = await axios.get(
-        "http://localhost:8080/api/v1/user/testApiCookie",
+        "http://localhost:8080/api/v1/user/logout",
         {
           withCredentials: true,
         }
       );
 
       if (response.status === 200) {
-        // 모든 관련 쿠키 삭제
-        document.cookie =
-          "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict";
-        document.cookie =
-          "refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict";
-        document.cookie =
-          "spotifyAccessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure; samesite=strict";
-
+        // 로그인 페이지로 리다이렉트
         router.push("/login");
       } else {
         throw new Error("로그아웃 실패");
@@ -57,6 +125,96 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("로그아웃 중 오류 발생:", error);
       alert("로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  const handleBioSubmit = async () => {
+    try {
+      const response = await axios.put(
+        "http://localhost:8080/api/v1/user/userIntro",
+        { userIntro: bioText },
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        setIsBioModalOpen(false);
+        setUserData((prev) => (prev ? { ...prev, userIntro: bioText } : null));
+        // 자기소개 업데이트 시간을 localStorage에 저장
+        localStorage.setItem("lastBioUpdate", new Date().toISOString());
+        router.refresh(); // 페이지 새로고침
+      }
+    } catch (error) {
+      console.error("자기소개 업데이트 중 오류 발생:", error);
+      alert("자기소개 업데이트 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  const handleNameSubmit = async () => {
+    try {
+      const response = await axios.put(
+        "http://localhost:8080/api/v1/user/profileName",
+        { name: nameText },
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        setIsEditModalOpen(false);
+        setUserData((prev) => (prev ? { ...prev, name: nameText } : null));
+        // 프로필 이름 업데이트 시간을 localStorage에 저장
+        localStorage.setItem("lastNameUpdate", new Date().toISOString());
+        router.refresh(); // 페이지 새로고침
+      }
+    } catch (error) {
+      console.error("이름 업데이트 중 오류 발생:", error);
+      alert("이름 업데이트 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleImageSubmit = async () => {
+    if (!selectedImage) {
+      alert("이미지를 선택해주세요.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("image", selectedImage);
+
+      const response = await axios.post(
+        "http://localhost:8080/api/v1/user/image",
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setIsImageModalOpen(false);
+        setSelectedImage(null);
+        setPreviewUrl(null);
+        // 이미지 업데이트 시간을 localStorage에 저장
+        localStorage.setItem("lastImageUpdate", new Date().toISOString());
+        // router.refresh(); // 페이지 새로고침
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("이미지 업로드 중 오류 발생:", error);
+      alert("이미지 업로드 중 오류가 발생했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -80,6 +238,15 @@ export default function ProfilePage() {
                   <path d="M18 0C8.06 0 0 8.06 0 18s8.06 18 18 18 18-8.06 18-18S27.94 0 18 0zm0 6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6 2.69-6 6-6zm0 25.2c-5 0-9.42-2.56-12-6.44.06-3.98 8-6.16 12-6.16 3.98 0 11.94 2.18 12 6.16-2.58 3.88-7 6.44-12 6.44z" />
                 </svg>
               </div>
+            ) : userData?.image ? (
+              <Image
+                src={`data:image/png;base64,${userData.image}`}
+                alt="프로필 이미지"
+                fill
+                unoptimized
+                className="rounded-full object-cover border-4 border-purple-200"
+                onError={() => setImageError(true)}
+              />
             ) : (
               <Image
                 src="/profile-default.png"
@@ -91,9 +258,7 @@ export default function ProfilePage() {
             )}
             <button
               className="absolute bottom-0 right-0 bg-purple-500 text-white p-2 rounded-full hover:bg-purple-600 transition-colors"
-              onClick={() => {
-                // TODO: 이미지 변경 로직 구현
-              }}
+              onClick={() => setIsImageModalOpen(true)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -105,8 +270,12 @@ export default function ProfilePage() {
               </svg>
             </button>
           </div>
-          <h2 className="text-2xl font-bold mb-2">프로토일 앨범다</h2>
-          <p className="text-gray-600 mb-4">proto@example.com</p>
+          <h2 className="text-2xl font-bold mb-2">
+            {userData?.name || "로딩 중..."}
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {userData?.email || "로딩 중..."}
+          </p>
         </div>
       </div>
 
@@ -137,7 +306,9 @@ export default function ProfilePage() {
               <div className="flex items-center gap-3">
                 <span className="text-lg text-gray-600">ID</span>
               </div>
-              <span className="text-gray-400">proto123</span>
+              <span className="text-gray-400">
+                {userData?.email || "로딩 중..."}
+              </span>
             </div>
           </div>
         </section>
@@ -229,19 +400,14 @@ export default function ProfilePage() {
                   type="text"
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="이름을 입력하세요"
+                  value={nameText}
+                  onChange={(e) => setNameText(e.target.value)}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  이메일
-                </label>
-                <input
-                  type="email"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="이메일을 입력하세요"
-                />
-              </div>
-              <button className="w-full bg-purple-500 text-white py-2 rounded-md hover:bg-purple-600 transition-colors">
+              <button
+                onClick={handleNameSubmit}
+                className="w-full bg-purple-500 text-white py-2 rounded-md hover:bg-purple-600 transition-colors"
+              >
                 저장하기
               </button>
             </div>
@@ -272,8 +438,86 @@ export default function ProfilePage() {
               <textarea
                 className="w-full p-2 border border-gray-300 rounded-md h-32 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="자기소개를 입력하세요"
+                value={bioText}
+                onChange={(e) => setBioText(e.target.value)}
               />
-              <button className="w-full bg-purple-500 text-white py-2 rounded-md hover:bg-purple-600 transition-colors">
+              <button
+                onClick={handleBioSubmit}
+                className="w-full bg-purple-500 text-white py-2 rounded-md hover:bg-purple-600 transition-colors"
+              >
+                저장하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 이미지 업로드 모달 */}
+      {isImageModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          onClick={() => setIsImageModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">프로필 이미지 변경</h3>
+              <button
+                onClick={() => setIsImageModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex flex-col items-center">
+                {previewUrl ? (
+                  <div className="relative w-32 h-32 mb-4">
+                    <Image
+                      src={previewUrl}
+                      alt="프로필 이미지 미리보기"
+                      fill
+                      className="rounded-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-32 h-32 rounded-full bg-purple-100 flex items-center justify-center mb-4">
+                    <svg
+                      className="w-16 h-16 text-purple-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id="imageInput"
+                  onChange={handleImageChange}
+                />
+                <label
+                  htmlFor="imageInput"
+                  className="cursor-pointer bg-purple-50 text-purple-500 px-4 py-2 rounded-md hover:bg-purple-100 transition-colors"
+                >
+                  이미지 선택
+                </label>
+              </div>
+              <button
+                onClick={handleImageSubmit}
+                className="w-full bg-purple-500 text-white py-2 rounded-md hover:bg-purple-600 transition-colors"
+                disabled={!selectedImage}
+              >
                 저장하기
               </button>
             </div>
