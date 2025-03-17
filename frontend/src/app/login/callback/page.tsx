@@ -24,7 +24,7 @@ export default function AuthCallback() {
 
       console.log("토큰 저장 완료!");
       // 홈으로 리다이렉트
-      window.location.href = "/";
+      window.location.href = "/push";
     } else {
       console.log("토큰을 찾을 수 없습니다!");
       router.push("/login");

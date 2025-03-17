@@ -20,9 +20,6 @@ interface User {
 export default function Sidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const [userData, setUserData] = useState<User | null>(null);
-  const [lastBioUpdate, setLastBioUpdate] = useState<string | null>(null);
-  const [lastNameUpdate, setLastNameUpdate] = useState<string | null>(null);
-  const [lastImageUpdate, setLastImageUpdate] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -44,31 +41,6 @@ export default function Sidebar() {
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  // localStorage의 lastBioUpdate, lastNameUpdate, lastImageUpdate 변경 감지
-  useEffect(() => {
-    const checkForUpdates = () => {
-      const newBioUpdate = localStorage.getItem("lastBioUpdate");
-      const newNameUpdate = localStorage.getItem("lastNameUpdate");
-      const newImageUpdate = localStorage.getItem("lastImageUpdate");
-
-      if (
-        newBioUpdate !== lastBioUpdate ||
-        newNameUpdate !== lastNameUpdate ||
-        newImageUpdate !== lastImageUpdate
-      ) {
-        setLastBioUpdate(newBioUpdate);
-        setLastNameUpdate(newNameUpdate);
-        setLastImageUpdate(newImageUpdate);
-        fetchUsers(); // 새로운 데이터 가져오기
-      }
-    };
-
-    // 1초마다 업데이트 확인
-    const interval = setInterval(checkForUpdates, 1000);
-
-    return () => clearInterval(interval);
-  }, [lastBioUpdate, lastNameUpdate, lastImageUpdate]);
 
   return (
     <div id="nav-bar">
@@ -178,7 +150,7 @@ export default function Sidebar() {
             <Image src="/user.png" alt="Avatar" width={28} height={28} />
           </div>
           <div id="nav-footer-titlebox">
-            <Link id="nav-footer-title" href="/">
+            <Link id="nav-footer-title" href="/user/profile">
               {userData?.name || "로딩 중..."}
             </Link>
             {/* <span id="nav-footer-subtitle">
@@ -190,10 +162,7 @@ export default function Sidebar() {
           </label>
         </div>
         <div id="nav-footer-content">
-          <p>
-            {userData?.userIntro ||
-              "자기소개를 작성하면 나오는 곳 입니다. 아무거나 적으면 됩니다. 자신을 소개해보세요. 자신을 한 문장으로 알려주세요."}
-          </p>
+          <p>{userData?.userIntro || "자기소개를 작성해보세요!!"}</p>
         </div>
       </div>
     </div>

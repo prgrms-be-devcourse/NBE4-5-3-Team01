@@ -14,7 +14,7 @@ export default function MusicRecommendation() {
   const [singer, setSinger] = useState("아티스트");
   const [recentTracks, setRecentTracks] = useState([]);
   const [moodTracks, setMoodTracks] = useState([]);
-  const [selectedMood, setSelectedMood] = useState(null);
+  const [selectedMood, setSelectedMood] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
   const isFetched = useRef(false);
@@ -40,7 +40,6 @@ export default function MusicRecommendation() {
         const randomMood = getRandomMood();
         setSelectedMood(randomMood);
         await fetchMoodTracks(randomMood);
-
       } catch (error) {
         console.error("데이터 로드 중 오류 발생:", error);
       } finally {
@@ -52,14 +51,12 @@ export default function MusicRecommendation() {
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get(`${API_URL}/user/byCookie`,
-        {
-          headers: {
-            "Content-Type": "application/json"
-          },
-          withCredentials: true
-        }
-      );
+      const res = await axios.get(`${API_URL}/user/byCookie`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
       setUserName(res.data.nickName || res.data.name);
       return res.data.id;
     } catch (error) {
@@ -68,16 +65,14 @@ export default function MusicRecommendation() {
     }
   };
 
-  const fetchRandomMusic = async (userId) => {
+  const fetchRandomMusic = async (userId: any) => {
     try {
-      const res = await axios.get(`${API_URL}/music/recent/random/${userId}`,
-        {
-          headers: {
-            "Content-Type": "application/json"
-          },
-          withCredentials: true
-        }
-      );
+      const res = await axios.get(`${API_URL}/music/recent/random/${userId}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
       return { id: res.data.singerId, name: res.data.singer };
     } catch (error) {
       console.error("랜덤 음악 조회 실패:", error);
@@ -85,21 +80,22 @@ export default function MusicRecommendation() {
     }
   };
 
-  const fetchRecentTracks = async (artistId, artistName) => {
+  const fetchRecentTracks = async (artistId: string, artistName: string) => {
     try {
-      const idList = artistId.split(",").map(id => id.trim());
-      const nameList = artistName.split(",").map(name => name.trim());
+      const idList = artistId.split(",").map((id) => id.trim());
+      const nameList = artistName.split(",").map((name) => name.trim());
       const randomNum = Math.floor(Math.random() * idList.length);
 
       const selectedArtist = idList[randomNum];
       setSinger(nameList[randomNum]);
 
-      const res = await axios.get(`${SPOTIFY_URL}/artist/${selectedArtist}/top-tracks`,
+      const res = await axios.get(
+        `${SPOTIFY_URL}/artist/${selectedArtist}/top-tracks`,
         {
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
           },
-          withCredentials: true
+          withCredentials: true,
         }
       );
       setRecentTracks(res.data);
@@ -109,16 +105,14 @@ export default function MusicRecommendation() {
     }
   };
 
-  const fetchMoodTracks = async (mood) => {
+  const fetchMoodTracks = async (mood: string) => {
     try {
-      const res = await axios.get(`${SPOTIFY_URL}/search?keyword=${mood}`,
-        {
-          headers: {
-            "Content-Type": "application/json"
-          },
-          withCredentials: true
-        }
-      );
+      const res = await axios.get(`${SPOTIFY_URL}/search?keyword=${mood}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
       setMoodTracks(res.data);
     } catch (error) {
       console.error("기분 음악 조회 실패:", error);
@@ -127,16 +121,28 @@ export default function MusicRecommendation() {
   };
 
   const getRandomMood = () => {
-    const moodOptions = ["행복", "슬픔", "에너지", "편안", "사랑", "우울", "설렘"];
+    const moodOptions = [
+      "행복",
+      "슬픔",
+      "에너지",
+      "편안",
+      "사랑",
+      "우울",
+      "설렘",
+    ];
     return moodOptions[Math.floor(Math.random() * moodOptions.length)];
   };
 
   const LoadingScreen = () => {
     return (
-      <div className="absolute inset-0 flex justify-center items-center bg-white z-50"
-        style={{ backgroundColor: "rgba(255, 255, 255, 0.7)" }}>
+      <div
+        className="absolute inset-0 flex justify-center items-center bg-white z-50"
+        style={{ backgroundColor: "rgba(255, 255, 255, 0.7)" }}
+      >
         <div className="text-center">
-          <p className="text-lg font-semibold text-gray-800">🎵 추천 음악을 불러오는 중...</p>
+          <p className="text-lg font-semibold text-gray-800">
+            🎵 추천 음악을 불러오는 중...
+          </p>
           <div className="w-8 h-8 mt-2 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
         </div>
       </div>

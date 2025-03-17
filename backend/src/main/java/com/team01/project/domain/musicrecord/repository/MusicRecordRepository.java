@@ -1,5 +1,6 @@
 package com.team01.project.domain.musicrecord.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,4 +25,15 @@ public interface MusicRecordRepository extends JpaRepository<MusicRecord, MusicR
 	// 해당 캘린더 날짜에 있는 음악 목록 가져오기
 	@Query("SELECT mr.music.id FROM MusicRecord mr WHERE mr.calendarDate.id = :calendarDateId")
 	List<String> findMusicIdsByCalendarDateId(@Param("calendarDateId") Long calendarDateId);
+
+
+	@Query("SELECT mr FROM MusicRecord mr "
+			+ "JOIN mr.calendarDate cd "
+			+ "WHERE cd.user.id = :userId "
+			+ "AND cd.date BETWEEN :startDate AND :endDate")
+	List<MusicRecord> findMusicRecordsByUserAndDateRange(
+			@Param("userId") String userId,
+			@Param("startDate") LocalDate startDate,
+			@Param("endDate") LocalDate endDate
+	);
 }

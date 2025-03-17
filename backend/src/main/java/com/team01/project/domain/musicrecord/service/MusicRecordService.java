@@ -1,5 +1,6 @@
 package com.team01.project.domain.musicrecord.service;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
@@ -39,24 +40,26 @@ public class MusicRecordService {
 
 	/**
 	 * 캘린더에 기록된 음악 리스트 조회
+	 *
 	 * @param calendarDateId 캘린더 아이디
 	 * @param loggedInUserId 현재 인증된 유저 아이디
 	 * @return 음악 리스트
 	 */
 	public List<Music> findMusicsByCalendarDateId(Long calendarDateId, String loggedInUserId) {
 		User loggedInUser = userRepository.findById(loggedInUserId)
-			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 유저입니다."));
+				.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 유저입니다."));
 
 		CalendarDate calendarDate = calendarDateRepository.findByIdOrThrow(calendarDateId);
 
 		permissionService.checkCalendarDateFetchPermission(calendarDate, loggedInUser);
 
 		return musicRecordRepository.findByCalendarDate(calendarDate)
-			.stream().map(MusicRecord::getMusic).toList();
+				.stream().map(MusicRecord::getMusic).toList();
 	}
 
 	/**
 	 * 캘린더에 기록된 음악 기록 하나 조회
+	 *
 	 * @param calendarDateId 캘린더 아이디
 	 * @return 음악 기록
 	 */
@@ -68,13 +71,14 @@ public class MusicRecordService {
 
 	/**
 	 * 캘린더에 음악 기록 저장
+	 *
 	 * @param calendarDateId 캘린더 아이디
 	 * @param loggedInUserId 현재 인증된 유저
-	 * @param newMusicIds 기록할 전체 음악 아이디 리스트
+	 * @param newMusicIds    기록할 전체 음악 아이디 리스트
 	 */
 	public void updateMusicRecords(Long calendarDateId, String loggedInUserId, List<String> newMusicIds) {
 		User loggedInUser = userRepository.findById(loggedInUserId)
-			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 유저입니다."));
+				.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 유저입니다."));
 
 		CalendarDate calendarDate = calendarDateRepository.findByIdOrThrow(calendarDateId);
 
@@ -90,30 +94,37 @@ public class MusicRecordService {
 
 		// 2. 기존 MusicId 목록 조회
 		Set<String> oldMusicIdset = oldMusicRecords.stream()
-			.map(musicRecord -> musicRecord.getMusic().getId())
-			.collect(Collectors.toSet());
+				.map(musicRecord -> musicRecord.getMusic().getId())
+				.collect(Collectors.toSet());
 
 		// 3. 새로 추가될 MusicId 목록
 		Set<String> newMusicIdSet = new HashSet<>(newMusicIds);
 
 		// 4. 삭제할 MusicRecord 목록
 		List<MusicRecord> musicRecordsToDelete = oldMusicRecords.stream()
-			.filter(musicRecord -> !newMusicIdSet.contains(musicRecord.getMusic().getId()))
-			.toList();
+				.filter(musicRecord -> !newMusicIdSet.contains(musicRecord.getMusic().getId()))
+				.toList();
 
 		// 5. 추가할 MusicRecord 목록
 		List<MusicRecord> musicRecordsToAdd = newMusicIdSet.stream()
-			.filter(musicId -> !oldMusicIdset.contains(musicId))
-			.map(musicId -> new MusicRecord(
-				new MusicRecordId(calendarDateId, musicId),
-				calendarDate,
-				musicRepository.getReferenceById(musicId)
-			))
-			.toList();
+				.filter(musicId -> !oldMusicIdset.contains(musicId))
+				.map(musicId -> new MusicRecord(
+						new MusicRecordId(calendarDateId, musicId),
+						calendarDate,
+						musicRepository.getReferenceById(musicId)
+				))
+				.toList();
 
 		// 6. MusicRecord 업데이트
 		musicRecordRepository.deleteAll(musicRecordsToDelete);
 		musicRecordRepository.saveAll(musicRecordsToAdd);
+	}
+
+	/**
+	 * 특정 연도와 월에 기록한 MusicRecord 리스트 조회
+	 */
+	public List<MusicRecord> getMusicRecordsByUserAndDateRange(String userId, LocalDate startDate, LocalDate endDate) {
+		return musicRecordRepository.findMusicRecordsByUserAndDateRange(userId, startDate, endDate);
 	}
 
 }

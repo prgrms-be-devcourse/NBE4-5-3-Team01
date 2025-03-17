@@ -143,7 +143,8 @@ export default function ProfilePage() {
         setUserData((prev) => (prev ? { ...prev, userIntro: bioText } : null));
         // 자기소개 업데이트 시간을 localStorage에 저장
         localStorage.setItem("lastBioUpdate", new Date().toISOString());
-        router.refresh(); // 페이지 새로고침
+        // router.refresh(); // 페이지 새로고침
+        window.location.reload();
       }
     } catch (error) {
       console.error("자기소개 업데이트 중 오류 발생:", error);
@@ -166,7 +167,8 @@ export default function ProfilePage() {
         setUserData((prev) => (prev ? { ...prev, name: nameText } : null));
         // 프로필 이름 업데이트 시간을 localStorage에 저장
         localStorage.setItem("lastNameUpdate", new Date().toISOString());
-        router.refresh(); // 페이지 새로고침
+        // router.refresh(); // 페이지 새로고침
+        window.location.reload();
       }
     } catch (error) {
       console.error("이름 업데이트 중 오류 발생:", error);
@@ -304,7 +306,7 @@ export default function ProfilePage() {
             </button>
             <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-purple-100">
               <div className="flex items-center gap-3">
-                <span className="text-lg text-gray-600">ID</span>
+                <span className="text-lg text-gray-600">Email</span>
               </div>
               <span className="text-gray-400">
                 {userData?.email || "로딩 중..."}

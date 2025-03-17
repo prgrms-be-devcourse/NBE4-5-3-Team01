@@ -387,11 +387,13 @@ label[for="nav-footer-toggle"] {
   display: flex;
   flex-direction: column;
   transition: opacity 1s;
+  white-space: nowrap;
 }
 
 #nav-footer-subtitle {
   color: var(--navbar-light-secondary);
   font-size: 0.6rem;
+  white-space: nowrap;
 }
 
 #nav-toggle:not(:checked) ~ #nav-footer-toggle:checked + #nav-footer {
