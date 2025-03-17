@@ -8,7 +8,7 @@
 .container {
   margin: 0 auto;
   padding: 22px 8px 32px 8px;
-  font-family: "Proxima Nova", sans-serif;
+  /* font-family: "Proxima Nova", sans-serif; */
   color: #393d3f;
   display: flex;
   flex-flow: column;
@@ -60,7 +60,8 @@
 
 /* Active 상태 (클릭 시) */
 .baseline:active {
-  background-color: #ae96fd; /* 클릭 시 배경색 */
+  background-color: #ae96fd;
+  /* 클릭 시 배경색 */
 }
 
 .btn_icon {
@@ -128,12 +129,15 @@
 .d51 {
   grid-area: name;
 }
+
 .d52 {
   grid-area: description;
 }
+
 .d53 {
   grid-area: email;
 }
+
 .d54 {
   grid-area: push;
 }
@@ -177,6 +181,7 @@
 .notcheck {
   border: 1px solid #727272;
 }
+
 .checked {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -208,11 +213,12 @@
   top: 46%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(-48deg);
-  display: none; /* 기본적으로 숨김 */
+  display: none;
+  /* 기본적으로 숨김 */
 }
 
 /* 체크되었을 때 체크 표시 보이게 하기 */
-.checkbox:checked + .checked::before {
+.checkbox:checked+.checked::before {
   display: block;
 }
 
@@ -299,5 +305,6 @@
 
 /* Active 상태 (클릭 시) */
 .s2:active {
-  background-color: #bbd0ff; /* 클릭 시 배경색 */
+  background-color: #bbd0ff;
+  /* 클릭 시 배경색 */
 }

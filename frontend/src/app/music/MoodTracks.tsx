@@ -77,7 +77,7 @@ const MoodTracks = ({ mood, tracks }) => {
                 <div ref={trackRef} className="flex gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
                     {tracks.map(track => (
                         <div key={track.id} className="w-40 flex-shrink-0">
-                            <img src={track.albumImage} alt={track.name} className="rounded-lg w-full h-auto" />
+                            <img src={track.albumImage} alt={track.name} className="rounded-lg w-full h-auto track-img" />
                             <p className="text-sm font-medium mt-2 break-words track-title">{track.name}</p>
                             <p className="text-xs text-gray-500 track-artist singer-name">{track.singer}</p>
                         </div>

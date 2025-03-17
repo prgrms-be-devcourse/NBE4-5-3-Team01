@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getCookie } from "@/app/utils/cookie";
 import axios from "axios";
+import "./style.css";
 
 interface User {
   id: string;
@@ -224,9 +225,8 @@ export default function ProfilePage() {
     <div className="p-8">
       {/* 프로필 이미지 및 기본 정보 */}
       <div
-        className={`${
-          isEditModalOpen || isBioModalOpen ? "pointer-events-none" : ""
-        }`}
+        className={`${isEditModalOpen || isBioModalOpen ? "pointer-events-none" : ""
+          }`}
       >
         <div className="flex flex-col items-center mb-8">
           <div className="relative w-32 h-32 mb-4">
@@ -344,11 +344,11 @@ export default function ProfilePage() {
         {/* 로그아웃 확인 모달 */}
         {isLogoutModalOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="modal-overlay"
             onClick={() => setIsLogoutModalOpen(false)}
           >
             <div
-              className="bg-white rounded-lg p-6 w-full max-w-sm"
+              className="modal"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="text-center mb-6">
@@ -377,11 +377,11 @@ export default function ProfilePage() {
       {/* 프로필 수정 모달 */}
       {isEditModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          className="modal-overlay"
           onClick={() => setIsEditModalOpen(false)}
         >
           <div
-            className="bg-white rounded-lg p-6 w-full max-w-md"
+            className="modal"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -420,11 +420,11 @@ export default function ProfilePage() {
       {/* 자기소개 모달 */}
       {isBioModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          className="modal-overlay"
           onClick={() => setIsBioModalOpen(false)}
         >
           <div
-            className="bg-white rounded-lg p-6 w-full max-w-md"
+            className="modal"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -457,11 +457,11 @@ export default function ProfilePage() {
       {/* 이미지 업로드 모달 */}
       {isImageModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          className="modal-overlay"
           onClick={() => setIsImageModalOpen(false)}
         >
           <div
-            className="bg-white rounded-lg p-6 w-full max-w-md"
+            className="modal"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">

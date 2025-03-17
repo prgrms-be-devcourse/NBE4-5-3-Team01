@@ -61,9 +61,8 @@ export default function Sidebar() {
           onMouseLeave={() => setIsHovered(false)}
         >
           <i
-            className={`fa-regular fa-bell fa-lg ${
-              isHovered ? "fa-shake" : ""
-            }`}
+            className={`fa-regular fa-bell fa-lg ${isHovered ? "fa-shake" : ""
+              }`}
           ></i>
         </Link>
         <label htmlFor="nav-toggle">
@@ -81,6 +80,15 @@ export default function Sidebar() {
           </Link>
         </div>
         <div className="navbutton">
+          <Link href="/notifications">
+            <div className="navLink">
+              <i className="fas fa-solid fa-bell"></i>
+              <span>Notification</span>
+            </div>
+          </Link>
+        </div>
+        <hr />
+        <div className="navbutton">
           <Link href="/calendar">
             <div className="navLink">
               <i className="fas fa-solid fa-calendar"></i>
@@ -96,15 +104,6 @@ export default function Sidebar() {
             </div>
           </Link>
         </div>
-        <hr />
-        <div className="navbutton">
-          <Link href="/following">
-            <div className="navLink">
-              <i className="fas fa-heart"></i>
-              <span>Following</span>
-            </div>
-          </Link>
-        </div>
         <div className="navbutton">
           <Link href="/user/recap">
             <div className="navLink">
@@ -113,26 +112,24 @@ export default function Sidebar() {
             </div>
           </Link>
         </div>
+        <hr />
         <div className="navbutton">
-          <Link href="/notifications">
+          <Link href="/follow">
             <div className="navLink">
-              <i className="fas fa-solid fa-bell"></i>
-              <span>Notification</span>
+              <i className="fas fa-heart"></i>
+              <span>Follow</span>
+            </div>
+          </Link>
+        </div>
+        <div className="navbutton">
+          <Link href="/user/search">
+            <div className="navLink">
+              <i className="fas fa-solid fa-magnifying-glass"></i>
+              <span>Search</span>
             </div>
           </Link>
         </div>
         <hr />
-        <div className="navbutton">
-          <Link href="/">
-            <div className="navLink">
-              <i
-                className="fas fa-brands fa-spotify"
-                style={{ fontWeight: 400 }}
-              ></i>
-              <span>Spotify</span>
-            </div>
-          </Link>
-        </div>
         <div className="navbutton">
           <Link href="/setting">
             <div className="navLink">

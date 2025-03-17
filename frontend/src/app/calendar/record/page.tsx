@@ -7,6 +7,8 @@ import MemoInput from "./MemoInput";
 import MusicList from "./MusicList";
 import MusicSearch from "./MusicSearch";
 import "./style.css";
+import { AlertComponent } from "@/components/alert";
+import { Card } from "@/components/ui/card";
 
 export default function CalendarRecordPage() {
   const API_URL = "http://localhost:8080/api/v1";
@@ -22,6 +24,12 @@ export default function CalendarRecordPage() {
   const [memo, setMemo] = useState("");
   const [selectedTracks, setSelectedTracks] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+
+  const [alertData, setAlertData] = useState<{
+    title: string;
+    description: string;
+    variant: "default" | "success" | "warning" | "destructive"
+  } | null>(null);
 
   // 📌 기존 기록 불러오기 (id가 존재할 경우)
   useEffect(() => {
@@ -53,7 +61,11 @@ export default function CalendarRecordPage() {
     try {
       // 📌 음악이 하나도 선택되지 않았다면 알림 표시
       if (selectedTracks.length === 0) {
-        alert("음악 기록을 추가해주세요!");
+        setAlertData({
+          title: "기록 저장",
+          description: "음악 기록을 추가해주세요",
+          variant: "warning",
+        });
         return;
       }
 
@@ -121,7 +133,11 @@ export default function CalendarRecordPage() {
       }
     } catch (error) {
       console.error("기록 저장 실패:", error);
-      alert("기록 저장 중 오류 발생!");
+      setAlertData({
+        title: "기록 저장",
+        description: "기록 저장 중 오류 발생",
+        variant: "destructive",
+      });
     }
   };
 
@@ -134,23 +150,32 @@ export default function CalendarRecordPage() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-3">
-        <h2 className="text-2xl font-bold">
-          {isEditing ? "기록 수정" : "기록 추가"}
-        </h2>
-        <button onClick={handleSaveRecord} className="btn btn-primary">
-          완료
-        </button>
+    <Card className="m-10 bg-white border-0 p-0">
+      <div className="p-6">
+        {alertData && (
+          <AlertComponent
+            title={alertData.title}
+            description={alertData.description}
+            variant={alertData.variant}
+          />
+        )}
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-2xl font-bold">
+            {isEditing ? "기록 수정" : "기록 추가"}
+          </h2>
+          <button onClick={handleSaveRecord} className="btn btn-primary">
+            완료
+          </button>
+        </div>
+        <div className="space-y-7">
+          <MusicSearch onSelectTrack={handleSelectTrack} />
+          <MusicList
+            selectedTracks={selectedTracks}
+            onRemoveTrack={handleRemoveTrack}
+          />
+          <MemoInput memo={memo} setMemo={setMemo} />
+        </div>
       </div>
-      <div className="space-y-7">
-        <MusicSearch onSelectTrack={handleSelectTrack} />
-        <MusicList
-          selectedTracks={selectedTracks}
-          onRemoveTrack={handleRemoveTrack}
-        />
-        <MemoInput memo={memo} setMemo={setMemo} />
-      </div>
-    </div>
+    </Card>
   );
 }

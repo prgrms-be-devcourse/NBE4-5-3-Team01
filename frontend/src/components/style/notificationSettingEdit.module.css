@@ -8,7 +8,7 @@
 .container {
   margin: 0 auto;
   padding: 22px 8px 32px 8px;
-  font-family: "Proxima Nova", sans-serif;
+  /* font-family: "Proxima Nova", sans-serif; */
   color: #393d3f;
   display: flex;
   flex-flow: column;
@@ -56,7 +56,8 @@
 
 /* Active 상태 (클릭 시) */
 .baseline:active {
-  background-color: #ae96fd; /* 클릭 시 배경색 */
+  background-color: #ae96fd;
+  /* 클릭 시 배경색 */
 }
 
 .btn_icon {
@@ -103,8 +104,7 @@
   padding-inline-start: 12px;
   padding-inline-end: 12px;
   cursor: pointer;
-  transition: transform var(--animation-speed, 300ms)
-    var(--animation-ease, ease);
+  transition: transform var(--animation-speed, 300ms) var(--animation-ease, ease);
 }
 
 .kaxeyf:hover {
@@ -115,12 +115,14 @@
 /* Active 상태 (클릭 시) */
 .kaxeyf:active {
   transform: translateY(var(--bg-inset-change-press, -4px));
-  background-color: #ae96fd; /* 클릭 시 배경색 */
+  background-color: #ae96fd;
+  /* 클릭 시 배경색 */
 }
 
 /* Elevated 상태 (Focus 또는 다른 상태) */
 .kaxeyf:focus {
-  background-color: #ae96fd; /* Elevated 상태 배경색 */
+  background-color: #ae96fd;
+  /* Elevated 상태 배경색 */
 }
 
 .kMKjYE {
@@ -184,9 +186,11 @@
 .d51 {
   grid-area: name;
 }
+
 .d52 {
   grid-area: description;
 }
+
 .d53 {
   margin-right: 25px;
   width: auto;
@@ -203,6 +207,7 @@
   padding-right: 15px;
   border-radius: 10px;
 }
+
 .saveButton:hover {
   background-color: #ae96fd;
 }
@@ -220,6 +225,7 @@
   padding-left: 15px;
   padding-right: 15px;
 }
+
 .d62:hover {
   background-color: #ae96fd;
 }
@@ -254,6 +260,7 @@
 .notcheck {
   border: 1px solid #727272;
 }
+
 .checked {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -285,11 +292,12 @@
   top: 46%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(-48deg);
-  display: none; /* 기본적으로 숨김 */
+  display: none;
+  /* 기본적으로 숨김 */
 }
 
 /* 체크되었을 때 체크 표시 보이게 하기 */
-.checkbox:checked + .checked::before {
+.checkbox:checked+.checked::before {
   display: block;
 }
 
@@ -370,5 +378,6 @@
 
 /* Active 상태 (클릭 시) */
 .s2:active {
-  background-color: #1ed760; /* 클릭 시 배경색 */
+  background-color: #1ed760;
+  /* 클릭 시 배경색 */
 }

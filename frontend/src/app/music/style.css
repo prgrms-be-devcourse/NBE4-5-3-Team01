@@ -63,6 +63,10 @@ button:disabled {
   /* Firefox */
 }
 
+.track-img {
+  border: 1px solid gainsboro;
+}
+
 .track-title {
   font-size: 0.875rem;
   /* ✅ 적절한 크기로 설정 */

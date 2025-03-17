@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <head>
         <link
           rel="stylesheet"
@@ -22,6 +22,10 @@ export default function RootLayout({
           integrity="sha512-dNr/..."
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
+        />
+        <link
+          href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/static/woff2/SUIT.css"
+          rel="stylesheet"
         />
       </head>
       <body>

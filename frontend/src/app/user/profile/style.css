@@ -1,0 +1,25 @@
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    /* 화면 전체를 덮음 */
+    background-color: rgba(255, 255, 255, 0.3);
+    /* 흐린 흰색 배경 */
+    backdrop-filter: blur(8px);
+    /* 블러 효과 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 40;
+    /* 모달보다 낮지만, 다른 요소들보다 높게 설정 */
+}
+
+.modal {
+    background-color: white;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    z-index: 50;
+    /* 모달이 가장 위에 위치 */
+}

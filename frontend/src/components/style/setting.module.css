@@ -8,7 +8,7 @@
 .container {
   margin: 0 auto;
   padding: 22px 8px 32px 8px;
-  font-family: "Proxima Nova", sans-serif;
+  /* font-family: "Proxima Nova", sans-serif; */
   color: #393d3f;
   display: flex;
   flex-direction: column;
@@ -64,7 +64,8 @@
 
 /* Active 상태 (클릭 시) */
 .baseline:active {
-  background-color: #ae96fd; /* 클릭 시 배경색 */
+  background-color: #ae96fd;
+  /* 클릭 시 배경색 */
 }
 
 .btn_icon {
@@ -108,8 +109,7 @@
   padding-inline-start: 12px;
   padding-inline-end: 12px;
   cursor: pointer;
-  transition: transform var(--animation-speed, 300ms)
-    var(--animation-ease, ease);
+  transition: transform var(--animation-speed, 300ms) var(--animation-ease, ease);
 }
 
 .kaxeyf:hover {
@@ -120,12 +120,14 @@
 /* Active 상태 (클릭 시) */
 .kaxeyf:active {
   transform: translateY(var(--bg-inset-change-press, -4px));
-  background-color: #e7c6ff; /* 클릭 시 배경색 */
+  background-color: #e7c6ff;
+  /* 클릭 시 배경색 */
 }
 
 /* Elevated 상태 (Focus 또는 다른 상태) */
 .kaxeyf:focus {
-  background-color: #ae96fd; /* Elevated 상태 배경색 */
+  background-color: #ae96fd;
+  /* Elevated 상태 배경색 */
 }
 
 .kMKjYE {
