@@ -117,6 +117,13 @@ public class UserController {
 		spotifyAccessTokenCookie.setMaxAge(0); // 즉시 만료
 		response.addCookie(spotifyAccessTokenCookie);
 
+		// refreshToken 쿠키 만료 처리
+		Cookie refreshTokenCookie = new Cookie("refreshToken", null);
+		refreshTokenCookie.setPath("/");
+		refreshTokenCookie.setHttpOnly(true);
+		refreshTokenCookie.setMaxAge(0); // 즉시 만료
+		response.addCookie(refreshTokenCookie);
+
 		return ResponseEntity.status(200).body("로그아웃 성공");
 	}
 

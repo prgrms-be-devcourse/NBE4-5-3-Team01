@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
+// import Sidebar from "@/components/Sidebar";
+import ConditionalSidebar from "@/components/ConditionalSidebar";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,7 +25,8 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <Sidebar />
+        <ConditionalSidebar />
+        {/* <Sidebar /> */}
         <main className="ml-64">{children}</main>
         {/* 사이드바 크기만큼 밀어줌 */}
       </body>
