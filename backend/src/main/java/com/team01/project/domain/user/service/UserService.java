@@ -179,6 +179,7 @@ public class UserService {
 		List<User> users = userRepository.searchUser(name);;
 
 		return users.stream()
+			.filter(user -> !user.getId().equals(currentUser.getId()))
 			.map(user ->
 				FollowResponse.of(
 				user,

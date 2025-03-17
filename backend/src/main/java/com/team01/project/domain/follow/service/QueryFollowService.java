@@ -26,6 +26,7 @@ public class QueryFollowService {
 		User user = userRepository.getById(userId);
 
 		return followRepository.findByFromUser(user).stream()
+			.filter(follow -> !follow.getToUser().getId().equals(currentUser.getId()))
 			.map(follow -> FollowResponse.of(
 				follow.getToUser(),
 				checkFollow(follow.getToUser(), currentUser),
@@ -39,6 +40,7 @@ public class QueryFollowService {
 		User user = userRepository.getById(userId);
 
 		return followRepository.findByToUser(user).stream()
+			.filter(follow -> !follow.getFromUser().getId().equals(currentUser.getId()))
 			.map(follow -> FollowResponse.of(
 				follow.getFromUser(),
 				checkFollow(follow.getFromUser(), currentUser),
@@ -54,8 +56,6 @@ public class QueryFollowService {
 
 		return CountFollowResponse.of(followingCount, followerCount);
 	}
-
-
 
 	private boolean checkFollow(User user, User currentUser) {
 		return followRepository.existsByToUserAndFromUser(user, currentUser);
