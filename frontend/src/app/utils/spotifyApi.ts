@@ -1,12 +1,24 @@
+import axios from "axios";
 import SpotifyWebApi from "spotify-web-api-js";
-import { getCookie } from "./cookie";
 
 const spotifyApi = new SpotifyWebApi();
-const spotifyToken = getCookie("spotifyAccessToken");
 
-if (spotifyToken) {
-  spotifyApi.setAccessToken(spotifyToken);
-}
+const fetchSpotifyToken = async () => {
+  try {
+    const response = await axios.get("http://localhost:8080/api/v1/user/spotify-token", {
+      withCredentials: true,
+    });
+    const spotifyToken = response.data;
+
+    if (spotifyToken) {
+      spotifyApi.setAccessToken(spotifyToken);
+      console.log("✅ Spotify Token 설정 완료!");
+    }
+  } catch (error) {
+    console.error("❌ Spotify Token 가져오기 실패:", error);
+  }
+};
+fetchSpotifyToken();
 
 export const searchSpotifyTracks = async (query: string) => {
   if (!query) return [];

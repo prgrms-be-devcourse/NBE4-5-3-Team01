@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
-import { getCookie } from "@/app/utils/cookie";
 import MemoInput from "./MemoInput";
 import MusicList from "./MusicList";
 import MusicSearch from "./MusicSearch";
@@ -33,13 +32,14 @@ export default function CalendarRecordPage() {
     try {
       if (id) {
         setIsEditing(true);
-        const jwt = getCookie("accessToken");
-        const res = await axios.get(`${API_URL}/calendar/${id}`, {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-            "Content-Type": "application/json"
+        const res = await axios.get(`${API_URL}/calendar/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json"
+            },
+            withCredentials: true
           }
-        });
+        );
 
         setMemo(res.data.memo || "");
         setSelectedTracks(res.data.musics || []);
@@ -53,8 +53,6 @@ export default function CalendarRecordPage() {
   // 📌 기록 저장 (신규 or 수정)
   const handleSaveRecord = async () => {
     try {
-      const jwt = getCookie("accessToken");
-
       // 📌 음악이 하나도 선택되지 않았다면 알림 표시
       if (selectedTracks.length === 0) {
         alert("음악 기록을 추가해주세요!");
@@ -73,9 +71,9 @@ export default function CalendarRecordPage() {
         selectedTracks,
         {
           headers: {
-            Authorization: `Bearer ${jwt}`,
             "Content-Type": "application/json"
-          }
+          },
+          withCredentials: true
         }
       );
 
@@ -87,9 +85,9 @@ export default function CalendarRecordPage() {
           { musicIds: musicIds },
           {
             headers: {
-              Authorization: `Bearer ${jwt}`,
               "Content-Type": "application/json"
-            }
+            },
+            withCredentials: true
           }
         );
 
@@ -97,9 +95,9 @@ export default function CalendarRecordPage() {
           { memo: finalMemo },
           {
             headers: {
-              Authorization: `Bearer ${jwt}`,
               "Content-Type": "application/json"
-            }
+            },
+            withCredentials: true
           }
         );
 
@@ -110,9 +108,9 @@ export default function CalendarRecordPage() {
         await axios.post(`${API_URL}/calendar`, { memo: finalMemo, musicIds }, {
           params: { year, month, day },
           headers: {
-            Authorization: `Bearer ${jwt}`,
             "Content-Type": "application/json",
           },
+          withCredentials: true
         });
 
         alert("새로운 기록이 추가되었습니다!");

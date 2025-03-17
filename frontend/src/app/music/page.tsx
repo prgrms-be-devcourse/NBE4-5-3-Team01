@@ -3,7 +3,6 @@
 import "@/app/music/style.css";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { getCookie } from "@/app/utils/cookie";
 import RecentTracks from "./RecentTracks";
 import MoodTracks from "./MoodTracks";
 
@@ -29,18 +28,14 @@ export default function MusicRecommendation() {
         setIsLoading(true);
 
         const fetchedUserId = await fetchUser();
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         const fetchedArtist = await fetchRandomMusic(fetchedUserId);
-        await new Promise(resolve => setTimeout(resolve, 1000));
 
         const randomMood = getRandomMood();
         setSelectedMood(randomMood);
 
         await fetchRecentTracks(fetchedArtist.id, fetchedArtist.name);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         await fetchMoodTracks(randomMood);
+
       } catch (error) {
         console.error("데이터 로드 중 오류 발생:", error);
       } finally {
@@ -52,10 +47,14 @@ export default function MusicRecommendation() {
 
   const fetchUser = async () => {
     try {
-      const jwt = getCookie("accessToken");
-      const res = await axios.get(`${API_URL}/user/byToken`, {
-        headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" }
-      });
+      const res = await axios.get(`${API_URL}/user/byCookie`,
+        {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          withCredentials: true
+        }
+      );
       setUserName(res.data.nickName || res.data.name);
       return res.data.id;
     } catch (error) {
@@ -66,10 +65,14 @@ export default function MusicRecommendation() {
 
   const fetchRandomMusic = async (userId) => {
     try {
-      const jwt = getCookie("accessToken");
-      const res = await axios.get(`${API_URL}/music/recent/random/${userId}`, {
-        headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" }
-      });
+      const res = await axios.get(`${API_URL}/music/recent/random/${userId}`,
+        {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          withCredentials: true
+        }
+      );
       return { id: res.data.singerId, name: res.data.singer };
     } catch (error) {
       console.error("랜덤 음악 조회 실패:", error);
@@ -79,8 +82,6 @@ export default function MusicRecommendation() {
 
   const fetchRecentTracks = async (artistId, artistName) => {
     try {
-      const jwt = getCookie("accessToken");
-
       const idList = artistId.split(",").map(id => id.trim());
       const nameList = artistName.split(",").map(name => name.trim());
       const randomNum = Math.floor(Math.random() * idList.length);
@@ -88,15 +89,15 @@ export default function MusicRecommendation() {
       const selectedArtist = idList[randomNum];
       setSinger(nameList[randomNum]);
 
-      console.log("[Artist] jwt:", jwt);
-      console.log("[Artist] randomNum:", randomNum);
-      console.log("[Artist] Artist:", selectedArtist);
-
-      const res = await axios.get(`${SPOTIFY_URL}/artist/${selectedArtist}/top-tracks`, {
-        headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" }
-      });
+      const res = await axios.get(`${SPOTIFY_URL}/artist/${selectedArtist}/top-tracks`,
+        {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          withCredentials: true
+        }
+      );
       setRecentTracks(res.data);
-      console.log("[Artist] result:", res.data);
     } catch (error) {
       console.error("최근 음악 조회 실패:", error);
       throw error;
@@ -105,15 +106,15 @@ export default function MusicRecommendation() {
 
   const fetchMoodTracks = async (mood) => {
     try {
-      const jwt = getCookie("accessToken");
-
-      console.log("[Mood] jwt:", jwt);
-      console.log("[Mood] mood:", mood);
-      const res = await axios.get(`${SPOTIFY_URL}/search?keyword=${mood}`, {
-        headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" }
-      });
+      const res = await axios.get(`${SPOTIFY_URL}/search?keyword=${mood}`,
+        {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          withCredentials: true
+        }
+      );
       setMoodTracks(res.data);
-      console.log("[Mood] result:", res.data);
     } catch (error) {
       console.error("기분 음악 조회 실패:", error);
       throw error;
