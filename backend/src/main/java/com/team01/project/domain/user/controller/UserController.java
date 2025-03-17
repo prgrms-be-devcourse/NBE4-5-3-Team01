@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -140,6 +141,19 @@ public class UserController {
 	public SimpleUserResponse getUserByToken(@RequestHeader("Authorization") String accessToken) {
 		String token = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
 		String userId = jwtTokenProvider.getUserIdFromToken(token);
+		return SimpleUserResponse.from(userService.getUserById(userId));
+	}
+
+	@ResponseBody
+	@GetMapping("/{user-id}")
+	public SimpleUserResponse getUserByUserId(@PathVariable(name = "user-id") String userId) {
+		return SimpleUserResponse.from(userService.getUserById(userId));
+	}
+
+	@ResponseBody
+	@GetMapping("/byCookie")
+	public SimpleUserResponse getUserByCookie(@CookieValue(name = "accessToken") String accessToken) {
+		String userId = jwtTokenProvider.getUserIdFromToken(accessToken);
 		return SimpleUserResponse.from(userService.getUserById(userId));
 	}
 }

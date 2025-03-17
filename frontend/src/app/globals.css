@@ -421,3 +421,8 @@ label[for="nav-footer-toggle"] {
   border-radius: 99px;
   background-color: #c8b6ff;
 }
+
+.fc-daygrid-day-frame {
+  position: relative;
+  overflow: hidden;
+}
