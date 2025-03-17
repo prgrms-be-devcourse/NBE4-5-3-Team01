@@ -49,6 +49,7 @@ const SearchPage = () => {
       } else {
         await axios.post(
           `http://localhost:8080/api/v1/follows/${userId}`,
+          {},
           {
             withCredentials: true
           }

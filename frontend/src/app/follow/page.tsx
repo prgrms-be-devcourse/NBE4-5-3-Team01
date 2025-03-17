@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { getCookie } from "../utils/cookie";
 import "@/components/style/follow.css";
 
 const FollowPage = () => {
@@ -39,14 +38,20 @@ const FollowPage = () => {
     try {
       if (isFollowing) {
         await axios.delete(`http://localhost:8080/api/v1/follows/${userId}`, {
-          withCredentials: true
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json"
+          }
         });
       } else {
         await axios.post(
           `http://localhost:8080/api/v1/follows/${userId}`,
           {},
           {
-            withCredentials: true
+            withCredentials: true,
+            headers: {
+              "Content-Type": "application/json"
+            }
           }
         );
       }
