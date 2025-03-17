@@ -3,35 +3,40 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { getCookie } from "../utils/cookie";
-import "@/components/style/follow.css";
+import { getCookie } from "../../utils/cookie";
+import "@/components/style/search.css";
+import { useFormState } from "react-dom";
 
-const FollowPage = () => {
+const SearchPage = () => {
   const [activeTab, setActiveTab] = useState("following");
+  const [nickName, setNickName] = useState("");
   const { id } = useParams<{ id: string }>(); 
   const [users, setUsers] = useState([]);
   const router = useRouter();
-  const searchParams = useSearchParams(); 
-  const userId = searchParams.get("userId");
+
+  const searchUsers = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/v1/user/search?q=${nickName}`,
+      {
+        withCredentials: true
+      }
+      );
+      setUsers(response.data);
+      console.log(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        if (!userId) return;
-        const response = await axios.get(`http://localhost:8080/api/v1/follows/${activeTab}/${userId}`,
-        {
-          withCredentials: true
-        }
-        );
-        setUsers(response.data);
-        console.log(users);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
+    searchUsers();
+  }, [activeTab]);
 
-    fetchUsers();
-  }, [activeTab, userId]);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      searchUsers();
+    }
+  };
 
   const toggleFollow = async (e: React.MouseEvent, userId: string, isFollowing: boolean) => {
     e.stopPropagation();
@@ -44,7 +49,6 @@ const FollowPage = () => {
       } else {
         await axios.post(
           `http://localhost:8080/api/v1/follows/${userId}`,
-          {},
           {
             withCredentials: true
           }
@@ -54,7 +58,7 @@ const FollowPage = () => {
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.user.id === userId
-            ? { ...user, isFollowing: !isFollowing } // 기존 isFollower 값 유지
+            ? { ...user, isFollowing: !isFollowing }
             : user
         )
       );
@@ -70,19 +74,14 @@ const FollowPage = () => {
   return (
     <div className="flex h-screen bg-#F8F7FF">
       <div className="tab-bar">
-        <div className="tab">
-          <button
-            className={`tab-button ${activeTab === "following" ? "active" : ""}`}
-            onClick={() => setActiveTab("following")}
-          >
-            팔로잉
-          </button>
-          <button
-            className={`tab-button ${activeTab === "follower" ? "active" : ""}`}
-            onClick={() => setActiveTab("follower")}
-          >
-            팔로워
-          </button>
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="검색..."
+            className="search-input"
+            onChange={(e) => setNickName(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
         </div>
 
         <div className="list">
@@ -115,4 +114,4 @@ const FollowPage = () => {
   );
 };
 
-export default FollowPage;
+export default SearchPage;

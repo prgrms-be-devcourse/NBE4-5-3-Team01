@@ -1,33 +1,32 @@
 .main {
-  background-color: #F8F7FF;
+  background-color: white;
 }
 
-.side-bar {
-  height: 100dvh;
-  width: 202px;
-  margin: 0 0;
+.search-bar {
+  position: relative;
+  height: 50px;
+  width: 800px;
   background-color: #C8B6FF;
+  border-radius: 6px;
+  margin: 50px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-input {
+  width: 96%;
+  height: 50px;
+  border: 0;
+  background-color: #C8B6FF;
+  color: black;
+  border-radius: 6px;
+  outline: none;
 }
 
 .tab-bar {
   width: 100%;
   height: 100dvh;
-}
-
-.tab {
-  height: 57px;
-  width: 100%;
-  background-color: white;
-  color: black;
-  font-size: 30px;
-  margin-top: 77px;
-  border-bottom: 1px solid black;
-}
-
-.tab-button {
-  width: 50%;
-  height: 57px;
-  margin: 0 auto;
 }
 
 .user-block {

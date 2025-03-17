@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.team01.project.domain.follow.controller.dto.FollowResponse;
 import com.team01.project.domain.user.dto.SimpleUserResponse;
 import com.team01.project.domain.user.dto.UserDto;
 import com.team01.project.domain.user.repository.RefreshTokenRepository;
@@ -152,10 +153,11 @@ public class UserController {
 
 	@ResponseBody
 	@GetMapping("/search")
-	public List<SimpleUserResponse> search(@RequestParam(name = "q") String name) {
-		return userService.search(name).stream()
-			.map(SimpleUserResponse::from)
-			.toList();
+	public List<FollowResponse> search(
+		@RequestParam(name = "q") String name,
+		@AuthenticationPrincipal OAuth2User user
+	) {
+		return userService.search(user.getName(), name);
 	}
 
 	@ResponseBody
