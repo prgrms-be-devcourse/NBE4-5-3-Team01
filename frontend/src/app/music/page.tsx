@@ -11,7 +11,7 @@ const SPOTIFY_URL = "http://localhost:8080/api/v1/music/spotify";
 
 export default function MusicRecommendation() {
   const [userName, setUserName] = useState("사용자");
-  const [singer, setSinger] = useState("");
+  const [singer, setSinger] = useState("아티스트");
   const [recentTracks, setRecentTracks] = useState([]);
   const [moodTracks, setMoodTracks] = useState([]);
   const [selectedMood, setSelectedMood] = useState(null);
@@ -30,10 +30,15 @@ export default function MusicRecommendation() {
         const fetchedUserId = await fetchUser();
         const fetchedArtist = await fetchRandomMusic(fetchedUserId);
 
+        if (!fetchedArtist || !fetchedArtist.id) {
+          console.warn("최근 음악 없음, 빈 리스트 반환");
+          setRecentTracks([]);
+        } else {
+          await fetchRecentTracks(fetchedArtist.id, fetchedArtist.name);
+        }
+
         const randomMood = getRandomMood();
         setSelectedMood(randomMood);
-
-        await fetchRecentTracks(fetchedArtist.id, fetchedArtist.name);
         await fetchMoodTracks(randomMood);
 
       } catch (error) {

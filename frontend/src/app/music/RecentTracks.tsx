@@ -63,17 +63,25 @@ const RecentTracks = ({ singer, tracks }) => {
                     </button>
                 </div>
             </div>
-            <div className="relative">
-                <div ref={trackRef} className="flex gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
-                    {tracks.map(track => (
-                        <div key={track.id} className="w-40 flex-shrink-0">
-                            <img src={track.albumImage} alt={track.name} className="rounded-lg w-full h-auto" />
-                            <p className="text-sm font-medium mt-2 break-words track-title">{track.name}</p>
-                            <p className="text-xs text-gray-500 track-artist singer-name">{track.singer}</p>
-                        </div>
-                    ))}
+            {/* 음악 기록이 없을 경우 안내 메시지 */}
+            {tracks.length === 0 ? (
+                <div className="p-6 text-center text-gray-500">
+                    아직 음악을 기록하신 적이 없어요!<br />
+                    새롭게 기록하면 추천해드릴게요! 😊
                 </div>
-            </div>
+            ) : (
+                <div className="relative">
+                    <div ref={trackRef} className="flex gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
+                        {tracks.map(track => (
+                            <div key={track.id} className="w-40 flex-shrink-0">
+                                <img src={track.albumImage} alt={track.name} className="rounded-lg w-full h-auto" />
+                                <p className="text-sm font-medium mt-2 break-words track-title">{track.name}</p>
+                                <p className="text-xs text-gray-500 track-artist singer-name">{track.singer}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </section>
     );
 };

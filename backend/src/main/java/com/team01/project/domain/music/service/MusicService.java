@@ -1,6 +1,7 @@
 package com.team01.project.domain.music.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -59,16 +60,21 @@ public class MusicService {
 	}
 
 	@Transactional(readOnly = true)
-	public Music getRandomRecentMusic(String userId) {
+	public Optional<Music> getRandomRecentMusic(String userId) {
 		// 1. 가장 최근 calendar_date ID 조회
-		Long recentCalendarDateId = musicRecordRepository.findRecentCalendarDateIdByUserId(userId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 사용자의 캘린더 기록이 없습니다."));
+		Optional<Long> recentCalendarDateIdOpt = musicRecordRepository.findRecentCalendarDateIdByUserId(userId);
+
+		if (recentCalendarDateIdOpt.isEmpty()) {
+			return Optional.empty(); // 캘린더 기록이 없는 경우 빈 값 반환
+		}
+
+		Long recentCalendarDateId = recentCalendarDateIdOpt.get();
 
 		// 2. 해당 날짜의 음악 기록 가져오기
 		List<String> musicIds = musicRecordRepository.findMusicIdsByCalendarDateId(recentCalendarDateId);
 
 		if (musicIds.isEmpty()) {
-			throw new IllegalArgumentException("가장 최근 캘린더 날짜에 음악 기록이 없습니다.");
+			return Optional.empty(); // 가장 최근 캘린더 날짜에 음악 기록이 없을 경우 빈 값 반환
 		}
 
 		// 3. 랜덤으로 하나 선택
@@ -76,7 +82,6 @@ public class MusicService {
 		String randomMusicId = musicIds.get(random.nextInt(musicIds.size()));
 
 		// 4. 선택된 음악 정보 반환 (존재하지 않으면 예외 발생)
-		return musicRepository.findById(randomMusicId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 음악을 찾을 수 없습니다."));
+		return musicRepository.findById(randomMusicId);
 	}
 }

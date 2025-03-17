@@ -127,7 +127,8 @@ public class MusicController {
 
 	@GetMapping("/recent/random/{userId}")
 	public MusicResponse getRandomRecentMusic(@PathVariable String userId) {
-		Music randomMusic = musicService.getRandomRecentMusic(userId);
+		Music randomMusic = musicService.getRandomRecentMusic(userId)
+			.orElseGet(() -> new Music("", "", "", "", null, "", ""));
 		return MusicResponse.fromEntity(randomMusic);
 	}
 }
