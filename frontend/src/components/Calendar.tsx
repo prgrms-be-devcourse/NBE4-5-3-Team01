@@ -54,7 +54,27 @@ const Calendar: React.FC = () => {
       const userId = params.get("userId");
       let currentOwnerId: string | null = null;
 
-      if (userId) {
+      // 현재 로그인한 사용자의 정보 조회
+      const response = await fetch(BASE_URL + "/user/byCookie", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("사용자 정보를 불러오는 데 실패했습니다.");
+      }
+
+      const currentUser: User = await response.json();
+
+      // 파라미터가 없거나 현재 로그인한 유저와 동일하다면 현재 로그인한 유저가 캘린더 오너
+      if (!userId || userId === currentUser.id) {
+        setUser(currentUser);
+        currentOwnerId = currentUser.id;
+        setIsCalendarOwner(true);
+      } else { // 아니라면 userId를 가진 유저와 맞팔인지 확인
         const response = await fetch(BASE_URL + `/follows/check/${userId}`, {
           method: "GET",
           headers: {
@@ -69,7 +89,7 @@ const Calendar: React.FC = () => {
 
         const isMutualFollowing: boolean = await response.json();
 
-        if (isMutualFollowing) {
+        if (isMutualFollowing) { // 맞팔이라면 userId를 가진 유저가 캘린더 오너
           const response = await fetch(BASE_URL + `/user/${userId}`, {
             method: "GET",
             headers: {
@@ -82,34 +102,16 @@ const Calendar: React.FC = () => {
             throw new Error("사용자 정보를 불러오는 데 실패했습니다.");
           }
 
-          const data: User = await response.json();
+          const fetchedUser: User = await response.json();
 
-          setUser(data);
-          currentOwnerId = data.id;
+          setUser(fetchedUser);
+          currentOwnerId = fetchedUser.id;
           setIsCalendarOwner(false);
-        } else {
+        } else { // 아니라면 캘린더 조회 권한 없음
           alert("캘린더를 조회할 권한이 없습니다.");
           router.push("/calendar");
           return;
         }
-      } else {
-        const response = await fetch(BASE_URL + "/user/byCookie", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("사용자 정보를 불러오는 데 실패했습니다.");
-        }
-
-        const data: User = await response.json();
-
-        setUser(data);
-        currentOwnerId = data.id;
-        setIsCalendarOwner(true);
       }
 
       if (currentOwnerId) {
