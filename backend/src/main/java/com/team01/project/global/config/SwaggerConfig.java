@@ -24,8 +24,8 @@ public class SwaggerConfig {
 	}
 
 	private Info apiInfo() {
-		return new Info().title("API Test") // API의 제목
-			.description("Let's practice Swagger UI") // API에 대한 설명
+		return new Info().title("음악 캘린더 API") // API의 제목
+			.description("음악 캘린더 서비스에 관한 API 문서화") // API에 대한 설명
 			.version("1.0.0"); // API의 버전
 	}
 }

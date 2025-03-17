@@ -1,6 +1,5 @@
 package com.team01.project.domain.user.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,11 +35,14 @@ import com.team01.project.domain.user.service.SpotifyRefreshTokenService;
 import com.team01.project.domain.user.service.UserService;
 import com.team01.project.global.security.JwtTokenProvider;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "Users", description = "유저 API")
 @RequestMapping("/user")
 @Controller
 @RequiredArgsConstructor
@@ -127,6 +129,7 @@ public class UserController {
 		return ResponseEntity.status(200).body("로그아웃 성공");
 	}
 
+	@Operation(summary = "jwt 재발급 api", description = "리프레시 토큰을 이용한 jwt를 재발급 한다.")
 	@ResponseBody
 	@PostMapping("/refresh")
 	public ResponseEntity<?> refreshToken(@RequestBody Map<String, Object> reqMap) {
@@ -134,29 +137,29 @@ public class UserController {
 		return userService.refreshToken(refreshToken);
 	}
 
-	@ResponseBody
-	@GetMapping("testApi")
-	public Map<String, String> testApi(@AuthenticationPrincipal OAuth2User user) {
-
-		String spotifyToken = user.getAttribute("spotifyToken");
-		System.out.println("스포티파이 토큰체크:" + spotifyToken);
-		String userId = user.getName();
-		System.out.println("유저아이디 체크:" + userId);
-		Map<String, String> resMap = new HashMap<>();
-		resMap.put("res", "테스트 api 입니다.");
-		resMap.put("userId", userId);
-		return resMap;
-	}
-
-	@ResponseBody
-	@GetMapping("testApiCookie")
-	public ResponseEntity<?> logout(@CookieValue(name = "accessToken", required = false) String accessToken) {
-		System.out.println("쿠키" + accessToken);
-		// accessToken 값이 null이 아니라면 토큰 기반 로그아웃 로직 수행
-		// 예: 토큰 검증, 리프레시 토큰 삭제 등
-		// ...
-		return ResponseEntity.ok("Logged out");
-	}
+	// @ResponseBody
+	// @GetMapping("testApi")
+	// public Map<String, String> testApi(@AuthenticationPrincipal OAuth2User user) {
+	//
+	// 	String spotifyToken = user.getAttribute("spotifyToken");
+	// 	System.out.println("스포티파이 토큰체크:" + spotifyToken);
+	// 	String userId = user.getName();
+	// 	System.out.println("유저아이디 체크:" + userId);
+	// 	Map<String, String> resMap = new HashMap<>();
+	// 	resMap.put("res", "테스트 api 입니다.");
+	// 	resMap.put("userId", userId);
+	// 	return resMap;
+	// }
+	//
+	// @ResponseBody
+	// @GetMapping("testApiCookie")
+	// public ResponseEntity<?> logout(@CookieValue(name = "accessToken", required = false) String accessToken) {
+	// 	System.out.println("쿠키" + accessToken);
+	// 	// accessToken 값이 null이 아니라면 토큰 기반 로그아웃 로직 수행
+	// 	// 예: 토큰 검증, 리프레시 토큰 삭제 등
+	// 	// ...
+	// 	return ResponseEntity.ok("Logged out");
+	// }
 
 	@ResponseBody
 	@GetMapping("/search")
@@ -175,6 +178,7 @@ public class UserController {
 		return SimpleUserResponse.from(userService.getUserById(userId));
 	}
 
+	@Operation(summary = "유저 정보 api", description = "현재 로그인한 유저의 정보를 가져온다.")
 	@ResponseBody
 	@GetMapping("/getUsers")
 	public ResponseEntity<UserDto> getUser(@AuthenticationPrincipal OAuth2User oAuth2User) {
@@ -183,6 +187,7 @@ public class UserController {
 		return ResponseEntity.ok(userDto);
 	}
 
+	@Operation(summary = "자기소개 변경 api", description = "현재 로그인한 유저의 자기소개를 수정한다.")
 	@ResponseBody
 	@PutMapping("/userIntro")
 	public void userIntro(@AuthenticationPrincipal OAuth2User oAuth2User, @RequestBody Map<String, Object> reqMap) {
@@ -191,6 +196,7 @@ public class UserController {
 		userService.updateUserIntro(userId, userIntro);
 	}
 
+	@Operation(summary = "이름 변경 api", description = "현재 로그인한 유저의 이름을 수정한다.")
 	@ResponseBody
 	@PutMapping("/profileName")
 	public void changeProfileName(@AuthenticationPrincipal OAuth2User oAuth2User,
@@ -200,6 +206,7 @@ public class UserController {
 		userService.updateProfileName(userId, profileName);
 	}
 
+	@Operation(summary = "이미지 변경 api", description = "현재 로그인한 유저의 프로필 사진을 변경한다.")
 	@ResponseBody
 	@PostMapping("/image")
 	public ResponseEntity<?> uploadImage(@AuthenticationPrincipal OAuth2User oAuth2User,
