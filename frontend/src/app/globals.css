@@ -477,3 +477,27 @@ label[for="nav-footer-toggle"] {
   position: relative;
   overflow: hidden;
 }
+
+.fc .fc-daygrid-body-natural .fc-daygrid-day-events {
+  margin-bottom: 0;
+}
+
+.fc .fc-toolbar {
+  justify-content: space-evenly;
+  color: #393D3F;
+}
+
+.fc .fc-toolbar-chunk .fc-button {
+  border: none;
+  background: #C8B6FF;
+  color: #393D3F;
+}
+
+.fc .fc-toolbar-chunk .fc-button:active {
+  border: none;
+  background: #C8B6FF;
+  color: #393D3F;
+}
+.fc .fc-bg-event {
+  background: white;
+}

@@ -76,7 +76,7 @@ export default function MusicDetailPage() {
         <div className="w-full max-w-2xl flex justify-between mb-3">
             <h2 className="text-lg text-[#393D3F]">{currentYear}년 {currentMonth}월 {currentDay}일</h2>
             {
-                !isReadOnly && <button className="text-lg text-[#393D3F]" onClick={handleButtonClick}>수정하기</button>
+                !isReadOnly && <button className="text-lg text-[#393D3F] bg-[#C8B6FF] rounded-lg px-2" onClick={handleButtonClick}>수정하기</button>
             }
         </div>
         <Carousel className="w-full max-w-2xl">

@@ -6,8 +6,6 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useState } from "react";
 import {
   DatesSetArg,
-  EventClickArg,
-  EventContentArg,
 } from "@fullcalendar/core";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -182,41 +180,8 @@ const Calendar: React.FC = () => {
     document.head.appendChild(style);
   }, []);
 
-  const handleDayCellContent = (arg: { date: Date; dayNumberText: string }) => {
-    const formattedDate = new Date(arg.date.setHours(0, 0, 0, 0))
-      .toISOString()
-      .split("T")[0];
-    const hasMemo = monthly?.some((item) => {
-      const itemDate = new Date(item.date);
-      itemDate.setHours(0, 0, 0, 0);
-      const formattedItemDate = itemDate.toISOString().split("T")[0];
-
-      return formattedItemDate === formattedDate && item.hasMemo;
-    });
-
-    return (
-      <div className="relative flex justify-between items-center w-full">
-        {hasMemo && (
-          <span className="w-1.5 h-1.5 bg-[#C8B6FF] rounded-full mr-1"></span>
-        )}
-        <span className="ml-auto">{arg.dayNumberText.replace("일", "")}</span>
-      </div>
-    );
-  };
-
-  const renderEventContent = (eventInfo: EventContentArg) => {
-    const imageUrl = eventInfo.event.extendedProps.albumImage;
-
-    return (
-      <div className="relative w-full h-full min-h-[50px] overflow-hidden">
-        {imageUrl && (
-          <img
-            src={imageUrl}
-            alt="event"
-            className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-          />
-        )}
-      </div>
+  const handleDayCellContent = (arg: { dayNumberText: string }) => {
+    return (<span className="ml-auto">{arg.dayNumberText.replace("일", "")}</span>
     );
   };
 
@@ -244,79 +209,130 @@ const Calendar: React.FC = () => {
     }
   };
 
-  const handleEventClick = (arg: EventClickArg) => {
-    if (!arg.event.start) return;
+  const createButton = () => {
+    const button = document.createElement("button");
+    button.textContent = "+";
 
-    const date = arg.event.start
-      .toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      })
-      .replace(/\./g, "")
-      .split(" ")
-      .join("-");
+    // 버튼 스타일링
+    button.style.position = "absolute"; // 위치를 절대값으로 설정
+    button.style.top = "50%"; // 세로 중앙 정렬
+    button.style.left = "50%"; // 가로 중앙 정렬
+    button.style.transform = "translate(-50%, -50%)"; // 중앙 정렬을 위한 이동
+    button.style.border = "none"; // 버튼 테두리 없애기
+    button.style.padding = "5px 10px"; // 버튼 안쪽 여백
+    button.style.cursor = "pointer"; // 커서 포인터로 변경
+    button.style.fontSize = "1.5em"; // 텍스트 크기
+    button.style.color = "text-[#393D3F]"; // 텍스트 색상
 
-    handleDateClick({ dateStr: date });
+    return button;
   };
 
   return (
-    <div className="flex flex-col w-full px-10 justify-center items-center">
-      <div className="w-9/12 flex justify-end mt-4 mb-4">
-        <h2 className="text-xl text-[#393D3F]">
-          {user?.name ?? "나"}의 캘린더📆
-        </h2>
-        <div className="flex space-x-4 ml-4">
-          <button
-            className="text-xl text-[#393D3F]"
-            onClick={() => handleFollowButtonClick(ownerId!)}
-          >
-            {followerCount} 팔로워
-          </button>
-          <button
-            className="text-xl text-[#393D3F]"
-            onClick={() => handleFollowButtonClick(ownerId!)}
-          >
-            {followingCount} 팔로잉
-          </button>
+      <div className="flex flex-col w-full px-10 justify-center items-center">
+        <div className="flex justify-end mt-4 mb-4" style={{width: "min(90vh, calc(100vw - 18rem))"}}>
+          <h2 className="text-xl text-[#393D3F]">
+            {user?.name ?? "나"}의 캘린더📆
+          </h2>
+          <div className="flex space-x-4 ml-4">
+            <button
+                className="text-lg text-[#393D3F] bg-[#C8B6FF] rounded-lg px-2"
+                onClick={() => handleFollowButtonClick(ownerId!)}
+            >
+              {followerCount} 팔로워
+            </button>
+            <button
+                className="text-lg text-[#393D3F] bg-[#C8B6FF] rounded-lg px-2"
+                onClick={() => handleFollowButtonClick(ownerId!)}
+            >
+              {followingCount} 팔로잉
+            </button>
+          </div>
+        </div>
+        <div
+            style={{
+              width: "min(90vh, calc(100vw - 18rem))",
+              height: "min(90vh, calc(100vw - 18rem))",
+            }}
+        >
+          <FullCalendar
+              locale="ko"
+              height="100%"
+              contentHeight="100%"
+              plugins={[dayGridPlugin, interactionPlugin]}
+              headerToolbar={{
+                left: "prevYear,prev",
+                center: "title",
+                right: "next,nextYear",
+              }}
+              initialView="dayGridMonth"
+              editable={false}
+              selectable={false}
+              selectMirror={true}
+              dayCellContent={handleDayCellContent}
+              datesSet={handleDateChange}
+              dateClick={handleDateClick}
+              dayMaxEvents={true}
+              events={monthly?.map((arg) => ({
+                start: arg.date,
+                display: "background", // 배경 이벤트로 설정
+                extendedProps: {
+                  albumImage: arg.albumImage,
+                },
+              }))}
+              eventDidMount={(info) => {
+                const albumImage = info.event.extendedProps.albumImage;
+                if (albumImage) {
+                  info.el.style.backgroundImage = `url(${albumImage})`;
+                  info.el.style.backgroundSize = "cover";
+                  info.el.style.backgroundPosition = "center";
+                  info.el.style.opacity = "1";
+                  info.el.style.pointerEvents = "none";
+                }
+                const cell = info.el.closest(".fc-daygrid-day");
+                const dateNumber = cell?.querySelector(".fc-daygrid-day-number") as HTMLElement;
+
+                if (dateNumber) {
+                  dateNumber.style.setProperty("color", "#C8B6FF", "important");
+                  dateNumber.style.setProperty("font-weight", "700", "important");
+                  dateNumber.style.setProperty("text-shadow", "0 0 3px rgba(0,0,0,0.5)", "important");
+                }
+              }}
+              dayCellDidMount={(info) => {
+                const cellDate = info.date.toLocaleDateString("en-CA"); // YYYY-MM-DD 형식으로 변환
+                const hasEvent = monthly.some((event) => event.date === cellDate);
+                const currentDate = new Date().toLocaleDateString("en-CA");
+                const isAfterToday = cellDate > currentDate;
+
+                if (isAfterToday) {
+                  return;
+                }
+                info.el.style.position = "relative"; // 날짜 셀에 상대적인 위치 부여
+
+                const button = createButton(); // [+] 버튼 생성
+                const cell = info.el as HTMLElement;
+
+                cell.addEventListener("mouseenter", () => {
+                  cell.style.backgroundColor = "#D9CFFF"; // 배경색 변경
+                  if (!hasEvent) {
+                    cell.appendChild(button); // 이벤트가 없으면 [+] 버튼 추가
+                  }
+                });
+
+                // 마우스가 셀에서 벗어날 때
+                cell.addEventListener("mouseleave", () => {
+                  cell.style.backgroundColor = ""; // 배경색 원래대로 복구
+                  if (!hasEvent && button.parentNode) {
+                    button.parentNode.removeChild(button); // [+] 버튼 제거
+                  }
+                });
+              }}
+              stickyHeaderDates={true}
+              validRange={{
+                end: new Date(),
+              }}
+          />
         </div>
       </div>
-      <div className="w-9/12">
-        <FullCalendar
-          locale={"ko"}
-          height={"85vh"}
-          contentHeight="auto"
-          plugins={[dayGridPlugin, interactionPlugin]}
-          headerToolbar={{
-            left: "title",
-            right: "prevYear,prev,today,next,nextYear",
-          }}
-          initialView="dayGridMonth"
-          editable={false}
-          selectable={false}
-          selectMirror={true}
-          dayCellContent={handleDayCellContent}
-          datesSet={handleDateChange}
-          dateClick={handleDateClick}
-          eventClick={handleEventClick}
-          dayMaxEvents={true}
-          events={monthly?.map((arg) => ({
-            start: arg.date,
-            date: arg.date,
-            borderColor: "#FFFFFF",
-            backgroundColor: "#FFFFFF",
-            extendedProps: {
-              albumImage: arg.albumImage,
-            },
-          }))}
-          eventContent={renderEventContent}
-          stickyHeaderDates={true}
-          validRange={{
-            end: new Date(),
-          }}
-        />
-      </div>
-    </div>
   );
 };
 
