@@ -81,9 +81,17 @@ const filterRecords = (
 // 가장 많이 들은 장르 계산 함수
 const getMostListenedGenre = (data: MusicRecordDto[]): string => {
   const genreCount: Record<string, number> = {};
+
   data.forEach((item) => {
-    genreCount[item.genre] = (genreCount[item.genre] || 0) + 1;
+    const genres = item.genre
+      ? item.genre.split(",").map((g) => g.trim())
+      : ["None"]; // 장르가 없으면 "None" 추가
+
+    genres.forEach((genre) => {
+      genreCount[genre] = (genreCount[genre] || 0) + 1;
+    });
   });
+
   return Object.entries(genreCount).reduce(
     (maxGenre, [genre, count]) =>
       count > genreCount[maxGenre] ? genre : maxGenre,
@@ -103,6 +111,14 @@ const getMostRecordedDate = (data: MusicRecordDto[]): string => {
   );
 };
 
+// 특정 날짜의 기록 개수 찾기
+const getMostRecordedDateCount = (
+  data: MusicRecordDto[],
+  targetDate: string
+): number => {
+  return data.filter((item) => item.date === targetDate).length;
+};
+
 // 아티스트별 기록 횟수를 계산 (여기서는 singer를 아티스트로 사용)
 const getFavoriteArtists = (data: MusicRecordDto[]): ArtistCount[] => {
   const artistCount: Record<string, number> = {};
@@ -119,14 +135,26 @@ const getGenreDistribution = (
   data: MusicRecordDto[]
 ): { labels: string[]; percentages: number[] } => {
   const genreCount: Record<string, number> = {};
+
   data.forEach((item) => {
-    genreCount[item.genre] = (genreCount[item.genre] || 0) + 1;
+    const genres = item.genre
+      ? item.genre.split(",").map((g) => g.trim())
+      : ["None"]; // 장르가 없으면 "None" 추가
+
+    genres.forEach((genre) => {
+      genreCount[genre] = (genreCount[genre] || 0) + 1;
+    });
   });
-  const total = data.length;
+
+  const total = Object.values(genreCount).reduce(
+    (sum, count) => sum + count,
+    0
+  );
   const labels = Object.keys(genreCount);
   const percentages = labels.map((genre) =>
     total ? Math.round((genreCount[genre] / total) * 100) : 0
   );
+
   return { labels, percentages };
 };
 
@@ -237,6 +265,11 @@ const RecapPage = () => {
     artists: getFavoriteArtists(filteredData),
   };
 
+  const mostRecordedDateCount = getMostRecordedDateCount(
+    filteredData,
+    recap.date
+  );
+
   const genreDistribution = getGenreDistribution(filteredData);
   const pieChartData = {
     labels: genreDistribution.labels,
@@ -290,6 +323,14 @@ const RecapPage = () => {
         tension: 0.1,
       },
     ],
+  };
+
+  const pieChartOptions = {
+    plugins: {
+      legend: {
+        onClick: () => null, // 범례 클릭 이벤트 막기
+      },
+    },
   };
 
   return (
@@ -348,7 +389,7 @@ const RecapPage = () => {
                   내가 많이 들은 <span>장르</span>
                 </div>
                 <div className="chart-container">
-                  <Pie data={pieChartData} />
+                  <Pie data={pieChartData} options={pieChartOptions} />
                 </div>
               </div>
               <div className="date">
@@ -360,7 +401,7 @@ const RecapPage = () => {
                 </div>
                 <div>
                   {recap.date} <br />
-                  <span>00</span>개의 노래를 기록했어요!!
+                  <span>{mostRecordedDateCount}</span>개의 노래를 기록했어요!!
                 </div>
               </div>
             </div>

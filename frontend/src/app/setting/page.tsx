@@ -210,7 +210,7 @@ const NotificationSettings = () => {
                   </div>
                   <div>
                     <Link
-                      href="/notifications/configure"
+                      href="/calendar"
                       className={`${styles.linkb} ${styles.kaxeyf}`}
                     >
                       <div className={styles.kMKjYE}></div>
@@ -258,7 +258,7 @@ const NotificationSettings = () => {
                   </div>
                   <div>
                     <Link
-                      href="/notifications/configure"
+                      href="/user/profile"
                       className={`${styles.linkb} ${styles.kaxeyf}`}
                     >
                       <div className={styles.kMKjYE}></div>
@@ -318,7 +318,7 @@ const NotificationSettings = () => {
                   </h1>
                   <div>
                     <Link
-                      href="/notifications/configure"
+                      href="/setting"
                       className={`${styles.linkb} ${styles.kaxeyf}`}
                     >
                       <div className={styles.kMKjYE}></div>
@@ -366,13 +366,6 @@ const NotificationSettings = () => {
                     </Link>
                   </div>
                 </div>
-                {/* <div className={styles.tabContent}>
-          {activeTab === "create" ? (
-            <NotificationCreate />
-          ) : (
-            <NotificationEdit />
-          )}
-        </div> */}
               </div>
             </div>
           </div>
