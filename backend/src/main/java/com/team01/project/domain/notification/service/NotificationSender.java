@@ -13,7 +13,6 @@ import com.team01.project.domain.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
-
 @Service
 @RequiredArgsConstructor
 public class NotificationSender {
@@ -27,9 +26,12 @@ public class NotificationSender {
 	public void sendEmail(User user, String title, String message) {
 		try {
 			// MimeMessage 객체 생성
-			var mimeMessage = javaMailSender.createMimeMessage();
-			var helper = new MimeMessageHelper(mimeMessage, true);
 
+			var mimeMessage = javaMailSender.createMimeMessage();
+			var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+			// 이메일 설정
+			helper.setFrom("samvision99@gmail.com");
 			// 이메일 설정
 			helper.setTo(user.getEmail());  // User의 이메일 주소 사용
 			helper.setSubject("Music Calendar 📅 " + title);
@@ -39,7 +41,7 @@ public class NotificationSender {
 			javaMailSender.send(mimeMessage);
 
 			System.out.println(
-					user.getName() + "님의 " + user.getEmail() + "로 " + title + " 알림이 전송되었습니다. 내용: " + message);
+				user.getName() + "님의 " + user.getEmail() + "로 " + title + " 알림이 전송되었습니다. 내용: " + message);
 		} catch (Exception e) {
 			// 예외 처리
 			e.printStackTrace();
@@ -54,11 +56,11 @@ public class NotificationSender {
 			Subscription sub = subscriptionOpt.get();
 			try {
 				pushNotificationService.sendPush(
-						sub.getEndpoint(),
-						sub.getP256dh(),
-						sub.getAuth(),
-						title,
-						message
+					sub.getEndpoint(),
+					sub.getP256dh(),
+					sub.getAuth(),
+					title,
+					message
 				);
 				System.out.println(user.getName() + "님에게 " + title + " 푸시알림이 전송되었습니다. 내용: " + message);
 			} catch (Exception e) {

@@ -225,22 +225,13 @@ export default function ProfilePage() {
     <div className="p-8">
       {/* 프로필 이미지 및 기본 정보 */}
       <div
-        className={`${isEditModalOpen || isBioModalOpen ? "pointer-events-none" : ""
-          }`}
+        className={`${
+          isEditModalOpen || isBioModalOpen ? "pointer-events-none" : ""
+        }`}
       >
         <div className="flex flex-col items-center mb-8">
           <div className="relative w-32 h-32 mb-4">
-            {imageError ? (
-              <div className="w-full h-full rounded-full bg-purple-100 flex items-center justify-center border-4 border-purple-200">
-                <svg
-                  className="w-full h-full text-purple-300"
-                  viewBox="0 0 36 36"
-                  fill="currentColor"
-                >
-                  <path d="M18 0C8.06 0 0 8.06 0 18s8.06 18 18 18 18-8.06 18-18S27.94 0 18 0zm0 6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6 2.69-6 6-6zm0 25.2c-5 0-9.42-2.56-12-6.44.06-3.98 8-6.16 12-6.16 3.98 0 11.94 2.18 12 6.16-2.58 3.88-7 6.44-12 6.44z" />
-                </svg>
-              </div>
-            ) : userData?.image ? (
+            {userData?.image && !imageError ? (
               <Image
                 src={`data:image/png;base64,${userData.image}`}
                 alt="프로필 이미지"
@@ -250,14 +241,17 @@ export default function ProfilePage() {
                 onError={() => setImageError(true)}
               />
             ) : (
-              <Image
-                src="/profile-default.png"
-                alt="프로필 이미지"
-                fill
-                className="rounded-full object-cover border-4 border-purple-200"
-                onError={() => setImageError(true)}
-              />
+              <div className="w-full h-full rounded-full bg-purple-100 flex items-center justify-center border-4 border-purple-200">
+                <svg
+                  className="w-full h-full text-purple-300"
+                  viewBox="0 0 36 36"
+                  fill="currentColor"
+                >
+                  <path d="M18 0C8.06 0 0 8.06 0 18s8.06 18 18 18 18-8.06 18-18S27.94 0 18 0zm0 6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6 2.69-6 6-6zm0 25.2c-5 0-9.42-2.56-12-6.44.06-3.98 8-6.16 12-6.16 3.98 0 11.94 2.18 12 6.16-2.58 3.88-7 6.44-12 6.44z" />
+                </svg>
+              </div>
             )}
+            {/* 이미지 변경 버튼 */}
             <button
               className="absolute bottom-0 right-0 bg-purple-500 text-white p-2 rounded-full hover:bg-purple-600 transition-colors"
               onClick={() => setIsImageModalOpen(true)}
@@ -347,10 +341,7 @@ export default function ProfilePage() {
             className="modal-overlay"
             onClick={() => setIsLogoutModalOpen(false)}
           >
-            <div
-              className="modal"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="text-center mb-6">
                 <h3 className="text-xl font-semibold mb-2">로그아웃</h3>
                 <p className="text-gray-600">정말 로그아웃 하시겠습니까?</p>
@@ -380,10 +371,7 @@ export default function ProfilePage() {
           className="modal-overlay"
           onClick={() => setIsEditModalOpen(false)}
         >
-          <div
-            className="modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold">프로필 수정</h3>
               <button
@@ -419,14 +407,8 @@ export default function ProfilePage() {
 
       {/* 자기소개 모달 */}
       {isBioModalOpen && (
-        <div
-          className="modal-overlay"
-          onClick={() => setIsBioModalOpen(false)}
-        >
-          <div
-            className="modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="modal-overlay" onClick={() => setIsBioModalOpen(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold">자기소개</h3>
               <button
@@ -460,10 +442,7 @@ export default function ProfilePage() {
           className="modal-overlay"
           onClick={() => setIsImageModalOpen(false)}
         >
-          <div
-            className="modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold">프로필 이미지 변경</h3>
               <button
