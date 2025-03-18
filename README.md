@@ -6,7 +6,7 @@
 
 ## 단단한 나뭇가지
 
-|<img height="180" style="width: auto;" alt="f3194686510bf918" src="https://github.com/user-attachments/assets/3e0031c5-95f6-4441-a18b-8878b4b357df" />|<img src="https://github.com/user-attachments/assets/1dfa0b9a-c333-40f5-9a7d-24581852465d" height="180" style="width: auto;">|<img src="https://github.com/user-attachments/assets/b446944e-9778-4beb-9733-b721df9278ef" height="180" style="width: auto;">|<img alt="f3194686510bf918" src="https://github.com/user-attachments/assets/0c0ec2fd-865b-456a-b9d5-ab110043ef51" height="180" style="width: auto;" />|<img height="180" style="width: auto;" alt="f3194686510bf918" src="https://github.com/user-attachments/assets/357b8f26-e3cb-4a35-b0ee-eff9da86a967" />|
+|<img height="150" style="width: auto;" alt="f3194686510bf918" src="https://github.com/user-attachments/assets/3e0031c5-95f6-4441-a18b-8878b4b357df" />|<img src="https://github.com/user-attachments/assets/1dfa0b9a-c333-40f5-9a7d-24581852465d" height="150" style="width: auto;">|<img src="https://github.com/user-attachments/assets/b446944e-9778-4beb-9733-b721df9278ef" height="150" style="width: auto;">|<img alt="f3194686510bf918" src="https://github.com/user-attachments/assets/0c0ec2fd-865b-456a-b9d5-ab110043ef51" height="150" style="width: auto;" />|<img height="150" style="width: auto;" alt="f3194686510bf918" src="https://github.com/user-attachments/assets/357b8f26-e3cb-4a35-b0ee-eff9da86a967" />|
 |:--:|:--:|:--:|:--:|:--:|
 |조정인|강웅빈|김지수|신우석|엄현수|
 |팀장|팀원|팀원|팀원|팀원|
@@ -28,22 +28,25 @@
 <br/>
 
 ## 3. 주요 기능
-- 회원 관리
-- 음악 검색, 기록 및 추천
-- 음악 기록 분석을 통한 주간, 월간, 장르별, 가수별 통계 시각화
-- 알림
-- 팔로우 기능 및 친구 캘린더 조회
+- 회원 관리 👥
+- 음악 검색, 기록 및 추천 🎵
+- 음악 기록 분석을 통한 주간, 월간, 장르별, 가수별 통계 시각화 📊
+- 이메일 알림 및 푸시 알림 🔔
+- 팔로우 기능 및 친구 캘린더 조회 💘
 
 <br/>
 
 ## 4. 작업 및 역할 분담
-|조정인|강웅빈|김지수|신우석|엄현수|
-|:--|:--|:--|:--|:--|
-|<ul><li>팀 리딩</li><li>음악 검색</li><li>음악 추천</li></ul>|<ul><li>팔로우</li><li>유저 검색</li><li>팔로잉, 팔로워 조회</li></ul>|<ul><li>캘린더 조회</li><li>캘린더 생성</li><li>음악 기록 및 기록 수정</li></ul>|<ul><li>소셜 로그인</li><li>회원 관리</li></ul>|<ul><li>이메일 알림 및 푸시 알림</li><li>알림 읽음 처리</li><li>받은 알림 목록 조회</li></ul>|
+|이름|역할|
+|:---:|:---|
+|조정인|<ul><li>팀 리딩</li><li>음악 검색</li><li>음악 추천</li></ul>|
+|강웅빈|<ul><li>팔로우</li><li>유저 검색</li><li>팔로잉, 팔로워 목록 조회</li></ul>|
+|김지수|<ul><li>캘린더 조회</li><li>캘린더 생성</li><li>음악 기록 및 기록 수정</li></ul>|
+|신우석|<ul><li>소셜 로그인</li><li>회원 관리</li></ul>|
+|엄현수|<ul><li>이메일 알림 및 푸시 알림</li><li>알림 읽음 처리</li><li>받은 알림 목록 조회</li><li>음악 기록 통계 시각화</li></ul>|
 
 <br/>
 <br/>
-
 
 # 🛠️ Tech
 ## 프로젝트 설정 및 실행
@@ -62,6 +65,9 @@ npm run dev
 
 ### 백엔드 설정
 `application.yml` 파일에 맞게 환경 변수 설정
+
+### 푸시 알림 허용
+`chrome://settings/content/siteDetails?site=http://localhost:3000/`에서 알림 허용
 
 ## 기술 스택
 ### 언어
