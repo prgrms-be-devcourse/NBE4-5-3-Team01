@@ -90,7 +90,7 @@
 ![image]()
 
 ## API 명세서
-[📝 API 명세서](https://github.com/prgrms-be-devcourse/NBE4-5-2-Team01/wiki/%F0%9F%93%8CAPI-%EB%AA%85%EC%84%B8%EC%84%9C)
+[📝 API 명세서](https://github.com/prgrms-be-devcourse/NBE4-5-2-Team01/wiki/%F0%9F%93%9D-API-%EB%AA%85%EC%84%B8%EC%84%9C)
 <br/>
 <br/>
 
