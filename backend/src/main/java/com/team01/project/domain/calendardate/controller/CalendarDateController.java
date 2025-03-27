@@ -9,8 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -119,13 +121,13 @@ public class CalendarDateController {
 	}
 
 	/**
-	 * 음악 기록 저장
+	 * 음악 기록 수정
 	 * @param calendarDateId 캘린더 아이디
 	 * @param request 음악 아이디 리스트
 	 * @param loggedInUser 현재 인증된 유저
 	 */
-	@Operation(summary = "작성된 음악 기록 수정 api", description = "현재 로그인 하고 있는 유저의 음악 기록 수정할때만 사용")
-	@PostMapping("/{calendar-date-id}/music")
+	@Operation(summary = "음악 기록 수정 api", description = "현재 인증된 유저의 특정 캘린더 날짜에 대한 음악 기록 수정")
+	@PutMapping("/{calendar-date-id}/music")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void saveMusicToCalendarDate(@PathVariable(name = "calendar-date-id") Long calendarDateId,
 		@RequestBody CalendarDateMusicSaveRequest request, @AuthenticationPrincipal OAuth2User loggedInUser) {
@@ -134,13 +136,13 @@ public class CalendarDateController {
 	}
 
 	/**
-	 * 메모 작성
+	 * 메모 기록 수정
 	 * @param calendarDateId 캘린더 아이디
 	 * @param request 새로운 메모
 	 * @param loggedInUser 현재 인증된 유저
 	 */
-	@Operation(summary = "작성된 메모 수정 api", description = "현재 로그인 하고 있는 유저의 메모 작성 수정할때만 사용")
-	@PostMapping("/{calendar-date-id}/memo")
+	@Operation(summary = "메모 기록 수정 api", description = "현재 인증된 유저의 특정 캘린더 날짜에 대한 메모 기록 수정")
+	@PatchMapping("/{calendar-date-id}/memo")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void writeMemoToCalendarDate(@PathVariable(name = "calendar-date-id") Long calendarDateId,
 		@RequestBody CalendarDateMemoSaveRequest request, @AuthenticationPrincipal OAuth2User loggedInUser) {

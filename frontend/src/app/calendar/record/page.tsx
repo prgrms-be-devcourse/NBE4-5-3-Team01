@@ -90,7 +90,7 @@ export default function CalendarRecordPage() {
 
       if (isEditing) {
         // 기존 기록 수정
-        await axios.post(
+        await axios.put(
           `${API_URL}/calendar/${id}/music`,
           { musicIds: musicIds },
           {
@@ -101,7 +101,7 @@ export default function CalendarRecordPage() {
           }
         );
 
-        await axios.post(
+        await axios.patch(
           `${API_URL}/calendar/${id}/memo`,
           { memo: finalMemo },
           {
