@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.team01.project.domain.musicrecord.controller.dto.MusicRecordDto;
 import com.team01.project.domain.musicrecord.service.MusicRecordService;
+import com.team01.project.global.dto.RsData;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +34,7 @@ public class MusicRecordController {
 	 */
 	@Operation(summary = "전체 기록 조회", description = "사용자의 음악 기록 목록 조회")
 	@GetMapping
-	public ResponseEntity<List<MusicRecordDto>> getMusicRecords(
+	public RsData<List<MusicRecordDto>> getMusicRecords(
 			@AuthenticationPrincipal OAuth2User user,
 			@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 			@RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -45,6 +45,6 @@ public class MusicRecordController {
 				musicRecordService.getMusicRecordsByUserAndDateRange(userId, startDate, endDate).stream()
 						.map(MusicRecordDto::from)
 						.collect(Collectors.toList());
-		return ResponseEntity.ok(records);
+		return new RsData<>("200-1", "사용자의 음악 기록 목록 조회가 완료되었습니다.", records);
 	}
 }

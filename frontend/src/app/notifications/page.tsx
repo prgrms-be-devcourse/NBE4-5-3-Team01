@@ -31,9 +31,9 @@ const Notifications = () => {
         }
       );
       setNotifications(
-        Array.isArray(response.data)
-          ? response.data
-          : response.data.notifications || []
+        Array.isArray(response.data.data)
+          ? response.data.data
+          : response.data.data.notifications || []
       );
     } catch (error) {
       console.error("Failed to fetch notifications", error);

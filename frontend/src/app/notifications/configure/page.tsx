@@ -30,7 +30,7 @@ const NotificationCreate = () => {
           }
         );
 
-        setNotifications(response.data);
+        setNotifications(response.data.data);
       } catch (error) {
         console.error("Failed to fetch notifications", error);
       }

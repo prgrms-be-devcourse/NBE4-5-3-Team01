@@ -236,14 +236,11 @@ const RecapPage = () => {
           endDate = lastDay.toISOString().split("T")[0];
         }
 
-        const response = await axios.get<MusicRecordDto[]>(
-          "http://localhost:8080/api/v1/recap",
-          {
-            params: { startDate, endDate },
-            withCredentials: true,
-          }
-        );
-        setRecords(response.data);
+        const response = await axios.get("http://localhost:8080/api/v1/recap", {
+          params: { startDate, endDate },
+          withCredentials: true,
+        });
+        setRecords(response.data.data);
       } catch (err) {
         console.error(err);
         setError("음악 기록을 불러오는 중 오류가 발생했습니다.");

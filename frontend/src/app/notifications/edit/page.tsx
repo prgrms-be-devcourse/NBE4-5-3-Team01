@@ -32,7 +32,7 @@ const NotificationEdit = () => {
             withCredentials: true, // 쿠키 포함
           }
         );
-        setNotifications(response.data);
+        setNotifications(response.data.data);
       } catch (error) {
         console.error("Failed to fetch notifications", error);
       }

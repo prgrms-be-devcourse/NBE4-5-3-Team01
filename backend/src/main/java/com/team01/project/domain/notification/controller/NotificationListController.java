@@ -3,7 +3,6 @@ package com.team01.project.domain.notification.controller;
 import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.team01.project.domain.notification.dto.NotificationListDto;
 import com.team01.project.domain.notification.service.NotificationListService;
+import com.team01.project.global.dto.RsData;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,46 +31,56 @@ public class NotificationListController {
 	// 현재 로그인한 사용자의 알림 목록 조회
 	@Operation(summary = "사용자의 알림리스트 조회", description = "현재 로그인한 사용자가 받은 알림리스트 조회")
 	@GetMapping
-	public ResponseEntity<List<NotificationListDto>> getUserNotifications(
+	public RsData<List<NotificationListDto>> getUserNotifications(
 			@AuthenticationPrincipal OAuth2User user) {
 		String userId = user.getName();
-		return ResponseEntity.ok(notificationListService.getUserNotificationLists(userId)
-				.stream()
-				.map(NotificationListDto::new)
-				.sorted(Comparator.comparing(NotificationListDto::notificationTime).reversed())
-				.toList());
+		return new RsData<>(
+				"200-1",
+				"사용자에게 온 알림리스트 조회가 완료되었습니다.",
+				notificationListService.getUserNotificationLists(userId)
+						.stream()
+						.map(NotificationListDto::new)
+						.sorted(Comparator.comparing(NotificationListDto::notificationTime).reversed())
+						.toList()
+		);
 	}
 
 	// 알림 읽음 처리
 	@Operation(summary = "알림 읽음 처리 단건", description = "선택한 알림의 읽음 처리")
 	@PatchMapping("/{notificationList-id}")
-	public ResponseEntity<String> markNotificationAsRead(
+	public RsData<Void> markNotificationAsRead(
 			@PathVariable(name = "notificationList-id") Long notificationListId,
 			@AuthenticationPrincipal OAuth2User user) {
 		String userId = user.getName();
 
 		notificationListService.markAsRead(notificationListId, userId);
-		return ResponseEntity.ok("Notification marked as read");
+		return new RsData<>(
+				"200-1",
+				"Notification marked as read"
+		);
 	}
 
 	// 안읽은 알람 모두 읽음 처리
 	@Operation(summary = "모든 알림 읽음 처리", description = "사용자의 모든 알림의 읽음 처리")
 	@PatchMapping("/mark-all-read")
-	public ResponseEntity<Void> markAllNotificationAsRead(@AuthenticationPrincipal OAuth2User user) {
+	public RsData<Void> markAllNotificationAsRead(@AuthenticationPrincipal OAuth2User user) {
 		String userId = user.getName();
 		notificationListService.markAllAsRead(userId);
-		return ResponseEntity.ok().build();
+		return new RsData<>(
+				"200-1",
+				"Notification marked All as read"
+		);
 	}
 
 
 	// 알림 리스트에서 알림 삭제
 	@Operation(summary = "알림 삭제", description = "알림리스트에서 선택한 알림 삭제")
 	@DeleteMapping("/{notificationList-id}")
-	public ResponseEntity<String> deleteNotification(
+	public RsData<Void> deleteNotification(
 			@PathVariable(name = "notificationList-id") Long notificationListId,
 			@AuthenticationPrincipal OAuth2User user) {
 		String userId = user.getName();
 		notificationListService.deleteNotification(notificationListId, userId);
-		return ResponseEntity.ok("Notification deleted");
+		return new RsData<>("200-1", "Notification deleted");
 	}
 }
