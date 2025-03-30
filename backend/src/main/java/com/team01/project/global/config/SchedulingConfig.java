@@ -17,4 +17,13 @@ public class SchedulingConfig {
 		scheduler.initialize(); // 명시적으로 초기화
 		return scheduler;
 	}
+
+	@Bean
+	public ThreadPoolTaskScheduler separateTaskScheduler() {
+		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+		scheduler.setPoolSize(5);
+		scheduler.setThreadNamePrefix("separate-scheduler-");
+		scheduler.initialize();
+		return scheduler;
+	}
 }

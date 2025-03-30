@@ -1,14 +1,12 @@
 package com.team01.project.domain.musicrecord.service;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +17,6 @@ import com.team01.project.domain.music.repository.MusicRepository;
 import com.team01.project.domain.musicrecord.entity.MusicRecord;
 import com.team01.project.domain.musicrecord.entity.MusicRecordId;
 import com.team01.project.domain.musicrecord.repository.MusicRecordRepository;
-import com.team01.project.domain.notification.event.NotificationRecordEvent;
 import com.team01.project.domain.user.entity.User;
 import com.team01.project.domain.user.repository.UserRepository;
 import com.team01.project.global.permission.PermissionService;
@@ -36,7 +33,6 @@ public class MusicRecordService {
 	private final MusicRepository musicRepository;
 	private final UserRepository userRepository;
 	private final PermissionService permissionService;
-	private final ApplicationEventPublisher eventPublisher;    // 🔥 이벤트 발행기 추가
 
 	/**
 	 * 캘린더에 기록된 음악 리스트 조회
@@ -86,11 +82,6 @@ public class MusicRecordService {
 
 		// 1. 기존 MusicRecord 조회
 		List<MusicRecord> oldMusicRecords = musicRecordRepository.findByCalendarDate(calendarDate);
-
-		if (oldMusicRecords.isEmpty()) {
-			// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록) 설정한 시각이 30분 이내라면
-			eventPublisher.publishEvent(new NotificationRecordEvent(this, LocalTime.now(), loggedInUser));
-		}
 
 		// 2. 기존 MusicId 목록 조회
 		Set<String> oldMusicIdset = oldMusicRecords.stream()

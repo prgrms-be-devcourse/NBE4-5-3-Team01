@@ -35,5 +35,18 @@ public class Subscription {
 	private String p256dh;
 	private String auth;
 
+	public void update(String endpoint, String p256dh, String auth) {
+		this.endpoint = endpoint;
+		this.p256dh = p256dh;
+		this.auth = auth;
+	}
+
+	public void updateWithUser(User user, String endpoint, String p256dh, String auth) {
+		this.user = user;
+		this.endpoint = endpoint;
+		this.p256dh = p256dh;
+		this.auth = auth;
+	}
+
 }
 

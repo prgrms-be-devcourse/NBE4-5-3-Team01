@@ -20,4 +20,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 	@Query("SELECT n FROM Notification n WHERE n.notificationTime >= :now AND n.notificationTime < :plusMinutes")
 	List<Notification> findNotificationsBetween(@Param("now") LocalTime now,
 												@Param("plusMinutes") LocalTime plusMinutes);
+
+	@Query("SELECT DISTINCT n.notificationTime FROM Notification n "
+			+ "WHERE n.notificationTime >= :start AND n.notificationTime < :end ORDER BY n.notificationTime ASC")
+	List<LocalTime> findDistinctNotificationTimeBetween(
+			@Param("start") LocalTime start, @Param("end") LocalTime end);
+
 }

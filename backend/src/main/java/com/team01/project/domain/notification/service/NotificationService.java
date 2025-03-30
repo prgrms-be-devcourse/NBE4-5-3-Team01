@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -14,10 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 import com.team01.project.domain.notification.constants.NotificationMessages;
 import com.team01.project.domain.notification.dto.NotificationUpdateDto;
 import com.team01.project.domain.notification.entity.Notification;
+import com.team01.project.domain.notification.entity.Subscription;
 import com.team01.project.domain.notification.event.NotificationInitEvent;
 import com.team01.project.domain.notification.repository.NotificationRepository;
+import com.team01.project.domain.notification.repository.SubscriptionRepository;
 import com.team01.project.domain.user.entity.User;
-import com.team01.project.domain.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +30,7 @@ public class NotificationService {
 	private final NotificationRepository notificationRepository;
 	private final ApplicationEventPublisher eventPublisher;    // 🔥 이벤트 발행기 추가
 
-	private final UserRepository userRepository; // User 조회를 위해 필요
+	private final SubscriptionRepository subscriptionRepository;
 
 	public List<Notification> getAllNotifications() {
 		return notificationRepository.findAll();
@@ -87,8 +89,8 @@ public class NotificationService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Notification> getNotificationsBetween(LocalTime now, LocalTime plusMinutes) {
-		return notificationRepository.findNotificationsBetween(now, plusMinutes);
+	public List<LocalTime> getNotificationTimeBetween(LocalTime start, LocalTime end) {
+		return notificationRepository.findDistinctNotificationTimeBetween(start, end);
 	}
 
 	// 유저가 회원가입할 때 생성
@@ -144,5 +146,13 @@ public class NotificationService {
 	public void initLoginNotifications(LocalTime time, User user) {
 		// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록)
 		eventPublisher.publishEvent(new NotificationInitEvent(this, time, user));
+	}
+
+	// 로그아웃 시 푸시 구독 정보 삭제
+	@Transactional
+	public void deleteSubscription(String userId) {
+		Optional<Subscription> subscription = subscriptionRepository.findByUserId(userId);
+
+		subscription.ifPresent(subscriptionRepository::delete);
 	}
 }

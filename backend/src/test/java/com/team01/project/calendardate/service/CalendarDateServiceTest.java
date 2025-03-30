@@ -1,8 +1,9 @@
 package com.team01.project.calendardate.service;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.when;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.team01.project.domain.calendardate.entity.CalendarDate;
 import com.team01.project.domain.calendardate.repository.CalendarDateRepository;
@@ -35,6 +37,9 @@ public class CalendarDateServiceTest {
 	private UserRepository userRepository;
 
 	@Mock
+	private ApplicationEventPublisher eventPublisher; // 목 객체
+
+	@Mock
 	private PermissionService permissionService;
 
 	@InjectMocks
@@ -52,21 +57,21 @@ public class CalendarDateServiceTest {
 		LocalDate end = yearMonth.atEndOfMonth();
 
 		List<CalendarDate> mockCalendarDates = List.of(
-			CalendarDate.builder()
-				.user(mockUser)
-				.date(LocalDate.of(2025, 3, 1))
-				.memo("memo 1")
-				.build(),
-			CalendarDate.builder()
-				.user(mockUser)
-				.date(LocalDate.of(2025, 3, 31))
-				.memo("memo 2")
-				.build()
+				CalendarDate.builder()
+						.user(mockUser)
+						.date(LocalDate.of(2025, 3, 1))
+						.memo("memo 1")
+						.build(),
+				CalendarDate.builder()
+						.user(mockUser)
+						.date(LocalDate.of(2025, 3, 31))
+						.memo("memo 2")
+						.build()
 		);
 
 		when(userRepository.findById(mockUserId)).thenReturn(Optional.ofNullable(mockUser));
 		when(calendarDateRepository.findByUserAndDateBetween(mockUser, start, end))
-			.thenReturn(mockCalendarDates);
+				.thenReturn(mockCalendarDates);
 
 		// when
 		List<CalendarDate> result = calendarDateService.findAllByYearAndMonth(mockUserId, mockUserId, yearMonth);
@@ -74,7 +79,7 @@ public class CalendarDateServiceTest {
 		// then
 		assertThat(result).hasSize(mockCalendarDates.size());
 		result.forEach(calendarDate ->
-			assertThat(calendarDate.getUser().getId()).isEqualTo(mockUserId));
+				assertThat(calendarDate.getUser().getId()).isEqualTo(mockUserId));
 
 	}
 
@@ -147,18 +152,18 @@ public class CalendarDateServiceTest {
 
 	CalendarDate getMockCalendarDate() {
 		return CalendarDate.builder()
-			.user(new User())
-			.date(LocalDate.of(2025, 3, 1))
-			.memo("memo 1")
-			.build();
+				.user(new User())
+				.date(LocalDate.of(2025, 3, 1))
+				.memo("memo 1")
+				.build();
 	}
 
 	CalendarDate getMockCalendarDate(LocalDate date) {
 		return CalendarDate.builder()
-			.user(new User())
-			.date(date)
-			.memo("memo 1")
-			.build();
+				.user(new User())
+				.date(date)
+				.memo("memo 1")
+				.build();
 	}
 
 }
