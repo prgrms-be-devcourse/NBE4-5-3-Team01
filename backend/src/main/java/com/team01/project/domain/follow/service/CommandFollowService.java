@@ -21,14 +21,17 @@ public class CommandFollowService {
 
 	private final FollowRepository followRepository;
 	private final UserRepository userRepository;
-	private final ApplicationEventPublisher eventPublisher;    // 🔥 이벤트 발행기 추가
+	private final ApplicationEventPublisher eventPublisher;
 
 	public void create(String fromUserId, String toUserId) {
 		User fromUser = userRepository.getById(fromUserId);
 		User toUser = userRepository.getById(toUserId);
+
+		if (followRepository.existsByToUserAndFromUser(toUser, fromUser)) {
+			throw new IllegalStateException("이미 팔로우 요청을 보냈습니다.");
+		}
 		followRepository.save(new Follow(toUser, fromUser));
 
-		// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록)
 		eventPublisher.publishEvent(new NotificationFollowEvent(this, LocalTime.now(), toUser, fromUser));
 	}
 
@@ -36,8 +39,17 @@ public class CommandFollowService {
 		User fromUser = userRepository.getById(fromUserId);
 		User toUser = userRepository.getById(toUserId);
 		Follow follow = followRepository.findByToUserAndFromUser(toUser, fromUser)
-				.orElseThrow(() -> new IllegalArgumentException("팔로우를 찾을 수 없습니다."));
+			.orElseThrow(() -> new IllegalArgumentException("팔로우를 찾을 수 없습니다."));
 
 		followRepository.delete(follow);
+	}
+
+	public void accept(String fromUserId, String toUserId) {
+		User fromUser = userRepository.getById(fromUserId);
+		User toUser = userRepository.getById(toUserId);
+
+		Follow follow = followRepository.findByToUserAndFromUser(toUser, fromUser)
+			.orElseThrow(() -> new IllegalArgumentException("팔로우를 찾을 수 없습니다."));
+		follow.accept();
 	}
 }

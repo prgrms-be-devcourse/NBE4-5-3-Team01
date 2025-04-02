@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team01.project.domain.follow.controller.dto.FollowResponse;
+import com.team01.project.domain.follow.entity.type.Status;
 import com.team01.project.domain.follow.repository.FollowRepository;
 import com.team01.project.domain.user.entity.RefreshToken;
 import com.team01.project.domain.user.entity.User;
@@ -176,16 +177,17 @@ public class UserService {
 
 	public List<FollowResponse> search(String currentUserId, String name) {
 		User currentUser = userRepository.getById(currentUserId);
-		List<User> users = userRepository.searchUser(name);;
+		List<User> users = userRepository.searchUser(name);
+		;
 
 		return users.stream()
 			.filter(user -> !user.getId().equals(currentUser.getId()))
 			.map(user ->
 				FollowResponse.of(
-				user,
-				checkFollow(user, currentUser),
-				checkFollow(currentUser, user)
-			))
+					user,
+					checkFollow(user, currentUser),
+					checkFollow(currentUser, user)
+				))
 			.toList();
 	}
 
@@ -194,8 +196,9 @@ public class UserService {
 			.orElseThrow(() -> new IllegalArgumentException("해당 ID의 유저 찾을 수 없습니다: " + id));
 	}
 
-	private boolean checkFollow(User user, User currentUser) {
-		return followRepository.existsByToUserAndFromUser(user, currentUser);
+	private Status checkFollow(User user, User currentUser) {
+		return followRepository.findStatusByToUserAndFromUser(user, currentUser)
+			.orElse(Status.NONE);
 	}
 
 	public User findByUserId(String userId) {

@@ -33,6 +33,7 @@ import com.team01.project.domain.user.repository.RefreshTokenRepository;
 import com.team01.project.domain.user.repository.UserRepository;
 import com.team01.project.domain.user.service.SpotifyRefreshTokenService;
 import com.team01.project.domain.user.service.UserService;
+import com.team01.project.global.dto.RsData;
 import com.team01.project.global.security.JwtTokenProvider;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -165,11 +166,15 @@ public class UserController {
 	@Operation(summary = "유저 검색 api", description = "이름과 닉네임으로 유저를 검색한다.")
 	@ResponseBody
 	@GetMapping("/search")
-	public List<FollowResponse> search(
-			@RequestParam(name = "q") String name,
-			@AuthenticationPrincipal OAuth2User user
+	public RsData<List<FollowResponse>> search(
+		@RequestParam(name = "q") String name,
+		@AuthenticationPrincipal OAuth2User user
 	) {
-		return userService.search(user.getName(), name);
+		return new RsData<>(
+			"200-1",
+			"유저 검색이 완료되었습니다.",
+			userService.search(user.getName(), name)
+		);
 	}
 
 	@Operation(summary = "유저 조회 api", description = "현재 로그인한 유저의 정보를 조회한다.")

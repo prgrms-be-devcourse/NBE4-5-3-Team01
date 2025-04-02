@@ -1,9 +1,12 @@
 package com.team01.project.domain.follow.entity;
 
+import com.team01.project.domain.follow.entity.type.Status;
 import com.team01.project.domain.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,8 +36,16 @@ public class Follow {
 	@JoinColumn(name = "from_user_id")
 	private User fromUser;
 
+	@Enumerated(value = EnumType.STRING)
+	private Status status;
+
 	public Follow(User toUser, User fromUser) {
 		this.toUser = toUser;
 		this.fromUser = fromUser;
+		this.status = Status.PENDING;
+	}
+
+	public void accept() {
+		this.status = Status.ACCEPT;
 	}
 }
