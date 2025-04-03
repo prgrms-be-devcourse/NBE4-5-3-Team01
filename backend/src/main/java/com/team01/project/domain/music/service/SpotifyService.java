@@ -227,7 +227,7 @@ public class SpotifyService {
 		}
 	}
 
-	private List<SpotifyPlaylistResponse> getUserPlaylists(String accessToken) {
+	public List<SpotifyPlaylistResponse> getUserPlaylists(String accessToken) {
 		String url = "/me/playlists?limit=10";
 		String token = extractToken(accessToken);
 
@@ -266,7 +266,7 @@ public class SpotifyService {
 		}
 	}
 
-	private List<MusicRequest> getTracksFromPlaylist(String playlistId, String accessToken) {
+	public List<MusicRequest> getTracksFromPlaylist(String playlistId, String accessToken) {
 		String url = "/playlists/" + playlistId + "/tracks?market=KR";
 		String token = extractToken(accessToken);
 
