@@ -1,13 +1,40 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { useGlobalAlert } from "@/components/GlobalAlert";
 
 const RecentTracks = ({ singer, tracks }) => {
+    const API_URL = "http://localhost:8080/api/v1";
+    const router = useRouter();
     const trackRef = useRef(null);
     const [isAtStart, setIsAtStart] = useState(true);
     const [isAtEnd, setIsAtEnd] = useState(false);
+    const { setAlert } = useGlobalAlert();
+
+    const handleSelectRecommendedTrack = async (trackId: string) => {
+        try {
+            const todayRecordRes = await axios.get(`${API_URL}/calendar/today`, {
+                headers: { "Content-Type": "application/json" },
+                withCredentials: true,
+            });
+
+            const todayRecord = todayRecordRes.data;
+
+            if (todayRecord.code === "200-1") {
+                router.push(`/calendar/record?id=${todayRecord.data}&trackId=${trackId}`);
+            } else {
+                const { year, month, day } = todayRecord.data;
+                router.push(`/calendar/record?year=${year}&month=${month}&day=${day}&trackId=${trackId}`);
+            }
+        } catch (error) {
+            console.error("오늘 기록 확인 오류:", error);
+            setAlert({ code: "500-4", message: "오늘 기록 확인에 실패했습니다." });
+        }
+    };
 
     // 스크롤 상태 업데이트 함수
     const updateScrollState = () => {
@@ -58,7 +85,7 @@ const RecentTracks = ({ singer, tracks }) => {
                     <button onClick={scrollLeft} className={`px-3 ${isAtStart ? "text-gray-300 cursor-default" : "text-black"}`} disabled={isAtStart}>
                         <FontAwesomeIcon icon={faChevronLeft} />
                     </button>
-                    <button onClick={scrollRight} className={`px-3 ${isAtEnd ? "text-gray-300 cursor-default" : "text-black"}`} disabled={isAtEnd}>
+                    <button onClick={scrollRight} className={`px-3 ${isAtEnd || tracks.length === 0 ? "text-gray-300 cursor-default" : "text-black"}`} disabled={isAtEnd || tracks.length === 0}>
                         <FontAwesomeIcon icon={faChevronRight} />
                     </button>
                 </div>
@@ -73,10 +100,15 @@ const RecentTracks = ({ singer, tracks }) => {
                 <div className="relative">
                     <div ref={trackRef} className="flex gap-4 overflow-x-auto hide-scrollbar whitespace-nowrap">
                         {tracks.map(track => (
-                            <div key={track.id} className="w-40 flex-shrink-0">
+                            <div
+                                key={track.id}
+                                onClick={() => handleSelectRecommendedTrack(track.id)}
+                                className="track-item w-40 flex-shrink-0"
+                            >
                                 <img src={track.albumImage} alt={track.name} className="rounded-lg w-full h-auto track-img" />
                                 <p className="text-sm font-medium mt-2 break-words track-title">{track.name}</p>
                                 <p className="text-xs text-gray-500 track-artist singer-name">{track.singer}</p>
+                                <span className="add-button">+</span>
                             </div>
                         ))}
                     </div>

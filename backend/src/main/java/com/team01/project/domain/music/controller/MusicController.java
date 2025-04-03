@@ -1,7 +1,6 @@
 package com.team01.project.domain.music.controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,6 +20,7 @@ import com.team01.project.domain.music.dto.MusicResponse;
 import com.team01.project.domain.music.entity.Music;
 import com.team01.project.domain.music.service.MusicService;
 import com.team01.project.domain.music.service.SpotifyService;
+import com.team01.project.global.dto.RsData;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,17 +41,18 @@ public class MusicController {
 		summary = "ID로 Spotify 음악 검색",
 		description = "Spotify에서 특정 ID의 음악을 검색하여 반환"
 	)
-	public MusicResponse getMusicFromSpotify(
+	public RsData<MusicResponse> getMusicFromSpotify(
 		@PathVariable String id,
 		@AuthenticationPrincipal OAuth2User user
 	) {
 		String spotifyToken = user.getAttribute("spotifyToken");
 		MusicRequest musicRequest = spotifyService.getTrackWithGenre(id, spotifyToken);
-		if (musicRequest != null) {
-			Music music = musicRequest.toEntity();
-			return MusicResponse.fromEntity(music);
-		}
-		throw new IllegalArgumentException("Invalid music data");
+		Music music = musicRequest.toEntity();
+		return new RsData<>(
+			"200-1",
+			"음악 조회 성공",
+			MusicResponse.fromEntity(music)
+		);
 	}
 
 	@PostMapping("/spotify/{id}")
@@ -60,16 +61,18 @@ public class MusicController {
 		summary = "ID로 Spotify 음악 저장",
 		description = "Spotify에서 특정 ID의 음악 정보를 가져와 DB에 저장"
 	)
-	public void saveMusicFromSpotify(
+	public RsData<String> saveMusicFromSpotify(
 		@PathVariable String id,
 		@AuthenticationPrincipal OAuth2User user
 	) {
 		String spotifyToken = user.getAttribute("spotifyToken");
 		MusicRequest musicRequest = spotifyService.getTrackWithGenre(id, spotifyToken);
-		if (musicRequest != null) {
-			Music savedMusic = musicService.saveMusic(musicRequest.toEntity());
-		}
-		throw new IllegalArgumentException("Invalid music data");
+		Music savedMusic = musicService.saveMusic(musicRequest.toEntity());
+		return new RsData<>(
+			"201-1",
+			"음악 저장 성공",
+			null
+		);
 	}
 
 	@PostMapping("/save-all")
@@ -78,7 +81,7 @@ public class MusicController {
 		summary = "음악 리스트 저장",
 		description = "요청받은 음악 리스트를 저장하며, 장르 정보가 없을 경우 Spotify에 조회하여 업데이트"
 	)
-	public void saveAllMusic(
+	public RsData<String> saveAllMusic(
 		@RequestBody List<Music> musicList,
 		@AuthenticationPrincipal OAuth2User user
 	) {
@@ -91,8 +94,13 @@ public class MusicController {
 				}
 				return music;
 			})
-			.collect(Collectors.toList());
+			.toList();
 		musicService.saveAllMusic(updatedMusicList);
+		return new RsData<>(
+			"201-2",
+			"음악 리스트 저장 완료",
+			null
+		);
 	}
 
 	@GetMapping("/spotify/search")
@@ -101,15 +109,20 @@ public class MusicController {
 		summary = "키워드로 Spotify에서 음악 검색",
 		description = "Spotify에서 특정 키워드로 검색하여 해당되는 음악 리스트 반환"
 	)
-	public List<MusicResponse> searchTracks(
+	public RsData<List<MusicResponse>> searchTracks(
 		@RequestParam String keyword,
 		@AuthenticationPrincipal OAuth2User user
 	) {
 		String spotifyToken = user.getAttribute("spotifyToken");
 		List<MusicRequest> tracks = spotifyService.searchByKeyword(keyword, spotifyToken);
-		return tracks.stream()
+		List<MusicResponse> responseList = tracks.stream()
 			.map(request -> MusicResponse.fromEntity(request.toEntity()))
-			.collect(Collectors.toList());
+			.toList();
+		return new RsData<>(
+			"200-2",
+			"키워드 검색 성공",
+			responseList
+		);
 	}
 
 	@GetMapping("/spotify/artist/{artistId}/top-tracks")
@@ -117,15 +130,20 @@ public class MusicController {
 		summary = "특정 아티스트의 인기곡 조회",
 		description = "Spotify에서 특정 아티스트의 인기곡 리스트 반환"
 	)
-	public List<MusicResponse> getTopTracksByArtist(
+	public RsData<List<MusicResponse>> getTopTracksByArtist(
 		@PathVariable String artistId,
 		@AuthenticationPrincipal OAuth2User user
 	) {
 		String spotifyToken = user.getAttribute("spotifyToken");
 		List<MusicRequest> topTracks = spotifyService.getTopTracksByArtist(artistId, spotifyToken);
-		return topTracks.stream()
+		List<MusicResponse> responseList = topTracks.stream()
 			.map(request -> MusicResponse.fromEntity(request.toEntity()))
-			.collect(Collectors.toList());
+			.toList();
+		return new RsData<>(
+			"200-3",
+			"아티스트 인기곡 조회 성공",
+			responseList
+		);
 	}
 
 	@GetMapping
@@ -134,10 +152,15 @@ public class MusicController {
 		summary = "모든 음악 목록 조회",
 		description = "현재 DB에 저장된 모든 음악 정보를 조회"
 	)
-	public List<MusicResponse> getAllMusic() {
-		return musicService.getAllMusic().stream()
+	public RsData<List<MusicResponse>> getAllMusic() {
+		List<MusicResponse> musicList = musicService.getAllMusic().stream()
 			.map(MusicResponse::fromEntity)
-			.collect(Collectors.toList());
+			.toList();
+		return new RsData<>(
+			"200-4",
+			"전체 음악 조회 성공",
+			musicList
+		);
 	}
 
 	@GetMapping("/{id}")
@@ -146,8 +169,13 @@ public class MusicController {
 		summary = "특정 ID의 음악 조회",
 		description = "DB에서 특정 ID에 해당하는 음악 정보를 반환"
 	)
-	public MusicResponse getMusicById(@PathVariable String id) {
-		return MusicResponse.fromEntity(musicService.getMusicById(id));
+	public RsData<MusicResponse> getMusicById(@PathVariable String id) {
+		Music music = musicService.getMusicById(id);
+		return new RsData<>(
+			"200-5",
+			"ID로 음악 조회 성공",
+			MusicResponse.fromEntity(music)
+		);
 	}
 
 	@DeleteMapping("/{id}")
@@ -156,8 +184,13 @@ public class MusicController {
 		summary = "특정 ID의 음악 삭제",
 		description = "DB에서 특정 ID에 해당하는 음악 정보를 삭제"
 	)
-	public void deleteMusic(@PathVariable String id) {
+	public RsData<String> deleteMusic(@PathVariable String id) {
 		musicService.deleteMusic(id);
+		return new RsData<>(
+			"204-1",
+			"음악 삭제 완료",
+			null
+		);
 	}
 
 	@GetMapping("/recent/random/{userId}")
@@ -165,9 +198,14 @@ public class MusicController {
 		summary = "최근에 추가된 음악 중 랜덤한 곡 반환",
 		description = "특정 사용자의 최근 추가된 음악 중 랜덤으로 선택하여 반환"
 	)
-	public MusicResponse getRandomRecentMusic(@PathVariable String userId) {
+	public RsData<MusicResponse> getRandomRecentMusic(@PathVariable String userId) {
 		Music randomMusic = musicService.getRandomRecentMusic(userId)
 			.orElseGet(() -> new Music("", "", "", "", null, "", ""));
-		return MusicResponse.fromEntity(randomMusic);
+		return new RsData<>(
+			"200-6",
+			"랜덤 음악 조회 성공",
+			MusicResponse.fromEntity(randomMusic)
+		);
+
 	}
 }

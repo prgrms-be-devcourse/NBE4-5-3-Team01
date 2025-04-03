@@ -1,23 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { searchSpotifyTracks } from "@/app/utils/spotifyApi";
 import "./style.css";
+import { useGlobalAlert } from "@/components/GlobalAlert";
 
-export default function MusicSearch({ onSelectTrack }) {
+const MAX_MUSIC_COUNT = 20;
+
+export default function MusicSearch({ onSelectTrack, selectedTracks }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+
+  const { setAlert } = useGlobalAlert();
+  const containerRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // 🔸 검색 결과 캐시 저장용
+  const latestResultsRef = useRef([]);
+  const isKorean = (text: string) => /[ㄱ-ㅎ|가-힣]/.test(text);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setResults([]); // 리스트 닫기
+        setSelectedIndex(-1);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleFocus = () => {
+    if (query.length > 2 && latestResultsRef.current.length > 0) {
+      setResults(latestResultsRef.current);
+    }
+  };
 
   const handleSearch = async (event) => {
     const keyword = event.target.value;
     setQuery(keyword);
     setSelectedIndex(-1);
 
-    if (keyword.length > 2) {
+    if (keyword.length > 2 || (isKorean(query) && query.length >= 2)) {
       const searchResults = await searchSpotifyTracks(keyword);
+      latestResultsRef.current = searchResults;
       setResults(searchResults);
     } else {
+      latestResultsRef.current = [];
       setResults([]);
     }
   };
@@ -33,6 +64,23 @@ export default function MusicSearch({ onSelectTrack }) {
   };
 
   const handleSelectTrack = (track) => {
+    const isDuplicate = selectedTracks.some((t) => t.id === track.id);
+    if (isDuplicate) {
+      setAlert({
+        code: "400-1",
+        message: "이미 추가한 곡이에요.",
+      });
+      return;
+    }
+
+    if (selectedTracks.length >= MAX_MUSIC_COUNT) {
+      setAlert({
+        code: "400-2",
+        message: `최대 ${MAX_MUSIC_COUNT}곡까지 추가할 수 있어요.`,
+      });
+      return;
+    }
+
     onSelectTrack(track);
     setQuery("");
     setResults([]);
@@ -40,12 +88,14 @@ export default function MusicSearch({ onSelectTrack }) {
   };
 
   return (
-    <div className="search-container">
+    <div className="search-container" ref={containerRef}>
       <input
         type="text"
         value={query}
         onChange={handleSearch}
         onKeyDown={handleKeyDown}
+        onFocus={handleFocus}
+        ref={inputRef}
         placeholder="Spotify에서 검색할 곡 또는 가수를 입력하세요."
         className="search-input"
       />

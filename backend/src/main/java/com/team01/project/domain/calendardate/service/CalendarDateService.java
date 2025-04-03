@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -104,4 +105,10 @@ public class CalendarDateService {
 		return calendarDateRepository.save(calendarDate);
 	}
 
+	/**
+	 * 오늘 날짜 캘린더 조회
+	 */
+	public Optional<CalendarDate> findByUserIdAndDate(String userId, LocalDate date) {
+		return calendarDateRepository.findByUserIdAndDate(userId, date);
+	}
 }

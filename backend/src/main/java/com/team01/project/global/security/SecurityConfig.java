@@ -36,33 +36,34 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenFilter jwtTokenFilter) throws Exception {
 		System.out.println("======= START SeCurityFilterChain =======");
 		http
-				.securityMatcher("/**") // 모든 요청에 대해 보안 적용
-				.csrf(AbstractHttpConfigurer::disable)
-				.authorizeHttpRequests(
-						authorizeRequests -> authorizeRequests.requestMatchers("/api/v1/user/login", "/api/v1/logout",
-										"/api/v1/user/refresh", "/api/v1/error", "/login", "/", "/api/v1/follows")
-								.permitAll()
-								.anyRequest()
-								.authenticated()) // 모든 요청에 대해 인증 필요
-				//.anyRequest().permitAll()
-				.sessionManagement(
-						session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT 사용 시 세션 비활성화
-				// JWT필터 추가 ( JWT token 검증 )
-				.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
-				.oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService))
-								.successHandler(oAuth2SuccessHandler)
-								//	.defaultSuccessUrl("http://localhost:3000/login/callback", true) // 로그인 성공 시 리다이렉트 url
-								.failureUrl("/loginFailure")// 로그인 실패 시 리다이렉트 url
-						// .authorizationEndpoint(authorization ->
-						// 	authorization.baseUri("/oauth2/authorization")) // OAuth 인증 경로
-				)
-				.exceptionHandling(ex -> ex.authenticationEntryPoint(((request, response, authException) -> {
-					response.setContentType("application/json; charset=UTF-8");
-					response.setCharacterEncoding("UTF-8");
-					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-					response.getWriter().write("{\"error\": \"Unauthorized - 액세스 토큰이 없거나 로그인 인증되지 않았습니다.\"}");
-				})))
-				.setSharedObject(HttpFirewall.class, relaxedHttpFirewall());
+			.securityMatcher("/**") // 모든 요청에 대해 보안 적용
+			.csrf(AbstractHttpConfigurer::disable)
+			.authorizeHttpRequests(
+				authorizeRequests -> authorizeRequests.requestMatchers("/api/v1/user/login", "/api/v1/logout",
+						"/api/v1/user/refresh", "/api/v1/error", "/login", "/", "/api/v1/follows")
+					.permitAll()
+					.anyRequest()
+					.authenticated()) // 모든 요청에 대해 인증 필요
+			// .permitAll())
+			//.anyRequest().permitAll()
+			.sessionManagement(
+				session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT 사용 시 세션 비활성화
+			// JWT필터 추가 ( JWT token 검증 )
+			.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+			.oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService))
+					.successHandler(oAuth2SuccessHandler)
+					//	.defaultSuccessUrl("http://localhost:3000/login/callback", true) // 로그인 성공 시 리다이렉트 url
+					.failureUrl("/loginFailure")// 로그인 실패 시 리다이렉트 url
+				// .authorizationEndpoint(authorization ->
+				// 	authorization.baseUri("/oauth2/authorization")) // OAuth 인증 경로
+			)
+			.exceptionHandling(ex -> ex.authenticationEntryPoint(((request, response, authException) -> {
+				response.setContentType("application/json; charset=UTF-8");
+				response.setCharacterEncoding("UTF-8");
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.getWriter().write("{\"error\": \"Unauthorized - 액세스 토큰이 없거나 로그인 인증되지 않았습니다.\"}");
+			})))
+			.setSharedObject(HttpFirewall.class, relaxedHttpFirewall());
 		return http.build();
 	}
 

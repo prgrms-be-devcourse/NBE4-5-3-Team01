@@ -3,6 +3,7 @@ package com.team01.project.domain.calendardate.controller;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ import com.team01.project.domain.calendardate.service.CalendarDateService;
 import com.team01.project.domain.music.entity.Music;
 import com.team01.project.domain.musicrecord.entity.MusicRecord;
 import com.team01.project.domain.musicrecord.service.MusicRecordService;
+import com.team01.project.global.dto.RsData;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -162,4 +164,29 @@ public class CalendarDateController {
 			.orElseGet(() -> MonthlyFetchResponse.SingleCalendarDate.from(calendarDate));
 	}
 
+	/**
+	 * 오늘 날짜의 캘린더 조회
+	 * @param loggedInUser 현재 인증된 유저
+	 * @return 캘린더 아이디 또는 오늘 날짜 정보
+	 */
+	@Operation(summary = "오늘 날짜의 캘린더 조회", description = "오늘 날짜의 캘린더 기록이 존재하는지 확인하여 아이디 또는 날짜 반환")
+	@GetMapping("/today")
+	@ResponseStatus(HttpStatus.OK)
+	public RsData<?> checkToday(@AuthenticationPrincipal OAuth2User loggedInUser) {
+		String loggedInUserId = loggedInUser.getName();
+		LocalDate today = LocalDate.now();
+
+		Optional<CalendarDate> todayRecord = calendarDateService.findByUserIdAndDate(loggedInUserId, today);
+
+		if (todayRecord.isPresent()) {
+			return new RsData<>("200-1", "오늘 기록이 존재합니다.", todayRecord.get().getId());
+		} else {
+			Map<String, Integer> todayInfo = Map.of(
+				"year", today.getYear(),
+				"month", today.getMonthValue(),
+				"day", today.getDayOfMonth()
+			);
+			return new RsData<>("200-2", "오늘 기록이 없습니다.", todayInfo);
+		}
+	}
 }

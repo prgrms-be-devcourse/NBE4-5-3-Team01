@@ -63,6 +63,50 @@ button:disabled {
   /* Firefox */
 }
 
+.track-item {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.track-item img {
+  width: 100%;
+  height: auto;
+  transition: filter 0.2s ease-in-out;
+  border-radius: 8px;
+}
+
+.track-item:hover img {
+  filter: brightness(0.5);
+  /* 더 어둡게 조정 가능 */
+}
+
+.add-button {
+  position: absolute;
+  top: 40%;
+  /* 앨범 이미지 영역 중심에 가깝게 조정 */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(50, 50, 50, 0.8);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  font-size: 28px;
+  /* "+" 버튼 크게 설정 */
+  pointer-events: none;
+}
+
+.track-item:hover .add-button {
+  opacity: 1;
+}
+
 .track-img {
   border: 1px solid gainsboro;
 }

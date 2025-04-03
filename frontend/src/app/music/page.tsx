@@ -3,9 +3,12 @@
 import "@/app/music/style.css";
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
+
 import RecentTracks from "./RecentTracks";
 import MoodTracks from "./MoodTracks";
+
 import { Card } from "@/components/ui/card";
+import { useGlobalAlert } from "@/components/GlobalAlert";
 
 const API_URL = "http://localhost:8080/api/v1";
 const SPOTIFY_URL = "http://localhost:8080/api/v1/music/spotify";
@@ -18,6 +21,7 @@ export default function MusicRecommendation() {
   const [selectedMood, setSelectedMood] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
+  const { setAlert } = useGlobalAlert();
   const isFetched = useRef(false);
 
   useEffect(() => {
@@ -28,11 +32,17 @@ export default function MusicRecommendation() {
       try {
         setIsLoading(true);
 
+        setAlert({ code: "200", message: "test" });
+        setAlert({ code: "204", message: "test" });
+        setAlert({ code: "400", message: "test" });
+        setAlert({ code: "500", message: "test" });
+        setAlert({ code: "", message: "test" });
+
         const fetchedUserId = await fetchUser();
         const fetchedArtist = await fetchRandomMusic(fetchedUserId);
 
         if (!fetchedArtist || !fetchedArtist.id) {
-          console.warn("최근 음악 없음, 빈 리스트 반환");
+          setAlert({ code: "401", message: "최근 음악 없음, 빈 리스트 반환" });
           setRecentTracks([]);
         } else {
           await fetchRecentTracks(fetchedArtist.id, fetchedArtist.name);
@@ -42,7 +52,7 @@ export default function MusicRecommendation() {
         setSelectedMood(randomMood);
         await fetchMoodTracks(randomMood);
       } catch (error) {
-        console.error("데이터 로드 중 오류 발생:", error);
+        setAlert({ code: "500", message: "데이터를 불러오는 중 오류가 발생했습니다." });
       } finally {
         setIsLoading(false);
       }
@@ -61,7 +71,7 @@ export default function MusicRecommendation() {
       setUserName(res.data.nickName || res.data.name);
       return res.data.id;
     } catch (error) {
-      console.error("사용자 정보 조회 실패:", error);
+      setAlert({ code: "500-2", message: "사용자 정보를 가져오지 못했어요." });
       throw error;
     }
   };
@@ -74,9 +84,15 @@ export default function MusicRecommendation() {
         },
         withCredentials: true,
       });
-      return { id: res.data.singerId, name: res.data.singer };
+
+      const { code, msg, data } = res.data;
+      setAlert({ code: code, message: msg });
+
+      if (code.startsWith("200")) {
+        return { id: data.singerId, name: data.singer };
+      }
     } catch (error) {
-      console.error("랜덤 음악 조회 실패:", error);
+      setAlert({ code: "500-3", message: "랜덤 음악을 불러오는 데 실패했어요." });
       throw error;
     }
   };
@@ -99,9 +115,15 @@ export default function MusicRecommendation() {
           withCredentials: true,
         }
       );
-      setRecentTracks(res.data);
+
+      const { code, msg, data } = res.data;
+      setAlert({ code: code, message: msg });
+
+      if (code.startsWith("200")) {
+        setRecentTracks(data);
+      }
     } catch (error) {
-      console.error("최근 음악 조회 실패:", error);
+      setAlert({ code: "500-4", message: "최근 기록에 대한 음악 정보를 불러올 수 없어요." });
       throw error;
     }
   };
@@ -114,9 +136,15 @@ export default function MusicRecommendation() {
         },
         withCredentials: true,
       });
-      setMoodTracks(res.data);
+
+      const { code, msg, data } = res.data;
+      setAlert({ code: code, message: msg });
+
+      if (code.startsWith("200")) {
+        setMoodTracks(data);
+      }
     } catch (error) {
-      console.error("기분 음악 조회 실패:", error);
+      setAlert({ code: "500-5", message: "기분에 맞는 음악을 불러오는 데 실패했어요." });
       throw error;
     }
   };

@@ -2,6 +2,7 @@ package com.team01.project.domain.calendardate.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -20,5 +21,7 @@ public interface CalendarDateRepository extends JpaRepository<CalendarDate, Long
 		return findById(calendarDateId).orElseThrow(()
 			-> new IllegalArgumentException("해당 ID의 캘린더 기록을 찾을 수 없습니다: " + calendarDateId));
 	}
+
+	Optional<CalendarDate> findByUserIdAndDate(String userId, LocalDate date);
 
 }

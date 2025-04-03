@@ -1,5 +1,6 @@
 import axios from "axios";
 import SpotifyWebApi from "spotify-web-api-js";
+import { preprocessKoreanQuery } from "@/app/utils/koreanPreprocess";
 
 const spotifyApi = new SpotifyWebApi();
 
@@ -24,7 +25,9 @@ export const searchSpotifyTracks = async (query: string) => {
   if (!query) return [];
 
   try {
-    const response = await spotifyApi.searchTracks(query, { market: "KR", limit: 5 });
+    const keyword = preprocessKoreanQuery(query);
+    const response = await spotifyApi.searchTracks(keyword, { market: "KR", limit: 5 });
+
     return response.tracks.items.map((track) => ({
       id: track.id,
       name: track.name,

@@ -498,6 +498,21 @@ label[for="nav-footer-toggle"] {
   background: #C8B6FF;
   color: #393D3F;
 }
+
 .fc .fc-bg-event {
   background: white;
+}
+
+@keyframes progressBar {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
+
+.animate-progressBar {
+  animation: progressBar 3s linear forwards;
 }
