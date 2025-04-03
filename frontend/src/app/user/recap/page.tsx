@@ -4,9 +4,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./recap.css";
 
-import { Pie, Line } from "react-chartjs-2";
+import { Pie, Line, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
+  BarElement,
   ArcElement,
   CategoryScale,
   LinearScale,
@@ -18,6 +19,7 @@ import {
 } from "chart.js";
 
 ChartJS.register(
+  BarElement,
   ArcElement,
   CategoryScale,
   LinearScale,
@@ -209,6 +211,9 @@ const RecapPage = () => {
   const [records, setRecords] = useState<MusicRecordDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTrack, setSelectedTrack] = useState<MusicRecordDto | null>(
+    null
+  );
 
   // view 값이 변경되거나 페이지 마운트 시에 API 호출
   useEffect(() => {
@@ -297,6 +302,20 @@ const RecapPage = () => {
   const dateDistribution = getRecordsPerDateWithRange(filteredData, view);
   const lineChartOptions = {
     scales: {
+      x: {
+        ticks: {
+          callback: function (value: any): string {
+            const dateStr = dateDistribution.dates[value]; // "YYYY-MM-DD"
+            const [, month, day] = dateStr.split("-");
+            return `${month}-${day}`; // "MM-DD"
+          },
+          font: {
+            weight: 700,
+            size: 14,
+          },
+          color: "#222222",
+        },
+      },
       y: {
         beginAtZero: true,
         ticks: {
@@ -304,6 +323,11 @@ const RecapPage = () => {
           callback: function (tickValue: string | number) {
             return Number(tickValue).toFixed(0);
           },
+          font: {
+            weight: 700,
+            size: 14,
+          },
+          color: "#222222",
         },
       },
     },
@@ -329,6 +353,89 @@ const RecapPage = () => {
       },
     },
   };
+
+  const totalRecordCount = filteredData.length;
+
+  const barColors = [
+    "#FF6384",
+    "#36A2EB",
+    "#FFCE56",
+    "#4BC0C0",
+    "#9966FF",
+    "#FF9F40",
+    "#8BC34A",
+    "#E91E63",
+    "#00BCD4",
+    "#9C27B0",
+    "#CDDC39",
+  ];
+
+  const topArtists = recap.artists.slice(0, 7);
+
+  const barChartData = {
+    labels: topArtists.map((item) => item.artist),
+    datasets: [
+      {
+        label: "기록 횟수",
+        data: topArtists.map((item) => item.count),
+        backgroundColor: barColors.slice(0, topArtists.length),
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const barChartOptions = {
+    indexAxis: "y" as const, // 가로 막대
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          precision: 0,
+          font: {
+            weight: 700,
+            size: 14,
+          },
+          color: "#222222",
+        },
+        title: {
+          display: true,
+          text: "횟수",
+          font: {
+            weight: 700,
+            size: 14,
+          },
+          color: "#222222",
+        },
+      },
+      y: {
+        ticks: {
+          font: {
+            weight: 700,
+            size: 14,
+          },
+          color: "#222222",
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        labels: {
+          font: {
+            weight: 700,
+            size: 14,
+          },
+          color: "#222222",
+        },
+      },
+    },
+  };
+
+  const topArtist = recap.artists[0]?.artist;
+
+  const topArtistTracks = filteredData.filter(
+    (item) => item.singer === topArtist
+  );
 
   return (
     <div id="recap-bar">
@@ -373,19 +480,79 @@ const RecapPage = () => {
         {!loading && !error && filteredData.length > 0 && (
           <>
             <div className="content1">
-              <section>
-                <h1 className="subject">
-                  내가 좋아하는 <span>아티스트</span>는..?
-                </h1>
-                <ul>
-                  {recap.artists.map((item, index) => (
-                    <li key={index}>
-                      <div className="artist">{item.artist}</div>
-                      <div className="count">{item.count}회</div>
-                    </li>
-                  ))}
-                </ul>
-              </section>
+              <div className="like-artist">
+                <section>
+                  <h1 className="subject">
+                    내가 좋아하는 <span>아티스트</span>는..?
+                  </h1>
+                  <div>
+                    <Bar data={barChartData} options={barChartOptions} />
+                  </div>
+                </section>
+                <div
+                  className="artist-count"
+                  style={{
+                    marginBottom: "20px",
+                    fontWeight: "bold",
+                    fontSize: "30px",
+                    textAlign: "center",
+                  }}
+                >
+                  총 {view === "weekly" ? "일주일에 " : "이번 달에 "}
+                  <span>{recap.artists.length}</span>명의 아티스트를 기록했고,{" "}
+                  <span>{totalRecordCount}</span>개의 음악을 기록했어요!
+                </div>
+              </div>
+              {topArtist && topArtistTracks.length > 0 && (
+                <div className="top-artist-tracks">
+                  <h2 className="track-section-title">
+                    🎤 회원님이 가장 좋아하는 {topArtist}의 등록한 노래
+                  </h2>
+
+                  {/* 캐러셀 또는 그리드 방식 */}
+                  <div className="track-carousel">
+                    {topArtistTracks.map((track, index) => (
+                      <div
+                        key={index}
+                        className="track-card"
+                        onClick={() => setSelectedTrack(track)}
+                      >
+                        <img
+                          src={track.albumImage}
+                          alt={track.musicName}
+                          className="album-image"
+                        />
+                        <div className="music-name">{track.musicName}</div>
+                        <div className="record-date">{track.date}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 모달 */}
+                  {selectedTrack && (
+                    <div
+                      className="modal-overlay"
+                      onClick={() => setSelectedTrack(null)}
+                    >
+                      <div
+                        className="modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <img
+                          src={selectedTrack.albumImage}
+                          alt={selectedTrack.musicName}
+                        />
+                        <h3>{selectedTrack.musicName}</h3>
+                        <p>아티스트: {selectedTrack.singer}</p>
+                        <p>등록 날짜: {selectedTrack.date}</p>
+                        <button onClick={() => setSelectedTrack(null)}>
+                          닫기
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div className="content2">
               <div className="genre">

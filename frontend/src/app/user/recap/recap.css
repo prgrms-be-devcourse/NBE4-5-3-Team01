@@ -13,9 +13,11 @@
   top: 1vw;
   width: calc(100vw - 16rem - 3vw);
   min-height: calc(100% - 2vw);
-  background: linear-gradient(135deg,
-      var(--recapbar-dark-primary) 0%,
-      var(--recapbar-dark-secondary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--recapbar-dark-primary) 0%,
+    var(--recapbar-dark-secondary) 100%
+  );
   border-radius: 16px;
 
   color: var(--recapbar-light-primary);
@@ -92,8 +94,13 @@
 
 .content1 {
   padding: 10px;
-  width: 50%;
-  max-height: 400px;
+  display: flex;
+  flex-direction: row;
+}
+
+.like-artist {
+  width: 1000px;
+  min-height: 400px;
 }
 
 .subject {
@@ -148,4 +155,132 @@
 
 .chart-container {
   width: 80%;
+}
+
+.top-artist-tracks {
+  padding: 20px;
+  min-width: 420px;
+}
+
+.track-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.track-card {
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.album-image {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.music-name {
+  margin-top: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.track-section-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 24px 0 12px;
+}
+
+.track-carousel {
+  display: flex;
+  flex-wrap: nowrap; /* 줄 바꿈 금지 */
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 8px;
+}
+
+.track-carousel::-webkit-scrollbar {
+  height: 8px;
+}
+
+.track-carousel::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 4px;
+}
+
+.track-card {
+  flex: 0 0 160px; /* 고정 너비 */
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.track-card:hover {
+  transform: scale(1.05);
+}
+
+.album-image {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.music-name {
+  margin-top: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.record-date {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+/* 모달 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 320px;
+  text-align: center;
+}
+
+.modal-content img {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.modal-content button {
+  margin-top: 16px;
+  padding: 6px 12px;
+  border: none;
+  background-color: #7c3aed;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
 }
