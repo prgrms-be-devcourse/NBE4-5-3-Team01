@@ -147,7 +147,7 @@ public class MusicController {
 		);
 	}
 
-	@GetMapping("/spotify/playlists")
+	@GetMapping("/spotify/playlist")
 	@Operation(
 		summary = "사용자의 Spotify Playlist 목록 조회",
 		description = "이름, 이미지, 트랙 수 등 포함된 요약 정보 반환"
@@ -165,7 +165,7 @@ public class MusicController {
 
 	}
 
-	@GetMapping("/spotify/playlists/{playlistId}")
+	@GetMapping("/spotify/playlist/{playlistId}")
 	@Operation(
 		summary = "특정 Spotify Playlist 트랙 조회",
 		description = "선택된 Playlist의 트랙 목록 반환"
