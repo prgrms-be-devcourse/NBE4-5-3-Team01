@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import com.team01.project.domain.user.entity.User;
 import com.team01.project.domain.user.repository.UserRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 	private final UserRepository userRepository;
@@ -18,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-		System.out.println("======= START CustomUserDetailsService.loadUserByUsername =======");
+		log.info("======= START CustomUserDetailsService.loadUserByUsername =======");
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userId));
 

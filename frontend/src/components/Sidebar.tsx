@@ -30,7 +30,7 @@ export default function Sidebar() {
         }
       );
 
-      const userData = response.data;
+      const userData = response.data.data;
       setUserData(userData);
     } catch (error) {
       console.error("사용자 정보 조회 중 오류 발생:", error);
@@ -61,8 +61,9 @@ export default function Sidebar() {
           onMouseLeave={() => setIsHovered(false)}
         >
           <i
-            className={`fa-regular fa-bell fa-lg ${isHovered ? "fa-shake" : ""
-              }`}
+            className={`fa-regular fa-bell fa-lg ${
+              isHovered ? "fa-shake" : ""
+            }`}
           ></i>
         </Link>
         <label htmlFor="nav-toggle">

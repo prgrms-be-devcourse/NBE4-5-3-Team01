@@ -8,6 +8,8 @@ export default function ConditionalSidebar() {
   // 예를 들어, "/login" 페이지에서는 사이드바를 숨김
   if (pathname === "/login") {
     return null;
+  } else if (pathname === "/signup") {
+    return null;
   }
   return <Sidebar />;
 }

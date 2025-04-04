@@ -1,6 +1,7 @@
 package com.team01.project.domain.user.service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,9 @@ import com.team01.project.domain.user.repository.RefreshTokenRepository;
 import com.team01.project.domain.user.repository.UserRepository;
 import com.team01.project.global.security.JwtTokenProvider;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
@@ -44,7 +48,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 	@Transactional
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-		System.out.println("======= START CustomOAuth2UserService.loadUser =======");
+		log.info("======= START CustomOAuth2UserService.loadUser =======");
 
 		if (userRequest == null) {
 			throw new RuntimeException("OAuth2UserRequest가 null입니다.");
@@ -57,15 +61,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 		OAuth2User user = delegate.loadUser(userRequest);
 		String spotifyAccessToken = userRequest.getAccessToken().getTokenValue();
 
-		System.out.println("spotify access token:" + spotifyAccessToken);
-		System.out.println("User Attributes: " + user.getAttributes()); // OAuth 사용자 정보 확인
+		// log.info("spotify access token:" + spotifyAccessToken);
+		// log.info("User Attributes: " + user.getAttributes()); // OAuth 사용자 정보 확인
 
 		String userId = user.getName();
 		if (userId == null) {
 			throw new RuntimeException("OAuth2 사용자 ID를 찾을 수 없습니다.");
 		}
 
-		System.out.println("OAuth2 User ID: " + userId);
+		log.info("OAuth2 User ID:{}", userId);
 		User foundUser = userRepository.findById(userId).orElse(null);
 
 		//db에 사용자 없을 시 생성
@@ -78,18 +82,18 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 				.build();
 
 			userRepository.save(foundUser);
-			System.out.println("최초 로그인 사용자 저장:" + userId);
+			log.info("최초 로그인 사용자 저장:{}", userId);
 
-			// notificationService.createDefaultNotifications(foundUser);
-			System.out.println(foundUser.getName() + "님의 알림이 생성되었습니다.");
+			notificationService.createDefaultNotifications(foundUser);
+			log.info("{}님의 알림이 생성되었습니다.", foundUser.getName());
 
-			// notificationService.initLoginNotifications(LocalTime.now(), foundUser);
+			notificationService.initLoginNotifications(LocalTime.now(), foundUser);
 		}
 
 		Optional<User> matchId = userRepository.findById(userId);
 
 		if (!matchId.isEmpty()) {
-			System.out.println("리프레시 토큰 테이블에 동일한 유저 ID 있을 때 기존 리프레시 토큰 삭제");
+			log.info("리프레시 토큰 테이블에 동일한 유저 ID 있을 때 기존 리프레시 토큰 삭제");
 			refreshTokenRepository.deleteByUserId(userId);
 		}
 
@@ -102,7 +106,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 		attributes.put("jwtToken", jwtToken);
 		attributes.put("refreshToken", refreshToken);
 
-		System.out.println("유저서비스에서 생성된 jwt:" + jwtToken);
+		log.info("유저서비스에서 생성된 jwt:{}", jwtToken);
 
 		return new DefaultOAuth2User(
 			Collections.singleton(new SimpleGrantedAuthority("USER")),

@@ -19,7 +19,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class JwtTokenFilter extends OncePerRequestFilter {
 	@Autowired
@@ -31,10 +33,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 		throws ServletException, IOException {
 
-		System.out.println("======= START JwtTokenFilter.doFilterInternal =======");
+		log.info("======= START JwtTokenFilter.doFilterInternal =======");
 
 		String header = request.getHeader("Authorization");
-		System.out.println("header값: " + header);
+		log.info("Header value:{}", header);
 
 		String token = null;
 
@@ -45,13 +47,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 		// 헤더에 토큰이 없으면 쿠키에서 "access_token"을 찾아봅니다.
 		if (token == null) {
-			System.out.println("Authorization 헤더에 토큰이 없으므로 쿠키에서 토큰을 찾습니다.");
+			log.info("Authorization 헤더에 토큰이 없으므로 쿠키에서 토큰을 찾습니다.");
 			if (request.getCookies() != null) {
 
 				for (var cookie : request.getCookies()) {
 					if ("accessToken".equals(cookie.getName())) {
 						token = cookie.getValue();
-						System.out.println("쿠키 액세스 토큰: " + token);
+						// log.info("쿠키 액세스 토큰:{} ", token);
 						break;
 					}
 				}
@@ -60,15 +62,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 		// 토큰이 여전히 없으면 필터 체인 계속 진행
 		if (token == null) {
-			System.out.println("토큰을 찾을 수 없습니다.");
+			log.info("토큰을 찾을 수 없습니다.");
 			chain.doFilter(request, response);
 			return;
 		}
 
-		System.out.println("[JwtTokenFilter] 클라이언트에서 받은 JWT: " + token);
+		// log.info("[JwtTokenFilter] 클라이언트에서 받은 JWT:{}", token);
 
 		boolean isValid = jwtTokenProvider.validateToken(token);
-		System.out.println("JWT 검증 결과: " + isValid);
+		log.info("JWT 검증 결과:{} ", isValid);
 
 		if (!isValid) {
 			response.setContentType("application/json; charset=UTF-8");
@@ -98,7 +100,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 		// SecurityContext에 인증 정보 저장
 		SecurityContextHolder.getContext().setAuthentication(auth);
-		System.out.println("SecurityContext에 설정된 인증 정보: " + SecurityContextHolder.getContext().getAuthentication());
+		// log.info("SecurityContext에 설정된 인증 정보:{}", SecurityContextHolder.getContext().getAuthentication());
 
 		chain.doFilter(request, response);
 	}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useGlobalAlert } from "@/components/GlobalAlert";
 import PlaylistTrackTable from "./PlaylistTrackTable";

@@ -29,7 +29,7 @@ public class UserRepositoryTest {
 			.email("test@example.com")
 			.createdDate(LocalDateTime.now())
 			.name("name")
-			.nickName("nickName")
+			.originalName("nickName")
 			.birthDay(localDate)
 			.field("사용자")
 			.build();
