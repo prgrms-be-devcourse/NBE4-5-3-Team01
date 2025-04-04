@@ -287,8 +287,9 @@ public class SpotifyService {
 
 			for (JsonNode item : items) {
 				JsonNode trackNode = item.path("track");
-				if (trackNode.isMissingNode() || trackNode.isNull())
+				if (trackNode.isMissingNode() || trackNode.isNull()) {
 					continue;
+				}
 
 				SpotifyTrackResponse track = objectMapper.treeToValue(trackNode, SpotifyTrackResponse.class);
 				LocalDate parsedReleaseDate = parseReleaseDate(track.getAlbum().getReleaseDate());
