@@ -21,14 +21,16 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class JwtTokenProvider {
 	private static final String SECRET_KEY_STRING =
 		"aXlvdXZvLWNvc2VjLXJhbmdvbGV" + "0LXNlY3JldC1rZXkta2V5LWZvci1qd3Q="; // Base64 인코딩된 값
 	private static final Key SECRET_KEY = Keys.hmacShaKeyFor(Base64.getDecoder().decode(SECRET_KEY_STRING));
 	private static final long VALIDITY_IN_MS = 3600000L; // 1시간
-	// private static final long VALIDITY_IN_MS = 10000L; // 10초
+	// private static final long VALIDITY_IN_MS = 3000L; // 10초
 	private long refreshTokenValidity = 1000 * 60 * 60 * 24 * 7; // 7일
 	private User user;
 
@@ -79,16 +81,16 @@ public class JwtTokenProvider {
 			parser.parseClaimsJws(token);
 			return true;
 		} catch (ExpiredJwtException e) {
-			System.out.println("JWT 만료");
+			log.info("JWT 만료");
 			return false;
 		} catch (SignatureException e) {
-			System.out.println("JWT 서명 검증 실패");
+			log.info("JWT 서명 검증 실패");
 			return false;
 		} catch (MalformedJwtException e) {
-			System.out.println("JWT 형식이 올바르지 않음");
+			log.info("JWT 형식이 올바르지 않음");
 			return false;
 		} catch (Exception e) {
-			System.out.println("JWT 검증 중 알 수 없는 오류 발생: " + e.getMessage());
+			log.info("JWT 검증 중 알 수 없는 오류 발생:{}", e.getMessage());
 			return false;
 		}
 	}
@@ -109,12 +111,12 @@ public class JwtTokenProvider {
 				return claims.get("spotifyToken", String.class);
 			} else {
 				// 만약 spotifyToken 클레임이 없다면, 이 토큰은 refresh token일 가능성이 높으므로 추출하지 않음
-				System.out.println("현재 토큰에는 스포티파이 토큰이 포함되어 있지 않습니다.");
+				log.info("현재 토큰에는 스포티파이 토큰이 포함되어 있지 않습니다.");
 				return null;
 			}
 		} catch (Exception e) {
 			// 그 외 에러 처리
-			System.err.println("Error parsing JWT: " + e.getMessage());
+			log.info("Error parsing JWT:{}", e.getMessage());
 		}
 		return null;
 	}

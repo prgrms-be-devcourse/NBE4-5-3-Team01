@@ -13,6 +13,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class SpotifyRefreshTokenService {
 
@@ -27,7 +30,7 @@ public class SpotifyRefreshTokenService {
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	public String refreshAccessToken(String refreshToken) {
-		System.out.println("===== START SpotifyRefreshTokenService.refreshAccessToken =====");
+		log.info("===== START SpotifyRefreshTokenService.refreshAccessToken =====");
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);

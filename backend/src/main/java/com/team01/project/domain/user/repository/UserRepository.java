@@ -13,11 +13,13 @@ import com.team01.project.domain.user.entity.User;
 public interface UserRepository extends JpaRepository<User, String> {
 	List<User> findAll();
 
-	@Query("SELECT u FROM User u WHERE u.name LIKE %:q% OR u.nickName LIKE %:q%")
+	@Query("SELECT u FROM User u WHERE u.name LIKE %:q% OR u.originalName LIKE %:q%")
 	List<User> searchUser(@Param("q") String name);
 
 	default User getById(String userId) {
 		return findById(userId)
 			.orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 	}
+
+	boolean existsById(String id);
 }

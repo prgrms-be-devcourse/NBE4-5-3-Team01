@@ -1,19 +1,14 @@
 package com.team01.project.domain.user.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.team01.project.domain.follow.controller.dto.FollowResponse;
 import com.team01.project.domain.user.dto.SimpleUserResponse;
 import com.team01.project.domain.user.dto.UserDto;
+import com.team01.project.domain.user.entity.User;
 import com.team01.project.domain.user.repository.RefreshTokenRepository;
 import com.team01.project.domain.user.repository.UserRepository;
 import com.team01.project.domain.user.service.SpotifyRefreshTokenService;
@@ -38,11 +34,12 @@ import com.team01.project.global.security.JwtTokenProvider;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Tag(name = "Users", description = "유저 API")
 @RequestMapping("/user")
 @Controller
@@ -55,21 +52,21 @@ public class UserController {
 	private final UserService userService;
 	private final UserRepository userRepository;
 
-	@GetMapping("/login")
-	public String loginPage(Authentication authentication) {
-		if (authentication != null && authentication.isAuthenticated()) {
-			System.out.println("인증확인:" + authentication);
-			System.out.println("redirect front");
-			return "redirect:http://localhost:3000"; // 이미 인증된 사용자는 메인 페이지로 리다이렉트
-		}
-		return "redirect:http://localhost:3000/login"; // 로그인 페이지를 반환
+	@Operation(summary = "로그인 api", description = "db에서 아이디 조회 후 입력한 비밀번호 검증 후 토큰 반환")
+	@ResponseBody
+	@PostMapping("/login")
+	public RsData<Map<String, Object>> login(@RequestBody Map<String, Object> reqMap) {
+
+		return new RsData<>("200-1", "로그인 성공", userService.validLogin(reqMap));
+
 	}
 
-	@GetMapping("/loginFailure")
-	public String loginFailure(Model model) {
-		model.addAttribute("error", "로그인 실패");
-		return "login";  // 로그인 실패 시 사용자에게 오류 메시지 표시
-	}
+	// @GetMapping("/loginFailure")
+	// public String loginFailure(Model model) {
+	// 	model.addAttribute("error", "로그인 실패");
+	// 	return "login";  // 로그인 실패 시 사용자에게 오류 메시지 표시
+	// }
+
 	//
 	// @ResponseBody
 	// @PostMapping("/logout")
@@ -78,80 +75,48 @@ public class UserController {
 	// 	return "로그아웃 성공";
 	// }
 
-	@Transactional
+	// @GetMapping("/logout")
+	// public void forceLogout(HttpServletRequest request, HttpServletResponse response,
+	// 	Authentication authentication) throws IOException {
+	// 	try {
+	// 		userService.logoutService(request, response, authentication);
+	// 		log.info("로그아웃 성공");
+	// 		// 로그아웃 성공 후, 로그인 페이지로 명시적으로 리다이렉트
+	// 		response.sendRedirect("http://localhost:3000/login");
+	// 	} catch (Exception e) {
+	// 		log.info("로그아웃 실패", e);
+	// 		response.sendRedirect("/login?error=true");
+	// 	}
+	// }
+
 	@GetMapping("/logout")
-	public ResponseEntity<?> forceLogout(
-			HttpServletRequest request, HttpServletResponse response,
-			Authentication authentication) {
-
-		if (authentication == null) {
-			System.out.println("authentication 객체가 NULL입니다. SecurityContext에 인증 정보 없음.");
-			return ResponseEntity.status(403).body("authentication null"); // 프론트에서 토큰 삭제해야 함
-		}
-
-		System.out.println("로그아웃 된 유저 ID: " + authentication.getName());
-
-		if (authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
-			OAuth2User oAuth2User = oAuth2AuthenticationToken.getPrincipal();
-			String userId = oAuth2User.getAttribute("id");
-
-			if (userId != null) {
-				System.out.println("저장된 RefreshToken 삭제: " + userId);
-				refreshTokenRepository.deleteByUserId(userId); // 로그아웃 시 리프레시 토큰 삭제
-			}
-
-			new SecurityContextLogoutHandler().logout(request, response, authentication);
-		}
-
-		request.getSession().invalidate();
-		SecurityContextHolder.clearContext(); //SecurityContext 명시적으로 초기화
-		System.out.println("SecurityContext 초기화 완료");
-
-		// accessToken 쿠키 만료 처리
-		Cookie accessTokenCookie = new Cookie("accessToken", null);
-		accessTokenCookie.setPath("/");
-		accessTokenCookie.setHttpOnly(true);
-		accessTokenCookie.setMaxAge(0); // 즉시 만료
-		response.addCookie(accessTokenCookie);
-
-		// spotifyAccessToken 쿠키 만료 처리
-		Cookie spotifyAccessTokenCookie = new Cookie("spotifyAccessToken", null);
-		spotifyAccessTokenCookie.setPath("/");
-		spotifyAccessTokenCookie.setHttpOnly(true);
-		spotifyAccessTokenCookie.setMaxAge(0); // 즉시 만료
-		response.addCookie(spotifyAccessTokenCookie);
-
-		// refreshToken 쿠키 만료 처리
-		Cookie refreshTokenCookie = new Cookie("refreshToken", null);
-		refreshTokenCookie.setPath("/");
-		refreshTokenCookie.setHttpOnly(true);
-		refreshTokenCookie.setMaxAge(0); // 즉시 만료
-		response.addCookie(refreshTokenCookie);
-
-		return ResponseEntity.status(200).body("로그아웃 성공");
+	public ResponseEntity<?> forceLogout(HttpServletRequest request, HttpServletResponse response,
+		Authentication authentication) {
+		return userService.logoutService(request, response, authentication);
 	}
 
 	@Operation(summary = "jwt 재발급 api", description = "리프레시 토큰을 이용한 jwt를 재발급 한다.")
 	@ResponseBody
 	@PostMapping("/refresh")
-	public ResponseEntity<?> refreshToken(@RequestBody Map<String, Object> reqMap) {
+	public RsData<Map<String, Object>> refreshToken(@RequestBody Map<String, Object> reqMap) {
 		String refreshToken = reqMap.get("refreshToken").toString();
-		return userService.refreshToken(refreshToken);
+		Map<String, Object> rsToken = userService.refreshToken(refreshToken);
+		return new RsData<>("200-1", "토큰을 재발급 합니다.", rsToken);
 	}
 
-	// @ResponseBody
-	// @GetMapping("testApi")
-	// public Map<String, String> testApi(@AuthenticationPrincipal OAuth2User user) {
-	//
-	// 	String spotifyToken = user.getAttribute("spotifyToken");
-	// 	System.out.println("스포티파이 토큰체크:" + spotifyToken);
-	// 	String userId = user.getName();
-	// 	System.out.println("유저아이디 체크:" + userId);
-	// 	Map<String, String> resMap = new HashMap<>();
-	// 	resMap.put("res", "테스트 api 입니다.");
-	// 	resMap.put("userId", userId);
-	// 	return resMap;
-	// }
+	@ResponseBody
+	@GetMapping("testApi")
+	public Map<String, String> testApi(@AuthenticationPrincipal OAuth2User user) {
+
+		String spotifyToken = user.getAttribute("spotifyToken");
+		System.out.println("스포티파이 토큰체크:" + spotifyToken);
+		String userId = user.getName();
+		System.out.println("유저아이디 체크:" + userId);
+		Map<String, String> resMap = new HashMap<>();
+		resMap.put("res", "테스트 api 입니다.");
+		resMap.put("userId", userId);
+		return resMap;
+	}
 	//
 	// @ResponseBody
 	// @GetMapping("testApiCookie")
@@ -189,49 +154,66 @@ public class UserController {
 	@Operation(summary = "유저 정보 api", description = "현재 로그인한 유저의 정보를 가져온다.")
 	@ResponseBody
 	@GetMapping("/getUsers")
-	public ResponseEntity<UserDto> getUser(@AuthenticationPrincipal OAuth2User oAuth2User) {
+	public RsData<UserDto> getUser(@AuthenticationPrincipal OAuth2User oAuth2User) {
 		String userId = oAuth2User.getName();
-		UserDto userDto = UserDto.from(userService.findByUserId(userId));
-		return ResponseEntity.ok(userDto);
+		User user = userService.findByUserId(userId);
+		return new RsData<>(
+			"200-1",
+			"유저 정보 조회 완료.",
+			UserDto.from(user)
+		);
 	}
 
 	@Operation(summary = "자기소개 변경 api", description = "현재 로그인한 유저의 자기소개를 수정한다.")
 	@ResponseBody
 	@PutMapping("/userIntro")
-	public void userIntro(@AuthenticationPrincipal OAuth2User oAuth2User, @RequestBody Map<String, Object> reqMap) {
+	public RsData<Void> userIntro(@AuthenticationPrincipal OAuth2User oAuth2User,
+		@RequestBody Map<String, Object> reqMap) {
 		String userIntro = reqMap.get("userIntro").toString();
 		String userId = oAuth2User.getName();
 		userService.updateUserIntro(userId, userIntro);
+
+		return new RsData<>(
+			"200-1",
+			"user intro modified"
+		);
 	}
 
 	@Operation(summary = "이름 변경 api", description = "현재 로그인한 유저의 이름을 수정한다.")
 	@ResponseBody
 	@PutMapping("/profileName")
-	public void changeProfileName(
-			@AuthenticationPrincipal OAuth2User oAuth2User,
-			@RequestBody Map<String, Object> reqMap) {
+	public RsData<Void> changeProfileName(
+		@AuthenticationPrincipal OAuth2User oAuth2User,
+		@RequestBody Map<String, Object> reqMap) {
 		String profileName = reqMap.get("name").toString();
 		String userId = oAuth2User.getName();
 		userService.updateProfileName(userId, profileName);
+
+		return new RsData<>(
+			"200-1",
+			"user name modified"
+		);
 	}
 
 	@Operation(summary = "이미지 변경 api", description = "현재 로그인한 유저의 프로필 사진을 변경한다.")
 	@ResponseBody
 	@PostMapping("/image")
-	public ResponseEntity<?> uploadImage(
-			@AuthenticationPrincipal OAuth2User oAuth2User,
-			@RequestParam("image") MultipartFile file) {
+	public RsData<String> uploadImage(
+		@AuthenticationPrincipal OAuth2User oAuth2User,
+		@RequestParam("image") MultipartFile file) {
 		String userId = oAuth2User.getName();
-		System.out.println("파일네임" + file.getName());
+		// log.info("파일네임:{}", file.getName());
 		try {
 			String savedFileInfo = userService.uploadImage(userId, file);
 
 			// 성공적으로 저장되었으면 200 OK와 함께 정보 반환
-			return ResponseEntity.ok("File uploaded successfully. Info: " + savedFileInfo);
+			return new RsData<>("200-1",
+				"File uploaded successfully.",
+				savedFileInfo);
 		} catch (Exception e) {
 			// 예외 발생 시 500 응답
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("File upload failed: " + e.getMessage());
+			return new RsData<>("500",
+				"error");
 		}
 
 	}
@@ -256,5 +238,29 @@ public class UserController {
 	public ResponseEntity<String> getSpotifyToken(@AuthenticationPrincipal OAuth2User user) {
 		String spotifyToken = user.getAttribute("spotifyToken");
 		return ResponseEntity.ok(spotifyToken);
+	}
+
+	@ResponseBody
+	@Operation(summary = "회원가입 api", description = "회원가입 기능")
+	@PostMapping("/signup")
+	public RsData<UserDto> userSignUp(@RequestBody UserDto body) {
+		User savedUser = userService.addUser(body);
+		UserDto userDto = UserDto.from(savedUser);
+		return new RsData<>("200-1", "등록된 유저", userDto);
+	}
+
+	@ResponseBody
+	@Operation(summary = "아이디 중복 확인 api", description = "회원가입 아이디 중복 확인")
+	@GetMapping("/check-duplicate")
+	public RsData<Boolean> checkDuplicate(@RequestParam("checkId") String checkId) {
+
+		boolean exists = userService.existsByLoginId(checkId);
+		if (exists) {
+			exists = false;
+		} else {
+			exists = true;
+		}
+
+		return new RsData<>("200-1", "아이디 중복 체크", exists);
 	}
 }

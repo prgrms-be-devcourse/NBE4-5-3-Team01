@@ -81,7 +81,7 @@ export default function ProfilePage() {
         console.log("response.data:", response.data);
 
         // response.data.data에서 사용자 정보 추출
-        const userData = response.data;
+        const userData = response.data.data;
 
         console.log("처리할 userData:", userData);
 
@@ -117,7 +117,8 @@ export default function ProfilePage() {
         }
       );
 
-      if (response.status === 200) {
+      console.log("리스폰스테이터스", response.status);
+      if (response.status === 200 || response.status === 302) {
         // 로그인 페이지로 리다이렉트
         router.push("/login");
       } else {

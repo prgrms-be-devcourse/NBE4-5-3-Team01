@@ -1,9 +1,11 @@
 package com.team01.project.domain.user.service;
 
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,11 +15,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -30,19 +36,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team01.project.domain.follow.controller.dto.FollowResponse;
 import com.team01.project.domain.follow.entity.type.Status;
 import com.team01.project.domain.follow.repository.FollowRepository;
+import com.team01.project.domain.notification.service.NotificationService;
+import com.team01.project.domain.user.dto.UserDto;
 import com.team01.project.domain.user.entity.RefreshToken;
 import com.team01.project.domain.user.entity.User;
 import com.team01.project.domain.user.repository.RefreshTokenRepository;
 import com.team01.project.domain.user.repository.UserRepository;
 import com.team01.project.global.security.JwtTokenProvider;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
-	@Autowired
-	private UserRepository userRepository;
+
+	private final UserRepository userRepository;
 
 	@Autowired
 	private JwtTokenProvider jwtTokenProvider;
@@ -66,16 +79,20 @@ public class UserService {
 
 	private final String uploadDir = "uploads/profiles/";
 
+	private final PasswordEncoder passwordEncoder;
+
+	private final NotificationService notificationService;
+
 	@Transactional
-	public ResponseEntity<?> refreshToken(String refreshTokenValue) {
-		System.out.println("======= START UserService.refreshToken =======");
+	public Map<String, Object> refreshToken(String refreshTokenValue) {
+		log.info("======= START UserService.refreshToken =======");
 		refreshTokenValue = refreshTokenValue.replace("\"", "");
 		if (!jwtTokenProvider.validateToken(refreshTokenValue)) {
 
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", 401);
 			response.put("message", "리프레시 토큰 검증에 실패했습니다.");
-			return ResponseEntity.status(401).body(response);
+			return null;
 		}
 
 		//현재 인증된 사용자의 정보를 얻음
@@ -97,7 +114,7 @@ public class UserService {
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", 401);
 			response.put("message", "리프레시 토큰이 일치하지 않습니다.");
-			return ResponseEntity.status(401).body(response);
+			return null;
 		}
 
 		//스포티파이 토큰 재발급
@@ -113,7 +130,7 @@ public class UserService {
 			Map<String, Object> response = new HashMap<>();
 			response.put("status", 401);
 			response.put("message", "사용자 인증에 실패하였습니다.");
-			return ResponseEntity.status(401).body(response);
+			return null;
 		}
 
 		//스포티파이 액세스 토큰 재발급
@@ -126,7 +143,7 @@ public class UserService {
 		response.put("status", 200);
 		response.put("accessToken", newAccessToken);
 		response.put("spotifyAccessToken", spotifyAccessToken);
-		return ResponseEntity.status(200).body(response);
+		return response;
 	}
 
 	private String refreshSpotifyAccessToken(OAuth2AuthorizedClient authorizedClient) {
@@ -201,6 +218,7 @@ public class UserService {
 			.orElse(Status.NONE);
 	}
 
+	@Transactional
 	public User findByUserId(String userId) {
 		return userRepository.findById(userId)
 			.orElseThrow(() -> new RuntimeException("유저의 ID를 찾을 수 없습니다. " + userId));
@@ -293,4 +311,111 @@ public class UserService {
 	// 		throw new RuntimeException("Failed to store file", e);
 	// 	}
 	// }
+
+	public ResponseEntity<?> logoutService(HttpServletRequest request, HttpServletResponse response,
+		Authentication authentication) {
+
+		if (authentication == null) {
+			log.info("authentication 객체가 NULL입니다. SecurityContext에 인증 정보 없음.");
+			// return "authentication null"; // 프론트에서 토큰 삭제해야 함
+		}
+
+		log.info("로그아웃 된 유저 ID:{} ", authentication.getName());
+		notificationService.deleteSubscription(authentication.getName());
+
+		if (authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
+			OAuth2User oAuth2User = oAuth2AuthenticationToken.getPrincipal();
+			String userId = oAuth2User.getAttribute("id");
+			if (userId != null) {
+				log.info("저장된 RefreshToken 삭제:{} ", userId);
+				refreshTokenRepository.deleteByUserId(userId); // 로그아웃 시 리프레시 토큰 삭제
+			}
+
+			new SecurityContextLogoutHandler().logout(request, response, authentication);
+		}
+
+		request.getSession().invalidate();
+		SecurityContextHolder.clearContext(); //SecurityContext 명시적으로 초기화
+		log.info("SecurityContext 초기화 완료");
+
+		// accessToken 쿠키 만료 처리
+		Cookie accessTokenCookie = new Cookie("accessToken", null);
+		accessTokenCookie.setPath("/");
+		accessTokenCookie.setHttpOnly(true);
+		accessTokenCookie.setMaxAge(0); // 즉시 만료
+		response.addCookie(accessTokenCookie);
+
+		// spotifyAccessToken 쿠키 만료 처리
+		Cookie spotifyAccessTokenCookie = new Cookie("spotifyAccessToken", null);
+		spotifyAccessTokenCookie.setPath("/");
+		spotifyAccessTokenCookie.setHttpOnly(true);
+		spotifyAccessTokenCookie.setMaxAge(0); // 즉시 만료
+		response.addCookie(spotifyAccessTokenCookie);
+
+		// refreshToken 쿠키 만료 처리
+		Cookie refreshTokenCookie = new Cookie("refreshToken", null);
+		refreshTokenCookie.setPath("/");
+		refreshTokenCookie.setHttpOnly(true);
+		refreshTokenCookie.setMaxAge(0); // 즉시 만료
+		response.addCookie(refreshTokenCookie);
+
+		return ResponseEntity.status(200).body("로그아웃 성공");
+
+	}
+
+	@Transactional
+	public User addUser(UserDto userDto) {
+
+		String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+
+		return userRepository.save(User.builder()
+			.id(userDto.getId())
+			.email(userDto.getEmail())
+			.name(userDto.getName())
+			.originalName(userDto.getOriginalName())
+			.field(userDto.getField())
+			.userPassword(encodedPassword)
+			.createdDate(LocalDateTime.now())
+			.build());
+
+	}
+
+	@Transactional
+	public boolean existsByLoginId(String id) {
+		return userRepository.existsById(id);
+	}
+
+	public Map<String, Object> validLogin(Map<String, Object> reqMap) {
+
+		Optional<User> user = userRepository.findById(reqMap.get("loginId").toString());
+
+		String password = user.map(User::getUserPassword).orElse(null);
+
+		boolean isPasswordCorrect = passwordEncoder
+			.matches(reqMap.get("password").toString(), password);
+
+		Map<String, Object> resMap = new HashMap<>();
+
+		if (!isPasswordCorrect) {
+			return null;
+		}
+
+		String jwtToken = jwtTokenProvider.generateJwtToken(reqMap.get("loginId").toString(), "");
+		String refreshToken = jwtTokenProvider.generateRefreshToken(reqMap.get("loginId").toString());
+
+		User foundUser = userRepository.findById(reqMap.get("loginId").toString()).orElse(null);
+
+		RefreshToken saveRefreshToken = RefreshToken.builder()
+			.user(foundUser)
+			.refreshToken(refreshToken)
+			.createdAt(LocalDateTime.now())
+			.build();
+
+		refreshTokenRepository.save(saveRefreshToken);
+
+		resMap.put("access_token", jwtToken);
+		resMap.put("refresh_token", refreshToken);
+
+		return resMap;
+	}
 }

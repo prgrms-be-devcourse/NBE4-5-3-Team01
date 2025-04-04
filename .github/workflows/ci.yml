@@ -10,7 +10,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      SPRING_MAIL_USERNAME: ${{ secrets.SPRING_MAIL_USERNAME }}
+      SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 23

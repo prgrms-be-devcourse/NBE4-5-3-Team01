@@ -15,6 +15,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -34,12 +35,14 @@ public class User {
 	@Column(name = "user_id")
 	private String id;
 
+	private String userPassword;
+
 	@Email
 	private String email;
 
 	private String name;
 
-	private String nickName;
+	private String originalName;
 
 	private String userIntro;
 
@@ -56,8 +59,8 @@ public class User {
 
 	private String field;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<RefreshToken> refreshTokens;
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private RefreshToken refreshTokens;
 
 	@Builder.Default
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

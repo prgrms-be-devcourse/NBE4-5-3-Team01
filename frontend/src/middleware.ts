@@ -23,8 +23,8 @@ const refreshAccessToken = async (refreshToken: string) => {
     const data = await response.json();
     console.log("Refresh token response data:", data);
     return {
-      accessToken: data.accessToken,
-      spotifyAccessToken: data.spotifyAccessToken
+      accessToken: data.data.accessToken,
+      spotifyAccessToken: data.data.spotifyAccessToken
     }; // 새로운 액세스 토큰과 스포티파이 토큰 반환
   } catch (error) {
     console.error("Error refreshing token:", error);
@@ -52,7 +52,8 @@ const isPublicRoute = (pathname: string): boolean => {
     "/api",
     "/_next",
     "/static",
-    "/favicon.ico"
+    "/favicon.ico",
+    "/signup"
   ];
   return publicPaths.some((path) => pathname.startsWith(path));
 };
