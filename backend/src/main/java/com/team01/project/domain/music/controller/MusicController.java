@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.team01.project.domain.music.dto.MusicRequest;
 import com.team01.project.domain.music.dto.MusicResponse;
+import com.team01.project.domain.music.dto.SpotifyPlaylistResponse;
 import com.team01.project.domain.music.entity.Music;
 import com.team01.project.domain.music.service.MusicService;
 import com.team01.project.domain.music.service.SpotifyService;
@@ -146,6 +147,50 @@ public class MusicController {
 		);
 	}
 
+	@GetMapping("/spotify/playlist")
+	@Operation(
+		summary = "사용자의 Spotify Playlist 목록 조회",
+		description = "이름, 이미지, 트랙 수 등 포함된 요약 정보 반환"
+	)
+	public RsData<List<SpotifyPlaylistResponse>> getUserPlaylists(
+		@AuthenticationPrincipal OAuth2User user
+	) {
+		String token = user.getAttribute("spotifyToken");
+		List<SpotifyPlaylistResponse> playlists = spotifyService.getUserPlaylists(token);
+		return new RsData<>(
+			"200-9",
+			"Playlist 목록 조회 성공",
+			playlists
+		);
+
+	}
+
+	@GetMapping("/spotify/playlist/{playlistId}")
+	@Operation(
+		summary = "특정 Spotify Playlist 트랙 조회",
+		description = "선택된 Playlist의 트랙 목록 반환"
+	)
+	public RsData<List<MusicResponse>> getTracksFromPlaylist(
+		@PathVariable String playlistId,
+		@AuthenticationPrincipal OAuth2User user
+	) {
+		String token = user.getAttribute("spotifyToken");
+		List<MusicRequest> tracks = spotifyService.getTracksFromPlaylist(playlistId, token);
+
+		if (tracks.size() > 20) {
+			return new RsData<>("400-LIMIT", "20곡 이하의 플레이리스트만 추가할 수 있습니다.", null);
+		}
+
+		List<MusicResponse> response = tracks.stream()
+			.map(req -> MusicResponse.fromEntity(req.toEntity()))
+			.toList();
+		return new RsData<>(
+			"200-10",
+			"Playlist 트랙 조회 성공",
+			response
+		);
+	}
+
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	@Operation(
@@ -169,7 +214,9 @@ public class MusicController {
 		summary = "특정 ID의 음악 조회",
 		description = "DB에서 특정 ID에 해당하는 음악 정보를 반환"
 	)
-	public RsData<MusicResponse> getMusicById(@PathVariable String id) {
+	public RsData<MusicResponse> getMusicById(
+		@PathVariable String id
+	) {
 		Music music = musicService.getMusicById(id);
 		return new RsData<>(
 			"200-5",
@@ -184,7 +231,9 @@ public class MusicController {
 		summary = "특정 ID의 음악 삭제",
 		description = "DB에서 특정 ID에 해당하는 음악 정보를 삭제"
 	)
-	public RsData<String> deleteMusic(@PathVariable String id) {
+	public RsData<String> deleteMusic(
+		@PathVariable String id
+	) {
 		musicService.deleteMusic(id);
 		return new RsData<>(
 			"204-1",
@@ -198,7 +247,9 @@ public class MusicController {
 		summary = "최근에 추가된 음악 중 랜덤한 곡 반환",
 		description = "특정 사용자의 최근 추가된 음악 중 랜덤으로 선택하여 반환"
 	)
-	public RsData<MusicResponse> getRandomRecentMusic(@PathVariable String userId) {
+	public RsData<MusicResponse> getRandomRecentMusic(
+		@PathVariable String userId
+	) {
 		Music randomMusic = musicService.getRandomRecentMusic(userId)
 			.orElseGet(() -> new Music("", "", "", "", null, "", ""));
 		return new RsData<>(

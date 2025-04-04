@@ -6,6 +6,7 @@ import axios from "axios";
 
 import RecentTracks from "./RecentTracks";
 import MoodTracks from "./MoodTracks";
+import PlaylistSection from "./PlaylistSection";
 
 import { Card } from "@/components/ui/card";
 import { useGlobalAlert } from "@/components/GlobalAlert";
@@ -13,7 +14,7 @@ import { useGlobalAlert } from "@/components/GlobalAlert";
 const API_URL = "http://localhost:8080/api/v1";
 const SPOTIFY_URL = "http://localhost:8080/api/v1/music/spotify";
 
-export default function MusicRecommendation() {
+export default function MusicPage() {
   const [userName, setUserName] = useState("사용자");
   const [singer, setSinger] = useState("아티스트");
   const [recentTracks, setRecentTracks] = useState([]);
@@ -32,11 +33,11 @@ export default function MusicRecommendation() {
       try {
         setIsLoading(true);
 
-        setAlert({ code: "200", message: "test" });
-        setAlert({ code: "204", message: "test" });
-        setAlert({ code: "400", message: "test" });
-        setAlert({ code: "500", message: "test" });
-        setAlert({ code: "", message: "test" });
+        // setAlert({ code: "200", message: "test" });
+        // setAlert({ code: "204", message: "test" });
+        // setAlert({ code: "400", message: "test" });
+        // setAlert({ code: "500", message: "test" });
+        // setAlert({ code: "", message: "test" });
 
         const fetchedUserId = await fetchUser();
         const fetchedArtist = await fetchRandomMusic(fetchedUserId);
@@ -181,8 +182,12 @@ export default function MusicRecommendation() {
   return (
     <Card className="m-10 bg-white border-0 p-0">
       <div className="p-6 space-y-8">
+        <PlaylistSection />
+      </div>
+
+      <div className="p-6 space-y-8">
         <div className="space-y-1">
-          <h2 className="text-2xl font-bold">음악 추천</h2>
+          <h2 className="text-2xl font-bold">🎧 음악 추천</h2>
           <p className="text-gray-500">{userName}님 맞춤 노래 추천</p>
         </div>
         <div className="relative">

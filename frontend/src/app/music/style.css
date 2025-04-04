@@ -15,6 +15,37 @@ button:disabled {
   color: #845BFF;
 }
 
+/* 📌 기본 버튼 스타일 */
+.btn {
+  color: #393D3F;
+  cursor: pointer;
+  /* 텍스트 색상 */
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease-in-out;
+}
+
+/* 📌 주요 버튼 (기본: 보라색) */
+.btn-primary {
+  background-color: #C8B6FF;
+  /* 메인 컬러 */
+}
+
+/* 📌 호버 효과: 부드러운 파스텔 느낌 */
+.btn-primary:hover {
+  background-color: #B5A1FF;
+  /* 약간 더 진한 보라색 */
+  box-shadow: 0px 4px 10px rgba(200, 182, 255, 0.5);
+  /* 부드러운 그림자 효과 */
+}
+
+/* 📌 클릭 (포커스) 효과 */
+.btn-primary:focus {
+  outline: none;
+  box-shadow: 0px 0px 8px #BBD0FF;
+}
+
 /* 활성화된 버튼 스타일 */
 .mood-button-active {
   background-color: #c8b6ff;
