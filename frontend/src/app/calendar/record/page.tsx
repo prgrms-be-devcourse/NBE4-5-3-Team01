@@ -41,13 +41,15 @@ export default function CalendarRecordPage() {
     const fetchInitialData = async () => {
       const data = await fetchRecord(id);
 
-      if (data.length !== 0) {
+      if (data !== undefined) {
         setMemo(data.memo || "");
         await setSelectedTracks(data.musics || []);
       }
 
+      console.log(data);
+
       if (trackId) {
-        await fetchTrack(trackId, data.musics);
+        await fetchTrack(trackId, data?.musics || []);
       }
     };
 

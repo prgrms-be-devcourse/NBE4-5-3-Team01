@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useGlobalAlert } from "@/components/GlobalAlert";
+import PlaylistTrackTable from "./PlaylistTrackTable";
 
 const SPOTIFY_URL = "http://localhost:8080/api/v1/music/spotify";
 
@@ -23,6 +25,7 @@ export default function PlaylistSection() {
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [selectedTracks, setSelectedTracks] = useState<Track[]>([]);
     const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
+    const { setAlert } = useGlobalAlert();
 
     useEffect(() => {
         fetchPlaylists();
@@ -33,9 +36,16 @@ export default function PlaylistSection() {
             const res = await axios.get(`${SPOTIFY_URL}/playlists`, {
                 withCredentials: true,
             });
-            setPlaylists(res.data.data); // RsData 기반
-        } catch (err) {
-            console.error("플레이리스트 로딩 실패:", err);
+
+            const { code, msg, data } = res.data;
+            setAlert({ code, message: msg });
+
+            if (code.startsWith("200")) {
+                setPlaylists(data);
+            }
+        } catch (error) {
+            setAlert({ code: "500-6", message: "Playlist 정보를 불러올 수 없습니다." });
+            throw error;
         }
     };
 
@@ -44,17 +54,26 @@ export default function PlaylistSection() {
             const res = await axios.get(`${SPOTIFY_URL}/playlists/${playlistId}`, {
                 withCredentials: true,
             });
-            console.log(res);
-            setSelectedTracks(res.data.data);
-            setSelectedPlaylistName(name);
-        } catch (err) {
-            console.error("트랙 로딩 실패:", err);
+
+            const { code, msg, data } = res.data;
+            setAlert({ code, message: msg });
+
+            if (code.startsWith("200")) {
+                setSelectedTracks(data);
+                setSelectedPlaylistName(name);
+            }
+        } catch (error) {
+            setAlert({ code: "500-7", message: "해당 Playlist의 트랙을 불러올 수 없습니다." });
+            throw error;
         }
     };
 
     return (
         <section className="mt-10">
-            <h3 className="text-xl font-semibold mb-4">🎧 내 플레이리스트</h3>
+            <div className="space-y-1 mb-5">
+                <h2 className="text-2xl font-bold">🎧 My Playlist</h2>
+                <p className="text-gray-500">유저의 Spotify Playlist</p>
+            </div>
 
             <div className="flex flex-wrap gap-4">
                 {playlists.map((playlist) => (
@@ -75,22 +94,7 @@ export default function PlaylistSection() {
             </div>
 
             {selectedTracks.length > 0 && (
-                <div className="mt-8">
-                    <h4 className="text-lg font-semibold mb-4">📀 {selectedPlaylistName}의 트랙들</h4>
-                    <div className="flex gap-4 overflow-x-auto whitespace-nowrap hide-scrollbar">
-                        {selectedTracks.map((track) => (
-                            <div key={track.id} className="w-40 flex-shrink-0">
-                                <img
-                                    src={track.albumImage}
-                                    alt={track.name}
-                                    className="rounded-lg w-full h-auto"
-                                />
-                                <p className="text-sm font-medium mt-2 break-words">{track.name}</p>
-                                <p className="text-xs text-gray-500">{track.singer}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <PlaylistTrackTable tracks={selectedTracks} playlistName={selectedPlaylistName} />
             )}
         </section>
     );

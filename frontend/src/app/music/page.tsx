@@ -187,7 +187,7 @@ export default function MusicPage() {
 
       <div className="p-6 space-y-8">
         <div className="space-y-1">
-          <h2 className="text-2xl font-bold">음악 추천</h2>
+          <h2 className="text-2xl font-bold">🎧 음악 추천</h2>
           <p className="text-gray-500">{userName}님 맞춤 노래 추천</p>
         </div>
         <div className="relative">
