@@ -86,12 +86,14 @@ export default function PlaylistTrackTable({ tracks, playlistId, playlistName }:
                 <h2 className="text-xl font-bold text-[#393D3F]">
                     {playlistName} <span className="text-gray-500 text-sm">({tracks.length}곡)</span>
                 </h2>
-                <button
-                    onClick={() => handleAddPlaylistToCalendar(playlistId)}
-                    className="btn btn-primary"
-                >
-                    🎶 기록으로 추가
-                </button>
+                {tracks.length > 0 && (
+                    <button
+                        onClick={() => handleAddPlaylistToCalendar(playlist.id)}
+                        className="btn btn-primary"
+                    >
+                        🎶 기록으로 추가
+                    </button>
+                )}
             </div>
 
             <div className="overflow-x-auto rounded-lg shadow">
