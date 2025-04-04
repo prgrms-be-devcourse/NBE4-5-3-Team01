@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useGlobalAlert } from "@/components/GlobalAlert";
 import PlaylistTrackTable from "./PlaylistTrackTable";
@@ -24,6 +25,7 @@ interface Track {
 export default function PlaylistSection() {
     const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [selectedTracks, setSelectedTracks] = useState<Track[]>([]);
+    const [selectedPlaylistId, setSelectedPlaylistId] = useState("");
     const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
     const { setAlert } = useGlobalAlert();
 
@@ -33,7 +35,7 @@ export default function PlaylistSection() {
 
     const fetchPlaylists = async () => {
         try {
-            const res = await axios.get(`${SPOTIFY_URL}/playlists`, {
+            const res = await axios.get(`${SPOTIFY_URL}/playlist`, {
                 withCredentials: true,
             });
 
@@ -51,7 +53,7 @@ export default function PlaylistSection() {
 
     const fetchTracks = async (playlistId: string, name: string) => {
         try {
-            const res = await axios.get(`${SPOTIFY_URL}/playlists/${playlistId}`, {
+            const res = await axios.get(`${SPOTIFY_URL}/playlist/${playlistId}`, {
                 withCredentials: true,
             });
 
@@ -60,6 +62,7 @@ export default function PlaylistSection() {
 
             if (code.startsWith("200")) {
                 setSelectedTracks(data);
+                setSelectedPlaylistId(playlistId);
                 setSelectedPlaylistName(name);
             }
         } catch (error) {
@@ -93,8 +96,8 @@ export default function PlaylistSection() {
                 ))}
             </div>
 
-            {selectedTracks.length > 0 && (
-                <PlaylistTrackTable tracks={selectedTracks} playlistName={selectedPlaylistName} />
+            {selectedPlaylistId && (
+                <PlaylistTrackTable tracks={selectedTracks} playlistId={selectedPlaylistId} playlistName={selectedPlaylistName} />
             )}
         </section>
     );

@@ -20,6 +20,7 @@ export default function CalendarRecordPage() {
 
   const searchParams = useSearchParams();
   const trackId = searchParams.get("trackId");
+  const playlistId = searchParams.get("playlistId");
 
   const id = searchParams.get("id");
   const year = searchParams.get("year");
@@ -46,10 +47,20 @@ export default function CalendarRecordPage() {
         await setSelectedTracks(data.musics || []);
       }
 
-      console.log(data);
-
       if (trackId) {
         await fetchTrack(trackId, data?.musics || []);
+      }
+
+      if (playlistId) {
+        if (id === null) {
+          await fetchTracksFromPlaylist(playlistId);
+        }
+        else {
+          setAlert({
+            code: "400-5",
+            message: "오늘은 이미 음악이 기록되어 있어 전체 추가는 불가능해요.",
+          });
+        }
       }
     };
 
@@ -81,7 +92,7 @@ export default function CalendarRecordPage() {
         // ✅ 20개 초과 여부도 밖에서 확인
         if (musics.length >= 20) {
           setAlert({
-            code: "400-1",
+            code: "400-3",
             message: "음악은 최대 20개까지만 추가할 수 있습니다.",
           });
           return;
@@ -96,6 +107,24 @@ export default function CalendarRecordPage() {
         message: "음악 정보를 가져오는 데 실패했습니다."
       });
       throw error;
+    }
+  };
+
+  const fetchTracksFromPlaylist = async (playlistId: string) => {
+    try {
+      const res = await axios.get(`${API_URL}/music/spotify/playlist/${playlistId}`, {
+        withCredentials: true,
+      });
+
+      const { code, data, msg } = res.data;
+      setAlert({ code, message: msg });
+
+      if (code.startsWith("200")) {
+        setSelectedTracks(data);
+      }
+    } catch (error) {
+      console.error(error);
+      setAlert({ code: "500-4", message: "플레이리스트 트랙을 불러오지 못했습니다." });
     }
   };
 
@@ -135,7 +164,7 @@ export default function CalendarRecordPage() {
       // 📌 음악이 하나도 선택되지 않았다면 알림 표시
       if (selectedTracks.length === 0) {
         setAlert({
-          code: "400-3",
+          code: "400-4",
           message: "음악 기록을 추가해주세요.",
         });
         return;

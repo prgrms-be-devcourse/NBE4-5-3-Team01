@@ -176,6 +176,11 @@ public class MusicController {
 	) {
 		String token = user.getAttribute("spotifyToken");
 		List<MusicRequest> tracks = spotifyService.getTracksFromPlaylist(playlistId, token);
+
+		if (tracks.size() > 20) {
+			return new RsData<>("400-LIMIT", "20곡 이하의 플레이리스트만 추가할 수 있습니다.", null);
+		}
+
 		List<MusicResponse> response = tracks.stream()
 			.map(req -> MusicResponse.fromEntity(req.toEntity()))
 			.toList();
