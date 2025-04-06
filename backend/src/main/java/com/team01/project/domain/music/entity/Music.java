@@ -41,8 +41,15 @@ public class Music {
 	@Column(name = "genre")
 	private String genre;
 
+	@Column(name = "uri")
+	private String uri;
+
 	public void setGenre(String genre) {
 		this.genre = genre;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
 	}
 
 	public boolean isSameAs(Music other) {
@@ -51,7 +58,8 @@ public class Music {
 			&& this.singerId.equals(other.getSingerId())
 			&& this.releaseDate.equals(other.getReleaseDate())
 			&& this.albumImage.equals(other.getAlbumImage())
-			&& Objects.equals(this.genre, other.getGenre());
+			&& Objects.equals(this.genre, other.getGenre())
+			&& this.uri.equals(other.getUri());
 	}
 
 	public void updateMusic(Music updatedMusic) {
@@ -61,5 +69,6 @@ public class Music {
 		this.releaseDate = updatedMusic.getReleaseDate();
 		this.albumImage = updatedMusic.getAlbumImage();
 		this.genre = updatedMusic.getGenre();
+		this.uri = updatedMusic.getUri();
 	}
 }

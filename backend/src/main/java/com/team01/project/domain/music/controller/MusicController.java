@@ -92,6 +92,7 @@ public class MusicController {
 				if (music.getGenre() == null || music.getGenre().isEmpty()) {
 					MusicRequest musicRequest = spotifyService.getTrackWithGenre(music.getId(), spotifyToken);
 					music.setGenre(musicRequest.getGenre());
+					music.setUri(musicRequest.getUri());
 				}
 				return music;
 			})
@@ -251,7 +252,7 @@ public class MusicController {
 		@PathVariable String userId
 	) {
 		Music randomMusic = musicService.getRandomRecentMusic(userId)
-			.orElseGet(() -> new Music("", "", "", "", null, "", ""));
+			.orElseGet(() -> new Music("", "", "", "", null, "", "", ""));
 		return new RsData<>(
 			"200-6",
 			"랜덤 음악 조회 성공",

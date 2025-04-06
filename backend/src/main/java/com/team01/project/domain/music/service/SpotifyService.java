@@ -122,7 +122,8 @@ public class SpotifyService {
 			track.getArtistsIdAsString(),
 			parsedReleaseDate,
 			track.getAlbum().getImages().get(0).getUrl(),
-			String.join(", ", allGenres)
+			String.join(", ", allGenres),
+			track.getUri()
 		);
 	}
 
@@ -165,7 +166,8 @@ public class SpotifyService {
 					track.getArtistsIdAsString(),
 					parsedReleaseDate,
 					track.getAlbum().getImages().get(0).getUrl(),
-					null
+					null,
+					track.getUri()
 				));
 			}
 
@@ -214,7 +216,8 @@ public class SpotifyService {
 					track.getArtistsIdAsString(),
 					parsedReleaseDate,
 					track.getAlbum().getImages().get(0).getUrl(),
-					null
+					null,
+					track.getUri()
 				));
 			}
 
@@ -301,7 +304,8 @@ public class SpotifyService {
 					track.getArtistsIdAsString(),
 					parsedReleaseDate,
 					track.getAlbum().getImages().get(0).getUrl(),
-					null
+					null,
+					track.getUri()
 				));
 			}
 

@@ -33,9 +33,11 @@ public class MusicRequest {
 
 	private String genre;
 
+	private String uri;
+
 	// 생성자
 	public MusicRequest(String id, String name, String singer, String singerId, LocalDate releaseDate,
-		String albumImage, String genre) {
+						String albumImage, String genre, String uri) {
 		this.id = id;
 		this.name = name;
 		this.singer = singer;
@@ -43,11 +45,12 @@ public class MusicRequest {
 		this.releaseDate = releaseDate;
 		this.albumImage = albumImage;
 		this.genre = genre;
+		this.uri = uri;
 	}
 
 	// 엔티티 변환 메서드
 	public Music toEntity() {
-		return new Music(id, name, singer, singerId, releaseDate, albumImage, genre);
+		return new Music(id, name, singer, singerId, releaseDate, albumImage, genre, uri);
 	}
 
 	// Setter 추가 (record에서는 불가능했던 부분 해결)

@@ -16,6 +16,9 @@ public class SpotifyTrackResponse {
 	private String id;
 	private String name;
 
+	@JsonProperty("uri")
+	private String uri;
+
 	@JsonProperty("artists")
 	private List<Artist> artists;
 
@@ -50,14 +53,10 @@ public class SpotifyTrackResponse {
 	}
 
 	public String getArtistsAsString() {
-		return artists.stream()
-			.map(Artist::getName)
-			.collect(Collectors.joining(", "));
+		return artists.stream().map(Artist::getName).collect(Collectors.joining(", "));
 	}
 
 	public String getArtistsIdAsString() {
-		return artists.stream()
-			.map(Artist::getId)
-			.collect(Collectors.joining(", "));
+		return artists.stream().map(Artist::getId).collect(Collectors.joining(", "));
 	}
 }

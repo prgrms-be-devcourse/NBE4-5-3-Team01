@@ -18,7 +18,8 @@ public record MusicResponse(
 	LocalDate releaseDate,
 
 	String albumImage,
-	String genre
+	String genre,
+	String uri
 ) {
 	public static MusicResponse fromEntity(Music music) {
 		return new MusicResponse(
@@ -28,7 +29,8 @@ public record MusicResponse(
 			music.getSingerId(),
 			music.getReleaseDate(),
 			music.getAlbumImage(),
-			music.getGenre()
+			music.getGenre(),
+			music.getUri()
 		);
 	}
 }
