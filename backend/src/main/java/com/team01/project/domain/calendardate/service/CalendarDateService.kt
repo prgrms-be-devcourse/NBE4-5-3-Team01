@@ -27,7 +27,6 @@ class CalendarDateService(
     private val eventPublisher: ApplicationEventPublisher,
     private val musicRecordService: MusicRecordService
 ) {
-
     /**
      * 특정 연도와 월에 해당하는 캘린더 리스트 조회
      */
@@ -115,5 +114,4 @@ class CalendarDateService(
     fun findByUserIdAndDate(userId: String, date: LocalDate): Optional<CalendarDate> {
         return calendarDateRepository.findByUserIdAndDate(userId, date)
     }
-
 }
