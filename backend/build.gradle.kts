@@ -4,8 +4,7 @@ plugins {
     kotlin("plugin.jpa") version "1.9.25"
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("checkstyle")
-    id("org.jlleitschuh.gradle.ktlint").version("12.1.1")
+    id("org.jlleitschuh.gradle.ktlint") version "11.6.0"
 }
 
 group = "com.team01"
@@ -104,10 +103,8 @@ tasks.withType<Checkstyle> {
     }
 }
 
-checkstyle {
-    maxWarnings = 0
-    configFile = file("checkstyle/naver-checkstyle-rules.xml")
-    configProperties = mapOf(
-        "suppressionFile" to "checkstyle/naver-checkstyle-suppressions.xml"
-    )
+ktlint {
+    verbose.set(true)
+    android.set(false)
+    outputToConsole.set(true)
 }

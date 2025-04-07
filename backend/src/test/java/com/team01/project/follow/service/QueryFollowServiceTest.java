@@ -71,8 +71,8 @@ public class QueryFollowServiceTest extends ServiceTest {
 
 		// then
 		assertAll(
-			() -> assertThat(count.followerCount()).isEqualTo(2),
-			() -> assertThat(count.followingCount()).isEqualTo(2)
+			() -> assertThat(count.followerCount).isEqualTo(2),
+			() -> assertThat(count.followingCount).isEqualTo(2)
 		);
 	}
 
