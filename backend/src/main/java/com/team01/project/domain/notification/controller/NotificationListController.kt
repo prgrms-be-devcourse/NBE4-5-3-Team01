@@ -31,7 +31,7 @@ class NotificationListController(
 
         return RsData(
             code = "200-1",
-            message = "사용자에게 온 알림리스트 조회가 완료되었습니다.",
+            msg = "사용자에게 온 알림리스트 조회가 완료되었습니다.",
             data = notifications
         )
     }
@@ -46,7 +46,7 @@ class NotificationListController(
         notificationListService.markAsRead(notificationListId, userId)
         return RsData(
             code = "200-1",
-            message = "Notification marked as read"
+            msg = "Notification marked as read"
         )
     }
 
@@ -57,7 +57,7 @@ class NotificationListController(
         notificationListService.markAllAsRead(userId)
         return RsData(
             code = "200-1",
-            message = "Notification marked All as read"
+            msg = "Notification marked All as read"
         )
     }
 
@@ -71,7 +71,7 @@ class NotificationListController(
         notificationListService.deleteNotification(notificationListId, userId)
         return RsData(
             code = "200-1",
-            message = "Notification deleted"
+            msg = "Notification deleted"
         )
     }
 }

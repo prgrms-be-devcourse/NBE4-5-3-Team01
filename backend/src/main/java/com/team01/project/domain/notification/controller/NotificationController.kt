@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -33,7 +34,7 @@ class NotificationController(
 
         return RsData(
             code = "200-1",
-            message = "전체 알림 목록 조회가 완료되었습니다.",
+            msg = "전체 알림 목록 조회가 완료되었습니다.",
             data = notifications
         )
     }
@@ -47,7 +48,7 @@ class NotificationController(
 
         return RsData(
             code = "200-1",
-            message = "사용자의 알림 목록 조회가 완료되었습니다.",
+            msg = "사용자의 알림 목록 조회가 완료되었습니다.",
             data = notifications
         )
     }
@@ -58,7 +59,7 @@ class NotificationController(
         val notification: Notification = notificationService.getNotification(notificationId)
         return RsData(
             code = "200-1",
-            message = "알림 단건 조회가 완료되었습니다.",
+            msg = "알림 단건 조회가 완료되었습니다.",
             data = NotificationDto(notification)
         )
     }
@@ -72,7 +73,7 @@ class NotificationController(
 
         return RsData(
             code = "200-1",
-            message = "알림 변경 목록 조회가 완료되었습니다.",
+            msg = "알림 변경 목록 조회가 완료되었습니다.",
             data = notifications
         )
     }
@@ -90,7 +91,7 @@ class NotificationController(
 
         return RsData(
             code = "200-1",
-            message = "Notification modified"
+            msg = "Notification modified"
         )
     }
 
@@ -105,7 +106,7 @@ class NotificationController(
 
         return RsData(
             code = "200-1",
-            message = "Notification updated"
+            msg = "Notification updated"
         )
     }
 }

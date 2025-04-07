@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -67,6 +68,6 @@ class SubscriptionController(
         }
 
         subscriptionRepository.save(subscription)
-        return RsData(code = "200-1", message = "구독 저장 성공")
+        return RsData(code = "200-1", msg = "구독 저장 성공")
     }
 }
