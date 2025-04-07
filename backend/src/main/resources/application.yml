@@ -6,10 +6,9 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      jdbc-url: ${URL}
-      username: ${USER}
-      password: ${PASSWORD}
+    url: ${URL}
+    username: ${USER}
+    password: ${PASSWORD}
 
   security:
     oauth2:
