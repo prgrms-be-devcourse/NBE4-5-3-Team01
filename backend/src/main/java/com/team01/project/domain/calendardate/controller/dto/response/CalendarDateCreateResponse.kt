@@ -6,4 +6,4 @@ package com.team01.project.domain.calendardate.controller.dto.response
  */
 data class CalendarDateCreateResponse(
     val id: Long
-) 
+)

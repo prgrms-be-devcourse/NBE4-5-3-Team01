@@ -7,4 +7,4 @@ package com.team01.project.domain.calendardate.controller.dto.request
 
 data class CalendarDateMusicSaveRequest(
     val musicIds: List<String>
-) 
+)
