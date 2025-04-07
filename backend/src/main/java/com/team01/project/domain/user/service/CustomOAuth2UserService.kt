@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.*
+import java.util.Collections
+import java.util.Optional
 
 @Service
 class CustomOAuth2UserService(
