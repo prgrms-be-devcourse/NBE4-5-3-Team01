@@ -1,52 +1,65 @@
-package com.team01.project.domain.notification.entity;
+package com.team01.project.domain.notification.entity
 
-import com.team01.project.domain.user.entity.User;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.team01.project.domain.user.entity.User
+import jakarta.persistence.*
 
 @Entity
-@Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class Subscription {
+data class Subscription(
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", referencedColumnName = "USER_ID", nullable = false)
-	private User user;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "USER_ID", nullable = false)
+    var user: User,
 
-	private String endpoint;
+    var endpoint: String,
 
-	// 구독 정보 안의 키 값들
-	private String p256dh;
-	private String auth;
+    var p256dh: String,
 
-	public void update(String endpoint, String p256dh, String auth) {
-		this.endpoint = endpoint;
-		this.p256dh = p256dh;
-		this.auth = auth;
-	}
+    var auth: String
 
-	public void updateWithUser(User user, String endpoint, String p256dh, String auth) {
-		this.user = user;
-		this.endpoint = endpoint;
-		this.p256dh = p256dh;
-		this.auth = auth;
-	}
+) {
 
+    fun update(endpoint: String, p256dh: String, auth: String) {
+        this.endpoint = endpoint
+        this.p256dh = p256dh
+        this.auth = auth
+    }
+
+    fun updateWithUser(user: User, endpoint: String, p256dh: String, auth: String) {
+        this.user = user
+        this.endpoint = endpoint
+        this.p256dh = p256dh
+        this.auth = auth
+    }
+
+    companion object {
+        fun builder() = SubscriptionBuilder()
+    }
+
+    class SubscriptionBuilder {
+        private var id: Long? = null
+        private lateinit var user: User
+        private lateinit var endpoint: String
+        private lateinit var p256dh: String
+        private lateinit var auth: String
+
+        fun id(id: Long?) = apply { this.id = id }
+        fun user(user: User) = apply { this.user = user }
+        fun endpoint(endpoint: String) = apply { this.endpoint = endpoint }
+        fun p256dh(p256dh: String) = apply { this.p256dh = p256dh }
+        fun auth(auth: String) = apply { this.auth = auth }
+
+        fun build(): Subscription {
+            return Subscription(
+                id = id,
+                user = user,
+                endpoint = endpoint,
+                p256dh = p256dh,
+                auth = auth
+            )
+        }
+    }
 }
-
