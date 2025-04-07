@@ -12,6 +12,7 @@ import com.team01.project.domain.musicrecord.service.MusicRecordService
 import com.team01.project.global.dto.RsData
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.web.bind.annotation.*
@@ -102,7 +103,7 @@ class CalendarDateController(
         @RequestParam year: Int,
         @RequestParam month: Int,
         @RequestParam day: Int,
-        @RequestBody request: CalendarDateCreateRequest,
+        @RequestBody @Valid request: CalendarDateCreateRequest,
         @AuthenticationPrincipal loggedInUser: OAuth2User
     ): RsData<CalendarDateCreateResponse> {
         val loggedInUserId = loggedInUser.name
@@ -153,7 +154,7 @@ class CalendarDateController(
     @PatchMapping("/{calendar-date-id}/memo")
     fun writeMemoToCalendarDate(
         @PathVariable(name = "calendar-date-id") calendarDateId: Long,
-        @RequestBody request: CalendarDateMemoSaveRequest,
+        @RequestBody @Valid request: CalendarDateMemoSaveRequest,
         @AuthenticationPrincipal loggedInUser: OAuth2User
     ): RsData<Void> {
         val loggedInUserId = loggedInUser.name
