@@ -18,7 +18,7 @@ interface FollowRepository : JpaRepository<Follow?, Long?> {
     fun findByToUserAndStatus(toUser: User, status: Status?): List<Follow>
 
     fun existsByToUserAndFromUser(toUser: User, fromUser: User): Boolean
-    
+
     fun countByFromUserAndStatus(fromUser: User, status: Status): Long
 
     fun countByToUserAndStatus(toUser: User, status: Status): Long
