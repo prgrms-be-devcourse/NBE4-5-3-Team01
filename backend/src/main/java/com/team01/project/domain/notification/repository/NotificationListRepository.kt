@@ -1,14 +1,10 @@
-package com.team01.project.domain.notification.repository;
+package com.team01.project.domain.notification.repository
 
-import java.util.List;
+import com.team01.project.domain.notification.entity.NotificationList
+import org.springframework.data.jpa.repository.JpaRepository
 
-import org.springframework.data.jpa.repository.JpaRepository;
+interface NotificationListRepository : JpaRepository<NotificationList, Long> {
+    fun findByUserId(userId: String): List<NotificationList>
 
-import com.team01.project.domain.notification.entity.NotificationList;
-
-
-public interface NotificationListRepository extends JpaRepository<NotificationList, Long> {
-	List<NotificationList> findByUserId(String userId);
-
-	List<NotificationList> findByUserIdAndIsReadFalse(String userId);
+    fun findByUserIdAndIsReadFalse(userId: String): List<NotificationList>
 }

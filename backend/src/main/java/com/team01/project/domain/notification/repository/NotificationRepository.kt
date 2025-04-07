@@ -1,29 +1,33 @@
-package com.team01.project.domain.notification.repository;
+package com.team01.project.domain.notification.repository
 
-import java.time.LocalTime;
-import java.util.List;
+import com.team01.project.domain.notification.entity.Notification
+import org.springframework.data.jpa.repository.EntityGraph
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import java.time.LocalTime
 
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+interface NotificationRepository : JpaRepository<Notification, Long> {
 
-import com.team01.project.domain.notification.entity.Notification;
+    fun findByUserId(userId: String): List<Notification>
 
+    @EntityGraph(attributePaths = ["user"])
+    fun findByNotificationTime(notificationTime: LocalTime): List<Notification>
 
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
-	List<Notification> findByUserId(String userId);
+    @Query(
+        "SELECT n FROM Notification n WHERE n.notificationTime >= :now AND n.notificationTime < :plusMinutes"
+    )
+    fun findNotificationsBetween(
+        @Param("now") now: LocalTime,
+        @Param("plusMinutes") plusMinutes: LocalTime
+    ): List<Notification>
 
-	@EntityGraph(attributePaths = {"user"})
-	List<Notification> findByNotificationTime(LocalTime notificationTime);
-
-	@Query("SELECT n FROM Notification n WHERE n.notificationTime >= :now AND n.notificationTime < :plusMinutes")
-	List<Notification> findNotificationsBetween(@Param("now") LocalTime now,
-												@Param("plusMinutes") LocalTime plusMinutes);
-
-	@Query("SELECT DISTINCT n.notificationTime FROM Notification n "
-			+ "WHERE n.notificationTime >= :start AND n.notificationTime < :end ORDER BY n.notificationTime ASC")
-	List<LocalTime> findDistinctNotificationTimeBetween(
-			@Param("start") LocalTime start, @Param("end") LocalTime end);
-
+    @Query(
+        "SELECT DISTINCT n.notificationTime FROM Notification n " +
+                "WHERE n.notificationTime >= :start AND n.notificationTime < :end ORDER BY n.notificationTime ASC"
+    )
+    fun findDistinctNotificationTimeBetween(
+        @Param("start") start: LocalTime,
+        @Param("end") end: LocalTime
+    ): List<LocalTime>
 }
