@@ -1,35 +1,32 @@
-package com.team01.project.domain.calendardate.repository;
+package com.team01.project.domain.calendardate.repository
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import com.team01.project.domain.calendardate.entity.CalendarDate
+import com.team01.project.domain.user.entity.User
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import java.time.LocalDate
+import java.util.*
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+interface CalendarDateRepository : JpaRepository<CalendarDate, Long> {
 
-import com.team01.project.domain.calendardate.entity.CalendarDate;
-import com.team01.project.domain.user.entity.User;
+    fun findByUserAndDateBetween(user: User, start: LocalDate, end: LocalDate): List<CalendarDate>
 
-public interface CalendarDateRepository extends JpaRepository<CalendarDate, Long> {
+    fun existsByUserAndDate(user: User, date: LocalDate): Boolean
 
-	List<CalendarDate> findByUserAndDateBetween(User user, LocalDate start, LocalDate end);
+    @Query("SELECT c FROM CalendarDate c JOIN FETCH c.user WHERE c.id = :calendarDateId")
+    fun findWithOwnerById(@Param("calendarDateId") calendarDateId: Long): Optional<CalendarDate>
 
-	boolean existsByUserAndDate(User user, LocalDate date);
+    fun findByUserIdAndDate(userId: String, date: LocalDate): Optional<CalendarDate>
 
-	@Query("SELECT c FROM CalendarDate c JOIN FETCH c.user WHERE c.id = :calendarDateId")
-	Optional<CalendarDate> findWithOwnerById(@Param("calendarDateId") Long calendarDateId);
+    fun findByIdOrThrow(calendarDateId: Long): CalendarDate =
+        findById(calendarDateId).orElseThrow {
+            IllegalArgumentException("해당 ID의 캘린더 기록을 찾을 수 없습니다: $calendarDateId")
+        }
 
-	default CalendarDate findByIdOrThrow(Long calendarDateId) {
-		return findById(calendarDateId).orElseThrow(()
-			-> new IllegalArgumentException("해당 ID의 캘린더 기록을 찾을 수 없습니다: " + calendarDateId));
-	}
-
-	default CalendarDate findWithOwnerByIdOrThrow(Long calendarDateId) {
-		return findWithOwnerById(calendarDateId).orElseThrow(()
-			-> new IllegalArgumentException("해당 ID의 캘린더 기록을 찾을 수 없습니다: " + calendarDateId));
-	}
-
-	Optional<CalendarDate> findByUserIdAndDate(String userId, LocalDate date);
-
+    fun findWithOwnerByIdOrThrow(calendarDateId: Long): CalendarDate =
+        findWithOwnerById(calendarDateId).orElseThrow {
+            IllegalArgumentException("해당 ID의 캘린더 기록을 찾을 수 없습니다: $calendarDateId")
+        }
+    
 }
