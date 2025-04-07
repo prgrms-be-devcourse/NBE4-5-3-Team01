@@ -111,7 +111,9 @@ class CalendarDateController(
         @RequestParam year: Int,
         @RequestParam month: Int,
         @RequestParam day: Int,
-        @RequestBody @Valid request: CalendarDateCreateRequest,
+        @RequestBody
+        @Valid
+        request: CalendarDateCreateRequest,
         @AuthenticationPrincipal loggedInUser: OAuth2User
     ): RsData<CalendarDateCreateResponse> {
         val loggedInUserId = loggedInUser.name
@@ -162,7 +164,9 @@ class CalendarDateController(
     @PatchMapping("/{calendar-date-id}/memo")
     fun writeMemoToCalendarDate(
         @PathVariable(name = "calendar-date-id") calendarDateId: Long,
-        @RequestBody @Valid request: CalendarDateMemoSaveRequest,
+        @RequestBody
+        @Valid
+        request: CalendarDateMemoSaveRequest,
         @AuthenticationPrincipal loggedInUser: OAuth2User
     ): RsData<Void> {
         val loggedInUserId = loggedInUser.name
