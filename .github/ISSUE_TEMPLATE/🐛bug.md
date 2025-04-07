@@ -1,7 +1,7 @@
 ---
 name: "\U0001F41BBug"
 about: 버그 발생시 사용하는 템플릿입니다.
-title: "[BUG]"
+title: "[Bug]"
 labels: "\U0001F41Bbug"
 assignees: ''
 
