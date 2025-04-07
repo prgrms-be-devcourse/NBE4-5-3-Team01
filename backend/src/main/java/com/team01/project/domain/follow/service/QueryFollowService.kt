@@ -5,6 +5,7 @@ import com.team01.project.domain.follow.controller.dto.FollowResponse
 import com.team01.project.domain.follow.entity.Follow
 import com.team01.project.domain.follow.entity.type.Status
 import com.team01.project.domain.follow.repository.FollowRepository
+import com.team01.project.domain.user.dto.SimpleUserResponse
 import com.team01.project.domain.user.entity.User
 import com.team01.project.domain.user.repository.UserRepository
 import lombok.RequiredArgsConstructor
@@ -23,20 +24,16 @@ class QueryFollowService(
         val currentUser = userRepository.getById(currentUserId)
         val user = userRepository.getById(userId)
 
-        val list = followRepository.findByFromUserAndStatus(user, Status.ACCEPT).stream()
+        return followRepository.findByFromUserAndStatus(user, Status.ACCEPT).stream()
             .filter { follow: Follow -> follow.toUser.id != currentUser.id }
             .map { follow: Follow ->
-                FollowResponse.of(
-                    follow.toUser,
+                FollowResponse(
+                    SimpleUserResponse.from(follow.toUser),
                     checkFollow(follow.toUser, currentUser),
                     checkFollow(currentUser, follow.toUser)
                 )
             }
             .toList()
-
-        println(list)
-
-        return list
     }
 
     fun findFollower(currentUserId: String, userId: String): List<FollowResponse> {
@@ -46,8 +43,8 @@ class QueryFollowService(
         return followRepository.findByToUserAndStatus(user, Status.ACCEPT).stream()
             .filter { follow: Follow -> follow.fromUser.id != currentUser.id }
             .map { follow: Follow ->
-                FollowResponse.of(
-                    follow.fromUser,
+                FollowResponse(
+                    SimpleUserResponse.from(follow.fromUser),
                     checkFollow(follow.fromUser, currentUser),
                     checkFollow(currentUser, follow.fromUser)
                 )
@@ -60,7 +57,7 @@ class QueryFollowService(
         val followingCount = followRepository.countByFromUserAndStatus(user, Status.ACCEPT)
         val followerCount = followRepository.countByToUserAndStatus(user, Status.ACCEPT)
 
-        return CountFollowResponse.of(followingCount, followerCount)
+        return CountFollowResponse(followingCount, followerCount)
     }
 
     private fun checkFollow(user: User, currentUser: User): Status {
@@ -73,7 +70,13 @@ class QueryFollowService(
 
         return followRepository.findByFromUser(currentUser)
             .stream()
-            .map { follow: Follow -> FollowResponse.of(follow.toUser, follow.status, Status.NONE) }
+            .map { follow: Follow ->
+                FollowResponse(
+                    SimpleUserResponse.from(follow.toUser),
+                    follow.status,
+                    Status.NONE
+                )
+            }
             .toList()
     }
 
@@ -81,7 +84,13 @@ class QueryFollowService(
         val currentUser = userRepository.getById(currentUserId)
 
         return followRepository.findByToUserAndStatus(currentUser, Status.PENDING).stream()
-            .map { follow: Follow -> FollowResponse.of(follow.fromUser, Status.NONE, follow.status) }
+            .map { follow: Follow ->
+                FollowResponse(
+                    SimpleUserResponse.from(follow.fromUser),
+                    Status.NONE,
+                    follow.status
+                )
+            }
             .toList()
     }
 }

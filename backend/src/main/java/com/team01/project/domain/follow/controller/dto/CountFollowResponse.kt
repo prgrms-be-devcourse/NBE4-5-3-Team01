@@ -1,11 +1,6 @@
-package com.team01.project.domain.follow.controller.dto;
+package com.team01.project.domain.follow.controller.dto
 
-public record CountFollowResponse(
-	Long followingCount,
-	Long followerCount
-) {
-
-	public static CountFollowResponse of(Long followingCount, Long followerCount) {
-		return new CountFollowResponse(followingCount, followerCount);
-	}
-}
+data class CountFollowResponse(
+    val followingCount: Long,
+    val followerCount: Long
+)
