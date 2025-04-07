@@ -12,7 +12,7 @@ import jakarta.persistence.ManyToOne
 import java.time.LocalTime
 
 @Entity
-data class Notification(
+class Notification(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
