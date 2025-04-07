@@ -1,82 +1,72 @@
-package com.team01.project.domain.notification.service;
+package com.team01.project.domain.notification.service
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
-import com.team01.project.domain.notification.entity.NotificationList;
-import com.team01.project.domain.notification.repository.NotificationListRepository;
-import com.team01.project.domain.user.entity.User;
-
-import lombok.RequiredArgsConstructor;
+import com.team01.project.domain.notification.entity.NotificationList
+import com.team01.project.domain.notification.repository.NotificationListRepository
+import com.team01.project.domain.user.entity.User
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.server.ResponseStatusException
+import java.time.LocalDateTime
 
 @Service
-@RequiredArgsConstructor
-public class NotificationListService {
+class NotificationListService(
+    private val notificationListRepository: NotificationListRepository
+) {
 
-	private final NotificationListRepository notificationListRepository;
+    @Transactional(readOnly = true)
+    fun getUserNotificationLists(userId: String): List<NotificationList> {
+        return notificationListRepository.findByUserId(userId)
+    }
 
-	@Transactional(readOnly = true)
-	public List<NotificationList> getUserNotificationLists(String userId) {
-		return notificationListRepository.findByUserId(userId);
-	}
+    @Transactional
+    fun markAsRead(notificationListId: Long, userId: String) {
+        val notificationList = notificationListRepository.findById(notificationListId)
+            .orElseThrow {
+                IllegalArgumentException("Notification not found with ID: $notificationListId")
+            }
 
-	@Transactional
-	public void markAsRead(Long notificationListId, String userId) {
-		NotificationList notificationList = notificationListRepository.findById(notificationListId)
-				.orElseThrow(() ->
-						new IllegalArgumentException("Notification not found with ID: " + notificationListId));
+        if (notificationList.user.id != userId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to update this notification.")
+        }
 
-		// 현재 로그인한 사용자의 알림인지 검증
-		if (!notificationList.getUser().getId().equals(userId)) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-					"You do not have permission to update this notification.");
-		}
+        notificationList.markAsRead()
+        notificationListRepository.save(notificationList)
+    }
 
-		notificationList.markAsRead();
-		notificationListRepository.save(notificationList);
-	}
+    @Transactional
+    fun markAllAsRead(userId: String) {
+        val notifications = notificationListRepository.findByUserIdAndIsReadFalse(userId)
 
-	@Transactional
-	public void markAllAsRead(String userId) {
+        if (notifications.isEmpty()) return
 
-		List<NotificationList> notifications = notificationListRepository.findByUserIdAndIsReadFalse(userId);
+        notifications.forEach { it.markAsRead() }
+        notificationListRepository.saveAll(notifications)
+    }
 
-		if (notifications.isEmpty()) {
-			return; // 읽지 않은 알림이 없다면 처리하지 않음
-		}
+    @Transactional
+    fun deleteNotification(notificationListId: Long, userId: String) {
+        val notificationList = notificationListRepository.findById(notificationListId)
+            .orElseThrow {
+                IllegalArgumentException("Notification not found with ID: $notificationListId")
+            }
 
-		notifications.forEach(notification -> notification.markAsRead()); // 모든 알림 읽음 처리
-		notificationListRepository.saveAll(notifications); // 변경된 알림 상태 저장
-	}
+        if (notificationList.user.id != userId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to delete this notification.")
+        }
 
+        notificationListRepository.deleteById(notificationListId)
+    }
 
-	@Transactional
-	public void deleteNotification(Long notificationListId, String userId) {
-		NotificationList notificationList = notificationListRepository.findById(notificationListId)
-				.orElseThrow(() ->
-						new IllegalArgumentException("Notification not found with ID: " + notificationListId));
+    @Transactional
+    fun addNotification(user: User, title: String, message: String, notificationTime: LocalDateTime) {
+        val notification = NotificationList.builder()
+            .user(user)
+            .title(title)
+            .message(message)
+            .notificationTime(notificationTime)
+            .build()
 
-		// 현재 로그인한 사용자의 알림인지 검증
-		if (!notificationList.getUser().getId().equals(userId)) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-					"You do not have permission to delete this notification.");
-		}
-
-		notificationListRepository.deleteById(notificationListId);
-	}
-
-	@Transactional
-	public void addNotification(User user, String title, String message, LocalDateTime notificationTime) {
-		notificationListRepository.save(NotificationList.builder()
-				.user(user)
-				.title(title)
-				.message(message)
-				.notificationTime(notificationTime)
-				.build());
-	}
+        notificationListRepository.save(notification)
+    }
 }

@@ -1,158 +1,121 @@
-package com.team01.project.domain.notification.service;
+package com.team01.project.domain.notification.service
 
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
-import com.team01.project.domain.notification.constants.NotificationMessages;
-import com.team01.project.domain.notification.dto.NotificationUpdateDto;
-import com.team01.project.domain.notification.entity.Notification;
-import com.team01.project.domain.notification.entity.Subscription;
-import com.team01.project.domain.notification.event.NotificationInitEvent;
-import com.team01.project.domain.notification.repository.NotificationRepository;
-import com.team01.project.domain.notification.repository.SubscriptionRepository;
-import com.team01.project.domain.user.entity.User;
-
-import lombok.RequiredArgsConstructor;
-
+import com.team01.project.domain.notification.constants.NotificationMessages
+import com.team01.project.domain.notification.dto.NotificationUpdateDto
+import com.team01.project.domain.notification.entity.Notification
+import com.team01.project.domain.notification.entity.Subscription
+import com.team01.project.domain.notification.event.NotificationInitEvent
+import com.team01.project.domain.notification.repository.NotificationRepository
+import com.team01.project.domain.notification.repository.SubscriptionRepository
+import com.team01.project.domain.user.entity.User
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.server.ResponseStatusException
+import java.time.LocalTime
 
 @Service
-@RequiredArgsConstructor
-public class NotificationService {
-	private final NotificationRepository notificationRepository;
-	private final ApplicationEventPublisher eventPublisher;    // 🔥 이벤트 발행기 추가
+class NotificationService(
+    private val notificationRepository: NotificationRepository,
+    private val eventPublisher: ApplicationEventPublisher,
+    private val subscriptionRepository: SubscriptionRepository
+) {
 
-	private final SubscriptionRepository subscriptionRepository;
+    fun getAllNotifications(): List<Notification> =
+        notificationRepository.findAll()
 
-	public List<Notification> getAllNotifications() {
-		return notificationRepository.findAll();
-	}
+    @Transactional(readOnly = true)
+    fun getUserNotifications(userId: String): List<Notification> =
+        notificationRepository.findByUserId(userId)
 
-	@Transactional(readOnly = true)
-	public List<Notification> getUserNotifications(String userId) {
-		return notificationRepository.findByUserId(userId);
-	}
+    @Transactional(readOnly = true)
+    fun getNotification(notificationId: Long): Notification =
+        notificationRepository.findById(notificationId)
+            .orElseThrow { IllegalArgumentException("Notification not found with ID: $notificationId") }
 
-	@Transactional(readOnly = true)
-	public Notification getNotification(Long notificationId) {
-		return notificationRepository.findById(notificationId)
-				.orElseThrow(() -> new IllegalArgumentException("Notification not found with ID: " + notificationId));
-	}
+    @Transactional(readOnly = true)
+    fun getModifiableNotification(userId: String): List<Notification> {
+        return notificationRepository.findByUserId(userId)
+            .filter { it.title in listOf("DAILY CHALLENGE", "BUILD PLAYLIST", "YEAR HISTORY") }
+    }
 
-	@Transactional(readOnly = true)
-	public List<Notification> getModifiableNotification(String userId) {
-		List<Notification> notifications = notificationRepository.findByUserId(userId);
-		List<Notification> modifiableNotifications = new ArrayList<>();
+    @Transactional
+    fun updateNotification(userId: String, notificationId: Long, notificationTime: LocalTime) {
+        val notification = notificationRepository.findById(notificationId)
+            .orElseThrow {
+                IllegalArgumentException("Notification not found with ID: $notificationId")
+            }
 
-		for (Notification notification : notifications) {
-			if (notification.getTitle().equals("DAILY CHALLENGE")
-					|| notification.getTitle().equals("BUILD PLAYLIST")
-					|| notification.getTitle().equals("YEAR HISTORY")) {
-				modifiableNotifications.add(notification);
-			}
-		}
+        if (notification.user.id != userId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to update this notification.")
+        }
 
+        notification.updateNotificationTime(notificationTime)
+        notificationRepository.save(notification)
 
-		return modifiableNotifications;
-	}
+        // 이벤트 발행 주석처리된 부분 필요시 복원 가능
+        // if (notification.notificationTime?.isBefore(LocalTime.now().plusMinutes(30)) == true) {
+        //     eventPublisher.publishEvent(NotificationUpdatedEvent(this, notification.notificationTime))
+        // }
+    }
 
-	@Transactional
-	public void updateNotification(String userId, Long notificationId, LocalTime notificationTime) {
-		Notification notification = notificationRepository.findById(notificationId)
-				.orElseThrow(() -> new IllegalArgumentException("Notification not found with ID: " + notificationId));
+    @Transactional(readOnly = true)
+    fun getNotificationsByTime(time: LocalTime): List<Notification> =
+        notificationRepository.findByNotificationTime(time)
 
-		if (!notification.getUser().getId().equals(userId)) { // 유저가 동일한지 확인
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-					"You do not have permission to update this notification.");
-		}
+    @Transactional(readOnly = true)
+    fun getNotificationTimeBetween(start: LocalTime, end: LocalTime): List<LocalTime> =
+        notificationRepository.findDistinctNotificationTimeBetween(start, end)
 
-		notification.updateNotificationTime(notificationTime);
-		notificationRepository.save(notification);
+    @Transactional
+    fun createDefaultNotifications(user: User) {
+        val notifications = NotificationMessages.DEFAULT_MESSAGES.map { (title, messageTemplate) ->
+            val time = when (title) {
+                "DAILY CHALLENGE" -> LocalTime.of(21, 0)
+                "YEAR HISTORY" -> LocalTime.of(9, 0)
+                "BUILD PLAYLIST" -> LocalTime.of(18, 0)
+                else -> null
+            }
 
-//		if (notification.getNotificationTime().isBefore(LocalTime.now().plusMinutes(30))) {
-//			// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록) 설정한 시각이 30분 이내라면
-//			eventPublisher.publishEvent(new NotificationUpdatedEvent(this, notification.getNotificationTime()));
-//		}
-	}
+            Notification.builder()
+                .user(user)
+                .notificationTime(time)
+                .title(title)
+                .message(String.format(messageTemplate, user.name))
+                .build()
+        }
 
-	@Transactional(readOnly = true)
-	public List<Notification> getNotificationsByTime(LocalTime time) {
-		return notificationRepository.findByNotificationTime(time);
-	}
+        notificationRepository.saveAll(notifications)
+    }
 
-	@Transactional(readOnly = true)
-	public List<LocalTime> getNotificationTimeBetween(LocalTime start, LocalTime end) {
-		return notificationRepository.findDistinctNotificationTimeBetween(start, end);
-	}
+    @Transactional
+    fun updateNotifications(notifications: List<NotificationUpdateDto>, userId: String) {
+        for (dto in notifications) {
+            val notification = notificationRepository.findById(dto.notificationId)
+                .orElseThrow {
+                    ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found with ID: ${dto.notificationId}")
+                }
 
-	// 유저가 회원가입할 때 생성
-	@Transactional
-	public void createDefaultNotifications(User user) {
-		List<Notification> notifications = new ArrayList<>();
+            if (notification.user.id != userId) {
+                throw ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to update this notification.")
+            }
 
-		for (Map.Entry<String, String> entry : NotificationMessages.DEFAULT_MESSAGES.entrySet()) {
-			// 메시지 타입에 따라 알림 시간 설정
-			LocalTime notificationTime = switch (entry.getKey()) {
-				case "DAILY CHALLENGE" -> LocalTime.of(21, 0);
-				case "YEAR HISTORY" -> LocalTime.of(9, 0);
-				case "BUILD PLAYLIST" -> LocalTime.of(18, 0);
-				default -> null;
-			};
+            notification.updateNotificationSettings(
+                dto.isEmailNotificationEnabled,
+                dto.isPushNotificationEnabled
+            )
+        }
+    }
 
-			notifications.add(Notification.builder()
-					.user(user)
-					.notificationTime(notificationTime)
-					.title(entry.getKey())
-					.message(String.format(entry.getValue(), user.getName()))
-					.build());
-		}
+    @Transactional
+    fun initLoginNotifications(time: LocalTime, user: User) {
+        eventPublisher.publishEvent(NotificationInitEvent(this, time, user))
+    }
 
-		notificationRepository.saveAll(notifications);
-	}
-
-	@Transactional
-	public void updateNotifications(List<NotificationUpdateDto> notifications, String userId) {
-		for (NotificationUpdateDto dto : notifications) {
-			// 알림이 존재하는지 확인
-			Notification notification = notificationRepository.findById(dto.notificationId())
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-							"Notification not found with ID: " + dto.notificationId()));
-
-			// 유저가 동일한지 확인
-			if (!notification.getUser().getId().equals(userId)) {
-				throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-						"You do not have permission to update this notification.");
-			}
-
-			// 알림 설정 업데이트
-			notification.updateNotificationSettings(
-					dto.isEmailNotificationEnabled(),
-					dto.isPushNotificationEnabled()
-			);
-		}
-	}
-
-
-	// 최초 로그인 시 보낼 알림 설정
-	@Transactional
-	public void initLoginNotifications(LocalTime time, User user) {
-		// 🔥 이벤트 발행 (`NotificationScheduler`에서 감지할 수 있도록)
-		eventPublisher.publishEvent(new NotificationInitEvent(this, time, user));
-	}
-
-	// 로그아웃 시 푸시 구독 정보 삭제
-	@Transactional
-	public void deleteSubscription(String userId) {
-		Optional<Subscription> subscription = subscriptionRepository.findByUserId(userId);
-
-		subscription.ifPresent(subscriptionRepository::delete);
-	}
+    @Transactional
+    fun deleteSubscription(userId: String) {
+        subscriptionRepository.findByUserId(userId)
+            .ifPresent { subscriptionRepository.delete(it) }
+    }
 }

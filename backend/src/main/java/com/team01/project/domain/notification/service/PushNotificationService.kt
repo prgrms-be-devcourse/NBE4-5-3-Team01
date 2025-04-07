@@ -1,55 +1,51 @@
-package com.team01.project.domain.notification.service;
+package com.team01.project.domain.notification.service
 
-import java.security.Security;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import jakarta.annotation.PostConstruct;
-import nl.martijndwars.webpush.Notification;
-import nl.martijndwars.webpush.PushService;
-import nl.martijndwars.webpush.Utils;
+import jakarta.annotation.PostConstruct
+import nl.martijndwars.webpush.Notification
+import nl.martijndwars.webpush.PushService
+import nl.martijndwars.webpush.Utils
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
+import java.security.Security
 
 @Service
-public class PushNotificationService {
+class PushNotificationService {
 
-	private PushService pushService;
+    private lateinit var pushService: PushService
 
-	// application.yml에서 VAPID 키 값을 주입받습니다.
-	@Value("${push.vapid.publicKey}")
-	private String publicKey;
+    // application.yml에서 VAPID 키 주입
+    @Value("\${push.vapid.publicKey}")
+    private lateinit var publicKey: String
 
-	@Value("${push.vapid.privateKey}")
-	private String privateKey;
+    @Value("\${push.vapid.privateKey}")
+    private lateinit var privateKey: String
 
+    @PostConstruct
+    fun init() {
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(BouncyCastleProvider())
+        }
 
-	@PostConstruct
-	public void init() {
+        try {
+            pushService = PushService()
+                .setPublicKey(Utils.loadPublicKey(publicKey))
+                .setPrivateKey(Utils.loadPrivateKey(privateKey))
+        } catch (e: Exception) {
+            throw RuntimeException("PushNotificationService 초기화 실패", e)
+        }
+    }
 
-		// Bouncy Castle 프로바이더 등록
-		if (Security.getProvider("BC") == null) {
-			Security.addProvider(new BouncyCastleProvider());
-		}
-
-		try {
-			this.pushService = new PushService()
-					.setPublicKey(Utils.loadPublicKey(publicKey))
-					.setPrivateKey(Utils.loadPrivateKey(privateKey));
-		} catch (Exception e) {
-			throw new RuntimeException("PushNotificationService 초기화 실패", e);
-		}
-	}
-
-	// 실제 푸시 메시지를 보내는 메서드
-	public void sendPush(
-			String endpoint, String userPublicKey, String auth, String title, String message) throws Exception {
-		String jsonPayload = String.format("{\"title\": \"%s\", \"message\": \"%s\"}", title, message);
-
-		// Notification 객체 생성
-		Notification notification = new Notification(endpoint, userPublicKey, auth, jsonPayload.getBytes());
-
-		// 여기서 pushService.send() 메서드로 푸시 알림 전송
-		pushService.send(notification);
-	}
+    @Throws(Exception::class)
+    fun sendPush(
+        endpoint: String,
+        userPublicKey: String,
+        auth: String,
+        title: String,
+        message: String
+    ) {
+        val jsonPayload = """{"title": "$title", "message": "$message"}"""
+        val notification = Notification(endpoint, userPublicKey, auth, jsonPayload.toByteArray())
+        pushService.send(notification)
+    }
 }
