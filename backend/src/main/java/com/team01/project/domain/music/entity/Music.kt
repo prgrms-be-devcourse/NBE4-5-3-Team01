@@ -1,74 +1,67 @@
-package com.team01.project.domain.music.entity;
+package com.team01.project.domain.music.entity
 
-import java.time.LocalDate;
-import java.util.Objects;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import java.time.LocalDate
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
-@Builder
-public class Music {
+class Music(
+    @Id
+    @Column(name = "music_id", unique = true, nullable = false)
+    var id: String,
 
-	@Id
-	@Column(name = "music_id", unique = true, nullable = false)
-	private String id;
+    @Column(name = "name", nullable = false)
+    var name: String,
 
-	@Column(name = "name", nullable = false)
-	private String name;
+    @Column(name = "singer", nullable = false)
+    var singer: String,
 
-	@Column(name = "singer", nullable = false)
-	private String singer;
+    @Column(name = "singer_id", nullable = false)
+    var singerId: String,
 
-	@Column(name = "singer_id", nullable = false)
-	private String singerId;
+    @Column(name = "release_date", nullable = false)
+    var releaseDate: LocalDate,
 
-	@Column(name = "release_date", nullable = false)
-	private LocalDate releaseDate;
+    @Column(name = "album_image", nullable = false)
+    var albumImage: String,
 
-	@Column(name = "album_image", nullable = false)
-	private String albumImage;
+    @Column(name = "genre")
+    var genre: String? = null,
 
-	@Column(name = "genre")
-	private String genre;
+    @Column(name = "uri")
+    var uri: String? = null
+) {
 
-	@Column(name = "uri")
-	private String uri;
+    // 기본 생성자 (JPA를 위한 protected no-arg constructor)
+    protected constructor() : this(
+        id = "",
+        name = "",
+        singer = "",
+        singerId = "",
+        releaseDate = LocalDate.now(),
+        albumImage = "",
+        genre = null,
+        uri = null
+    )
 
-	public void setGenre(String genre) {
-		this.genre = genre;
-	}
+    fun isSameAs(other: Music): Boolean {
+        return name == other.name &&
+                singer == other.singer &&
+                singerId == other.singerId &&
+                releaseDate == other.releaseDate &&
+                albumImage == other.albumImage &&
+                genre == other.genre &&
+                uri == other.uri
+    }
 
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
-
-	public boolean isSameAs(Music other) {
-		return this.name.equals(other.getName())
-			&& this.singer.equals(other.getSinger())
-			&& this.singerId.equals(other.getSingerId())
-			&& this.releaseDate.equals(other.getReleaseDate())
-			&& this.albumImage.equals(other.getAlbumImage())
-			&& Objects.equals(this.genre, other.getGenre())
-			&& this.uri.equals(other.getUri());
-	}
-
-	public void updateMusic(Music updatedMusic) {
-		this.name = updatedMusic.getName();
-		this.singer = updatedMusic.getSinger();
-		this.singerId = updatedMusic.getSingerId();
-		this.releaseDate = updatedMusic.getReleaseDate();
-		this.albumImage = updatedMusic.getAlbumImage();
-		this.genre = updatedMusic.getGenre();
-		this.uri = updatedMusic.getUri();
-	}
+    fun updateMusic(updatedMusic: Music) {
+        name = updatedMusic.name
+        singer = updatedMusic.singer
+        singerId = updatedMusic.singerId
+        releaseDate = updatedMusic.releaseDate
+        albumImage = updatedMusic.albumImage
+        genre = updatedMusic.genre
+        uri = updatedMusic.uri
+    }
 }
