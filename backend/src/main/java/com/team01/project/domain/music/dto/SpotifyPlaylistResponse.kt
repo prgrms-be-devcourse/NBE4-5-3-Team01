@@ -1,9 +1,8 @@
-package com.team01.project.domain.music.dto;
+package com.team01.project.domain.music.dto
 
-public record SpotifyPlaylistResponse(
-	String id,
-	String name,
-	String image,
-	int trackCount
-) {
-}
+data class SpotifyPlaylistResponse(
+    val id: String,
+    val name: String,
+    val image: String,
+    val trackCount: Int
+)

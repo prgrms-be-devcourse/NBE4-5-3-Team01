@@ -1,36 +1,37 @@
-package com.team01.project.domain.music.dto;
+package com.team01.project.domain.music.dto
 
-import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer
+import com.team01.project.domain.music.entity.Music
+import java.time.LocalDate
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.team01.project.domain.music.entity.Music;
+data class MusicResponse(
+    val id: String,
+    val name: String,
+    val singer: String,
+    val singerId: String,
 
-public record MusicResponse(
-	String id,
-	String name,
-	String singer,
-	String singerId,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonDeserialize(using = LocalDateDeserializer::class)
+    val releaseDate: LocalDate,
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	@JsonDeserialize(using = LocalDateDeserializer.class)
-	LocalDate releaseDate,
-
-	String albumImage,
-	String genre,
-	String uri
+    val albumImage: String,
+    val genre: String?,
+    val uri: String?
 ) {
-	public static MusicResponse fromEntity(Music music) {
-		return new MusicResponse(
-			music.getId(),
-			music.getName(),
-			music.getSinger(),
-			music.getSingerId(),
-			music.getReleaseDate(),
-			music.getAlbumImage(),
-			music.getGenre(),
-			music.getUri()
-		);
-	}
+    companion object {
+        fun fromEntity(music: Music): MusicResponse {
+            return MusicResponse(
+                id = music.id,
+                name = music.name,
+                singer = music.singer,
+                singerId = music.singerId,
+                releaseDate = music.releaseDate,
+                albumImage = music.albumImage,
+                genre = music.genre,
+                uri = music.uri
+            )
+        }
+    }
 }

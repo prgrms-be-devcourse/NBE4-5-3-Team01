@@ -1,62 +1,48 @@
-package com.team01.project.domain.music.dto;
+package com.team01.project.domain.music.dto
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SpotifyTrackResponse {
-	private String id;
-	private String name;
+data class SpotifyTrackResponse(
+    val id: String,
+    val name: String,
 
-	@JsonProperty("uri")
-	private String uri;
+    @JsonProperty("uri")
+    val uri: String,
 
-	@JsonProperty("artists")
-	private List<Artist> artists;
+    @JsonProperty("artists")
+    val artists: List<Artist>,
 
-	private Album album;
+    val album: Album
+) {
+    fun getArtistsAsString(): String {
+        return artists.joinToString(", ") { it.name }
+    }
 
-	@Getter
-	@Setter
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class Album {
-		private String name;
+    fun getArtistsIdAsString(): String {
+        return artists.joinToString(", ") { it.id }
+    }
 
-		@JsonProperty("release_date")
-		private String releaseDate;
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class Album(
+        val name: String,
 
-		@JsonProperty("images")
-		private List<Image> images;
-	}
+        @JsonProperty("release_date")
+        val releaseDate: String,
 
-	@Getter
-	@Setter
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class Artist {
-		private String id;
-		private String name;
-	}
+        @JsonProperty("images")
+        val images: List<Image>
+    )
 
-	@Getter
-	@Setter
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class Image {
-		private String url;
-	}
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class Artist(
+        val id: String,
+        val name: String
+    )
 
-	public String getArtistsAsString() {
-		return artists.stream().map(Artist::getName).collect(Collectors.joining(", "));
-	}
-
-	public String getArtistsIdAsString() {
-		return artists.stream().map(Artist::getId).collect(Collectors.joining(", "));
-	}
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class Image(
+        val url: String
+    )
 }
