@@ -6,9 +6,10 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${URL}
-    username: ${USER}
-    password: ${PASSWORD}
+    hikari:
+      jdbc-url: ${URL}
+      username: ${USER}
+      password: ${PASSWORD}
 
   security:
     oauth2:
@@ -32,14 +33,15 @@ spring:
     level:
       org:
         hibernate:
-          SQL: debug
-      org.springframework.security: DEBUG
-      org.springframework.security.oauth2: DEBUG
-      org.springframework.web: DEBUG
+          SQL: DEBUG
+        springframework:
+          security: DEBUG
+          security.oauth2: DEBUG
+          web: DEBUG
 
   jpa:
     database: mysql
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    database-platform: org.hibernate.dialect.MySQLDialect
     generate-ddl: true
     hibernate:
       ddl-auto: update

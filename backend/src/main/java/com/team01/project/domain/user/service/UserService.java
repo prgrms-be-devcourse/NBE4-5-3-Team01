@@ -38,6 +38,7 @@ import com.team01.project.domain.follow.entity.type.Status;
 import com.team01.project.domain.follow.repository.FollowRepository;
 import com.team01.project.domain.notification.service.NotificationService;
 import com.team01.project.domain.user.dto.UserDto;
+import com.team01.project.domain.user.entity.CalendarVisibility;
 import com.team01.project.domain.user.entity.RefreshToken;
 import com.team01.project.domain.user.entity.User;
 import com.team01.project.domain.user.repository.RefreshTokenRepository;
@@ -276,6 +277,17 @@ public class UserService {
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to read file bytes", e);
 		}
+	}
+
+	/**
+	 * 캘린더 공개 여부 변경
+	 * @param userId 인증된 유저의 아이디
+	 * @param newCalendarVisibility 캘린더 공개 여부
+	 */
+	@Transactional
+	public void updateCalendarVisibility(String userId, CalendarVisibility newCalendarVisibility) {
+		User user = userRepository.getById(userId);
+		user.updateCalendarVisibility(newCalendarVisibility);
 	}
 
 	// @Transactional

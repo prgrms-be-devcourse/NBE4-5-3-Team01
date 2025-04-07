@@ -473,36 +473,6 @@ label[for="nav-footer-toggle"] {
   background-color: #c8b6ff;
 }
 
-.fc-daygrid-day-frame {
-  position: relative;
-  overflow: hidden;
-}
-
-.fc .fc-daygrid-body-natural .fc-daygrid-day-events {
-  margin-bottom: 0;
-}
-
-.fc .fc-toolbar {
-  justify-content: space-evenly;
-  color: #393D3F;
-}
-
-.fc .fc-toolbar-chunk .fc-button {
-  border: none;
-  background: #C8B6FF;
-  color: #393D3F;
-}
-
-.fc .fc-toolbar-chunk .fc-button:active {
-  border: none;
-  background: #C8B6FF;
-  color: #393D3F;
-}
-
-.fc .fc-bg-event {
-  background: white;
-}
-
 @keyframes progressBar {
   from {
     width: 100%;

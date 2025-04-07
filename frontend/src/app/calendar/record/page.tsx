@@ -143,7 +143,7 @@ export default function CalendarRecordPage() {
         // console.log(res.data);
         // setAlert({ code: code, message: msg });
         const code = "200";
-        const data = res.data;
+        const data = res.data.data;
 
         if (code.startsWith("2")) {
           return data;

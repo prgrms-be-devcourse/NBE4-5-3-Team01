@@ -210,7 +210,7 @@ const NotificationSettings = () => {
                   </div>
                   <div>
                     <Link
-                      href="/calendar"
+                      href="/user/calendar-visibility"
                       className={`${styles.linkb} ${styles.kaxeyf}`}
                     >
                       <div className={styles.kMKjYE}></div>
@@ -239,7 +239,7 @@ const NotificationSettings = () => {
                               fontWeight: "400",
                             }}
                           >
-                            캘린더 관리
+                            캘린더 공개 설정
                           </p>
                         </div>
                         <div className={styles.cmcLAf}>

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.team01.project.domain.calendardate.entity.CalendarDate;
 import com.team01.project.domain.music.dto.MusicResponse;
 import com.team01.project.domain.music.entity.Music;
+import com.team01.project.global.permission.CalendarPermission;
 
 /**
  * 캘린더 조회 응답 DTO
@@ -16,6 +17,7 @@ import com.team01.project.domain.music.entity.Music;
  * @param date 날짜
  * @param memo 작성한 메모
  * @param musics 기록된 음악 리스트
+ * @param calendarPermission 캘린더 권한
  */
 public record CalendarDateFetchResponse(
 
@@ -27,16 +29,23 @@ public record CalendarDateFetchResponse(
 
 	String memo,
 
-	List<MusicResponse> musics
+	List<MusicResponse> musics,
+
+	CalendarPermission calendarPermission
 
 ) {
 
-	public static CalendarDateFetchResponse of(CalendarDate calendarDate, List<Music> musics) {
+	public static CalendarDateFetchResponse of(
+		CalendarDate calendarDate,
+		List<Music> musics,
+		CalendarPermission calendarPermission
+	) {
 		return new CalendarDateFetchResponse(
 			calendarDate.getId(),
 			calendarDate.getDate(),
 			calendarDate.getMemo(),
-			musics.stream().map(MusicResponse::fromEntity).toList()
+			musics.stream().map(MusicResponse::fromEntity).toList(),
+			calendarPermission
 		);
 	}
 

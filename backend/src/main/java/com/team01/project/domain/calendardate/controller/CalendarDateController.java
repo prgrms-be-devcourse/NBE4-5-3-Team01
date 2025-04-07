@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team01.project.domain.calendardate.controller.dto.request.CalendarDateCreateRequest;
@@ -29,7 +27,6 @@ import com.team01.project.domain.calendardate.controller.dto.response.CalendarDa
 import com.team01.project.domain.calendardate.controller.dto.response.MonthlyFetchResponse;
 import com.team01.project.domain.calendardate.entity.CalendarDate;
 import com.team01.project.domain.calendardate.service.CalendarDateService;
-import com.team01.project.domain.music.entity.Music;
 import com.team01.project.domain.musicrecord.entity.MusicRecord;
 import com.team01.project.domain.musicrecord.service.MusicRecordService;
 import com.team01.project.global.dto.RsData;
@@ -51,24 +48,36 @@ public class CalendarDateController {
 	 * 먼슬리 캘린더 조회
 	 * @param year 연도
 	 * @param month 월
-	 * @param ownerId 캘린더 소유자 아이디
+	 * @param calendarOwnerId 캘린더 소유자 아이디
 	 * @param loggedInUser 현재 인증된 유저
 	 * @return 먼슬리 캘린더
 	 */
-	@Operation(summary = "먼슬리 캘린더 조회 api", description = "현재 로그인 하고 있는 유저 또는 헤더의 Calendar-Own"
-		+ "er-Id와 동일한 아이디를 갖는 유저의 먼슬리 캘린더 조회")
+	@Operation(
+		summary = "먼슬리 캘린더 조회 api",
+		description = "현재 인증된 유저 또는 헤더의 Calendar-Owner-Id와 동일한 아이디를 갖는 유저의 먼슬리 캘린더 조회"
+	)
 	@GetMapping(params = {"year", "month"})
-	@ResponseStatus(HttpStatus.OK)
-	public MonthlyFetchResponse fetchMonthlyCalendar(@RequestParam int year, @RequestParam int month,
-		@RequestHeader(name = "Calendar-Owner-Id", required = false) String ownerId,
-		@AuthenticationPrincipal OAuth2User loggedInUser) {
+	public RsData<MonthlyFetchResponse> fetchMonthlyCalendar(
+		@RequestParam int year,
+		@RequestParam int month,
+		@RequestHeader(name = "Calendar-Owner-Id", required = false) String calendarOwnerId,
+		@AuthenticationPrincipal OAuth2User loggedInUser
+	) {
 		String loggedInUserId = loggedInUser.getName();
 		YearMonth yearMonth = YearMonth.of(year, month);
 
 		List<MonthlyFetchResponse.SingleCalendarDate> monthly = mapToMonthly(
-			calendarDateService.findAllByYearAndMonth(ownerId, loggedInUserId, yearMonth));
+			calendarDateService.findAllByYearAndMonth(
+				calendarOwnerId == null ? loggedInUserId : calendarOwnerId,
+				loggedInUserId,
+				yearMonth)
+		);
 
-		return new MonthlyFetchResponse(monthly);
+		return new RsData<>(
+			"200-10",
+			"먼슬리 캘린더 조회에 성공했습니다.",
+			new MonthlyFetchResponse(monthly)
+		);
 	}
 
 	/**
@@ -77,20 +86,23 @@ public class CalendarDateController {
 	 * @param loggedInUser 현재 인증된 유저
 	 * @return 캘린더
 	 */
-	@Operation(summary = "캘린더 조회 api", description = "현재 로그인 하고 있는 유저의 캘린더 조회")
+	@Operation(summary = "캘린더 조회 api", description = "캘린더 아이디에 해당하는 캘린더 조회")
 	@GetMapping("/{calendar-date-id}")
-	@ResponseStatus(HttpStatus.OK)
-	public CalendarDateFetchResponse fetchCalendarDate(@PathVariable(name = "calendar-date-id") Long calendarDateId,
-		@AuthenticationPrincipal OAuth2User loggedInUser) {
+	public RsData<CalendarDateFetchResponse> fetchCalendarDate(
+		@PathVariable(name = "calendar-date-id") Long calendarDateId,
+		@AuthenticationPrincipal OAuth2User loggedInUser
+	) {
 		String loggedInUserId = loggedInUser.getName();
 
-		// CalendarDate 조회
-		CalendarDate calendarDate = calendarDateService.findById(calendarDateId, loggedInUserId);
+		// CalendarDate와 함께 CalendarDate에 기록된 Music 리스트 조회
+		CalendarDateFetchResponse responseDto =
+			calendarDateService.findCalendarDateWithMusics(calendarDateId, loggedInUserId);
 
-		// CalendarDate와 연관된 MusicRecord를 이용해 Music 리스트 조회
-		List<Music> musics = musicRecordService.findMusicsByCalendarDateId(calendarDateId, loggedInUserId);
-
-		return CalendarDateFetchResponse.of(calendarDate, musics);
+		return new RsData<>(
+			"200-11",
+			"캘린더 조회에 성공했습니다.",
+			responseDto
+		);
 	}
 
 	/**
@@ -102,12 +114,15 @@ public class CalendarDateController {
 	 * @param loggedInUser 현재 인증된 유저
 	 * @return 생성된 캘린더 아이디
 	 */
-	@Operation(summary = "캘린더 생성 api", description = "현재 로그인 하고 있는 유저의 캘린더 생성")
+	@Operation(summary = "캘린더 생성 api", description = "현재 인증된 유저의 캘린더 생성")
 	@PostMapping(params = {"year", "month", "day"})
-	@ResponseStatus(HttpStatus.CREATED)
-	public CalendarDateCreateResponse createCalendarDate(@RequestParam int year, @RequestParam int month,
-		@RequestParam int day, @RequestBody CalendarDateCreateRequest request,
-		@AuthenticationPrincipal OAuth2User loggedInUser) {
+	public RsData<CalendarDateCreateResponse> createCalendarDate(
+		@RequestParam int year,
+		@RequestParam int month,
+		@RequestParam int day,
+		@RequestBody CalendarDateCreateRequest request,
+		@AuthenticationPrincipal OAuth2User loggedInUser
+	) {
 		String loggedInUserId = loggedInUser.getName();
 		LocalDate date = LocalDate.of(year, month, day);
 
@@ -117,9 +132,13 @@ public class CalendarDateController {
 		Long calendarDateId = calendarDate.getId();
 
 		// 음악 기록 저장
-		musicRecordService.updateMusicRecords(calendarDateId, loggedInUserId, request.musicIds());
+		musicRecordService.createMusicRecords(calendarDateId, request.musicIds());
 
-		return new CalendarDateCreateResponse(calendarDateId);
+		return new RsData<>(
+			"201-10",
+			"캘린더 생성에 성공했습니다",
+			new CalendarDateCreateResponse(calendarDateId)
+		);
 	}
 
 	/**
@@ -130,11 +149,18 @@ public class CalendarDateController {
 	 */
 	@Operation(summary = "음악 기록 수정 api", description = "현재 인증된 유저의 특정 캘린더 날짜에 대한 음악 기록 수정")
 	@PutMapping("/{calendar-date-id}/music")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void saveMusicToCalendarDate(@PathVariable(name = "calendar-date-id") Long calendarDateId,
-		@RequestBody CalendarDateMusicSaveRequest request, @AuthenticationPrincipal OAuth2User loggedInUser) {
+	public RsData<Void> saveMusicToCalendarDate(
+		@PathVariable(name = "calendar-date-id") Long calendarDateId,
+		@RequestBody CalendarDateMusicSaveRequest request,
+		@AuthenticationPrincipal OAuth2User loggedInUser
+	) {
 		String loggedInUserId = loggedInUser.getName();
 		musicRecordService.updateMusicRecords(calendarDateId, loggedInUserId, request.musicIds());
+
+		return new RsData<>(
+			"200-12",
+			"음악 기록 수정에 성공했습니다."
+		);
 	}
 
 	/**
@@ -145,11 +171,18 @@ public class CalendarDateController {
 	 */
 	@Operation(summary = "메모 기록 수정 api", description = "현재 인증된 유저의 특정 캘린더 날짜에 대한 메모 기록 수정")
 	@PatchMapping("/{calendar-date-id}/memo")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void writeMemoToCalendarDate(@PathVariable(name = "calendar-date-id") Long calendarDateId,
-		@RequestBody CalendarDateMemoSaveRequest request, @AuthenticationPrincipal OAuth2User loggedInUser) {
+	public RsData<Void> writeMemoToCalendarDate(
+		@PathVariable(name = "calendar-date-id") Long calendarDateId,
+		@RequestBody CalendarDateMemoSaveRequest request,
+		@AuthenticationPrincipal OAuth2User loggedInUser
+	) {
 		String loggedInUserId = loggedInUser.getName();
-		calendarDateService.writeMemo(calendarDateId, loggedInUserId, request.memo());
+		calendarDateService.updateMemo(calendarDateId, loggedInUserId, request.memo());
+
+		return new RsData<>(
+			"200-13",
+			"메모 기록 수정에 성공했습니다."
+		);
 	}
 
 	private List<MonthlyFetchResponse.SingleCalendarDate> mapToMonthly(List<CalendarDate> calendarDates) {
@@ -171,7 +204,6 @@ public class CalendarDateController {
 	 */
 	@Operation(summary = "오늘 날짜의 캘린더 조회", description = "오늘 날짜의 캘린더 기록이 존재하는지 확인하여 아이디 또는 날짜 반환")
 	@GetMapping("/today")
-	@ResponseStatus(HttpStatus.OK)
 	public RsData<?> checkToday(@AuthenticationPrincipal OAuth2User loggedInUser) {
 		String loggedInUserId = loggedInUser.getName();
 		LocalDate today = LocalDate.now();

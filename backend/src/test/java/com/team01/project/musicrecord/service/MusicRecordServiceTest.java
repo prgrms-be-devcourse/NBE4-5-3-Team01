@@ -1,5 +1,6 @@
 package com.team01.project.musicrecord.service;
 
+import static com.team01.project.global.permission.CalendarPermission.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -53,11 +54,16 @@ class MusicRecordServiceTest {
 	private Long calendarDateId;
 	private CalendarDate calendarDate;
 	private List<MusicRecord> musicRecords;
+	private String userId;
+	private User user;
 
 	@BeforeEach
 	void 초기화() {
+		userId = "test-user";
+		user = User.builder().id(userId).build();
+
 		calendarDateId = 1L;
-		calendarDate = CalendarDate.builder().id(calendarDateId).build();
+		calendarDate = CalendarDate.builder().id(calendarDateId).user(user).build();
 
 		Music music1 = Music.builder().id("1").name("Song 1").build();
 		Music music2 = Music.builder().id("2").name("Song 2").build();
@@ -72,15 +78,11 @@ class MusicRecordServiceTest {
 	void 기록한_음악_목록을_캘린더_아이디로_조회한다() {
 
 		// given
-		String userId = "test-user";
-		User user = User.builder().id(userId).build();
-
 		when(calendarDateRepository.findByIdOrThrow(calendarDateId)).thenReturn(calendarDate);
 		when(musicRecordRepository.findByCalendarDate(calendarDate)).thenReturn(musicRecords);
-		when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
 
 		// when
-		List<Music> result = musicRecordService.findMusicsByCalendarDateId(calendarDateId, userId);
+		List<Music> result = musicRecordService.findMusicsByCalendarDateId(calendarDateId);
 
 		// then
 		assertThat(result).hasSize(musicRecords.size());
@@ -113,14 +115,13 @@ class MusicRecordServiceTest {
 		String commonMusicId = musicRecords.getFirst().getMusic().getId();
 		String musicIdToAdd = "3";
 		String musicNameToAdd = "Song 3";
-		String userId = "test-user";
-		User user = User.builder().id(userId).build();
 
+		when(calendarDateRepository.findWithOwnerByIdOrThrow(calendarDateId)).thenReturn(calendarDate);
+		when(userRepository.getById(userId)).thenReturn(user);
+		when(permissionService.checkPermission(any(User.class), any(User.class))).thenReturn(EDIT);
 		when(musicRecordRepository.findByCalendarDate(calendarDate)).thenReturn(musicRecords);
-		when(calendarDateRepository.findByIdOrThrow(calendarDateId)).thenReturn(calendarDate);
-		when(musicRepository.getReferenceById(musicIdToAdd))
+		when(musicRepository.findByIdOrThrow(musicIdToAdd))
 			.thenReturn(Music.builder().id(musicIdToAdd).name(musicNameToAdd).build());
-		when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
 
 		List<String> newMusicIds = List.of(commonMusicId, musicIdToAdd);
 
