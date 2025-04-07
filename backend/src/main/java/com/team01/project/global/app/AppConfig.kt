@@ -1,28 +1,24 @@
-package com.team01.project.global.app;
+package com.team01.project.global.app
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.Getter;
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.context.annotation.Configuration
+import jakarta.annotation.PostConstruct
 
 @Configuration
-public class AppConfig {
+class AppConfig(
+    private val objectMapperInjected: ObjectMapper
+) {
 
-	public static boolean isNotProd() {
-		return true;
-	}
+    @PostConstruct
+    fun init() {
+        objectMapper = objectMapperInjected
+    }
 
-	@Getter
-	public static ObjectMapper objectMapper;
+    companion object {
+        lateinit var objectMapper: ObjectMapper
 
-	@Autowired
-	public void setObjectMapper(ObjectMapper objectMapper) {
-		AppConfig.objectMapper = objectMapper;
-	}
+        fun isNotProd(): Boolean = true
 
-	public static String getSiteFrontUrl() {
-		return "http://localhost:3000";
-	}
+        fun getSiteFrontUrl(): String = "http://localhost:3000"
+    }
 }
