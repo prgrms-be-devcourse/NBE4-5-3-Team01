@@ -1,7 +1,10 @@
 package com.team01.project.domain.notification.entity
 
 import com.team01.project.domain.user.entity.User
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToOne
 
 @Entity
 data class Subscription(

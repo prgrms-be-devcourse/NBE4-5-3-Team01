@@ -3,7 +3,6 @@ package com.team01.project.domain.notification.service
 import com.team01.project.domain.notification.constants.NotificationMessages
 import com.team01.project.domain.notification.dto.NotificationUpdateDto
 import com.team01.project.domain.notification.entity.Notification
-import com.team01.project.domain.notification.entity.Subscription
 import com.team01.project.domain.notification.event.NotificationInitEvent
 import com.team01.project.domain.notification.repository.NotificationRepository
 import com.team01.project.domain.notification.repository.SubscriptionRepository

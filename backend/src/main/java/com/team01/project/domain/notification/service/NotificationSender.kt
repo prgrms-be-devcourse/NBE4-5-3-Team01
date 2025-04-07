@@ -1,6 +1,5 @@
 package com.team01.project.domain.notification.service
 
-import com.team01.project.domain.notification.entity.Subscription
 import com.team01.project.domain.notification.repository.SubscriptionRepository
 import com.team01.project.domain.user.entity.User
 import org.springframework.mail.javamail.JavaMailSender

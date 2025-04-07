@@ -24,7 +24,7 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
 
     @Query(
         "SELECT DISTINCT n.notificationTime FROM Notification n " +
-                "WHERE n.notificationTime >= :start AND n.notificationTime < :end ORDER BY n.notificationTime ASC"
+            "WHERE n.notificationTime >= :start AND n.notificationTime < :end ORDER BY n.notificationTime ASC"
     )
     fun findDistinctNotificationTimeBetween(
         @Param("start") start: LocalTime,

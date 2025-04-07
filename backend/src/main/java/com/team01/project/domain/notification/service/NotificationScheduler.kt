@@ -1,7 +1,10 @@
 package com.team01.project.domain.notification.service
 
 import com.team01.project.domain.notification.entity.Notification
-import com.team01.project.domain.notification.event.*
+import com.team01.project.domain.notification.event.NotificationFollowEvent
+import com.team01.project.domain.notification.event.NotificationInitEvent
+import com.team01.project.domain.notification.event.NotificationRecordEvent
+import com.team01.project.domain.notification.event.NotificationUpdatedEvent
 import com.team01.project.domain.user.entity.User
 import jakarta.annotation.PostConstruct
 import org.springframework.context.event.EventListener
@@ -12,7 +15,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.util.*
+import java.util.Date
 import java.util.concurrent.ScheduledFuture
 
 @Service
