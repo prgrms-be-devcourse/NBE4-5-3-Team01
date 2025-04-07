@@ -8,7 +8,7 @@ data class NotificationDto(
     val userId: String,
     val title: String,
     val message: String,
-    val notificationTime: LocalTime,
+    val notificationTime: LocalTime?,
     val isEmailEnabled: Boolean,
     val isPushEnabled: Boolean
 ) {
