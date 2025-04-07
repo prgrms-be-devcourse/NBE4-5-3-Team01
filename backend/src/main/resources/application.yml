@@ -17,7 +17,7 @@ spring:
           spotify:
             client-id: fadbee879e0e4575a2bb28abfe276934
             client-secret: 9a938eb715544e279e03a547c0e64aa5
-            scope: user-read-private, user-read-email, playlist-read-private
+            scope: user-read-private, user-read-email, playlist-read-private, user-read-playback-state, user-modify-playback-state, streaming
             redirect-uri: http://localhost:8080/api/v1/login/oauth2/code/spotify
             authorization-grant-type: authorization_code
             client-name: Spotify
@@ -32,18 +32,18 @@ spring:
     level:
       org:
         hibernate:
-          SQL: debug
-      org.springframework.security: DEBUG
-      org.springframework.security.oauth2: DEBUG
-      org.springframework.web: DEBUG
+          SQL: DEBUG
+        springframework:
+          security: DEBUG
+          security.oauth2: DEBUG
+          web: DEBUG
 
   jpa:
     database: mysql
-    database-platform: org.hibernate.dialect.MySQL8Dialect
+    database-platform: org.hibernate.dialect.MySQLDialect
     generate-ddl: true
     hibernate:
       ddl-auto: update
-
 
   mail:
     username: ${HOST_EMAIL}

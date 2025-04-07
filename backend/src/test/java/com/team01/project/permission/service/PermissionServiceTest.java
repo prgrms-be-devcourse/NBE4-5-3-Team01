@@ -1,7 +1,11 @@
 package com.team01.project.permission.service;
 
-import static org.assertj.core.api.Assertions.*;
+import static com.team01.project.domain.follow.entity.type.Status.*;
+import static com.team01.project.global.permission.CalendarPermission.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -11,12 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.team01.project.domain.calendardate.entity.CalendarDate;
 import com.team01.project.domain.calendardate.repository.CalendarDateRepository;
+import com.team01.project.domain.follow.entity.type.Status;
 import com.team01.project.domain.follow.repository.FollowRepository;
+import com.team01.project.domain.user.entity.CalendarVisibility;
 import com.team01.project.domain.user.entity.User;
+import com.team01.project.global.permission.CalendarPermission;
 import com.team01.project.global.permission.PermissionService;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,26 +37,28 @@ class PermissionServiceTest {
 	@InjectMocks
 	private PermissionService permissionService;
 
-	private User owner;
+	private User calendarOwner;
 	private User loggedInUser;
-	private CalendarDate calendarDate;
 
 	@BeforeEach
 	void 초기화() {
-		owner = User.builder().id("owner").build();
-		loggedInUser = User.builder().id("logged in user").build();
-		calendarDate = CalendarDate.builder().id(1L).user(owner).build();
+		calendarOwner = User.builder()
+			.id("calendar owner")
+			.calendarVisibility(CalendarVisibility.FOLLOWER_ONLY) // 팔로워에게 공개
+			.build();
+		loggedInUser = User.builder()
+			.id("logged in user")
+			.build();
 	}
 
 	@Test
 	void 오너라서_캘린더를_수정할_권한이_있다() {
 
-		// given
-		when(calendarDateRepository.existsByIdAndUser(calendarDate.getId(), owner)).thenReturn(true);
+		// when
+		CalendarPermission calendarPermission = permissionService.checkPermission(calendarOwner, calendarOwner);
 
-		// when & then
-		assertThatCode(() -> permissionService.checkCalendarDateUpdatePermission(calendarDate.getId(), owner))
-			.doesNotThrowAnyException();
+		// then
+		assertEquals(EDIT, calendarPermission);
 
 	}
 
@@ -59,80 +66,55 @@ class PermissionServiceTest {
 	void 오너가_아니라서_캘린더를_수정할_권한이_없다() {
 
 		// given
-		when(calendarDateRepository.existsByIdAndUser(calendarDate.getId(), loggedInUser)).thenReturn(false);
+		when(followRepository.findStatusByToUserAndFromUser(any(User.class), any(User.class)))
+			.thenReturn(Optional.of(ACCEPT));
 
-		// when & then
-		assertThatThrownBy(
-			() -> permissionService.checkCalendarDateUpdatePermission(calendarDate.getId(), loggedInUser))
-			.isInstanceOf(ResponseStatusException.class)
-			.hasMessageContaining("해당 캘린더를 수정할 권한이 없습니다.");
+		// when
+		CalendarPermission calendarPermission = permissionService.checkPermission(calendarOwner, loggedInUser);
+
+		// then
+		assertNotEquals(EDIT, calendarPermission);
 
 	}
 
 	@Test
 	void 오너라서_캘린더를_조회할_권한이_있다() {
 
-		// given
-		when(calendarDateRepository.existsByIdAndUser(calendarDate.getId(), owner)).thenReturn(true);
+		// when
+		CalendarPermission calendarPermission = permissionService.checkPermission(calendarOwner, calendarOwner);
 
-		// when & then
-		assertThatCode(() -> permissionService.checkCalendarDateFetchPermission(calendarDate, owner))
-			.doesNotThrowAnyException();
+		// then
+		assertNotEquals(CalendarPermission.NONE, calendarPermission);
 
 	}
 
 	@Test
-	void 서로_팔로잉_중이라서_캘린더를_조회할_권한이_있다() {
+	void 팔로워라서_팔로워_공개_캘린더를_조회할_권한이_있다() {
 
 		// given
-		when(followRepository.existsByToUserAndFromUser(owner, loggedInUser)).thenReturn(true);
-		when(followRepository.existsByToUserAndFromUser(loggedInUser, owner)).thenReturn(true);
+		when(followRepository.findStatusByToUserAndFromUser(any(User.class), any(User.class)))
+			.thenReturn(Optional.of(ACCEPT));
 
-		// when & then
-		assertThatCode(() -> permissionService.checkCalendarDateFetchPermission(calendarDate, loggedInUser))
-			.doesNotThrowAnyException();
+		// when
+		CalendarPermission calendarPermission = permissionService.checkPermission(calendarOwner, loggedInUser);
+
+		// then
+		assertEquals(VIEW, calendarPermission);
 
 	}
 
 	@Test
 	void 캘린더를_조회할_권한이_없다() {
 
-		// when & then
-		assertThatThrownBy(() -> permissionService.checkCalendarDateFetchPermission(calendarDate, loggedInUser))
-			.isInstanceOf(ResponseStatusException.class)
-			.hasMessageContaining("해당 캘린더를 조회할 권한이 없습니다.");
-
-	}
-
-	@Test
-	void 오너라서_먼슬리_캘린더를_조회할_권한이_있다() {
-
-		// when & then
-		assertThatCode(() -> permissionService.checkMonthlyFetchPermission(owner, owner))
-			.doesNotThrowAnyException();
-
-	}
-
-	@Test
-	void 서로_팔로잉_중이라서_먼슬리_캘린더를_조회할_권한이_있다() {
-
 		// given
-		when(followRepository.existsByToUserAndFromUser(owner, loggedInUser)).thenReturn(true);
-		when(followRepository.existsByToUserAndFromUser(loggedInUser, owner)).thenReturn(true);
+		when(followRepository.findStatusByToUserAndFromUser(any(User.class), any(User.class)))
+			.thenReturn(Optional.of(Status.NONE));
 
-		// when & then
-		assertThatCode(() -> permissionService.checkMonthlyFetchPermission(owner, loggedInUser))
-			.doesNotThrowAnyException();
+		// when
+		CalendarPermission calendarPermission = permissionService.checkPermission(calendarOwner, loggedInUser);
 
-	}
-
-	@Test
-	void 먼슬리_캘린더를_조회할_권한이_없다() {
-
-		// when & then
-		assertThatThrownBy(() -> permissionService.checkMonthlyFetchPermission(owner, loggedInUser))
-			.isInstanceOf(ResponseStatusException.class)
-			.hasMessageContaining("해당 먼슬리 캘린더를 조회할 권한이 없습니다.");
+		// then
+		assertEquals(CalendarPermission.NONE, calendarPermission);
 
 	}
 

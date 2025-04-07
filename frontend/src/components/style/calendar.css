@@ -1,0 +1,33 @@
+.fc {
+    background-color: #F8F7FF;
+    color: #393D3F;
+}
+
+.fc-daygrid-day {
+    background-color: white;
+}
+
+.fc-daygrid-day-number {
+    color: #393D3F !important;
+}
+
+.fc-daygrid-day-frame {
+    position: relative;
+    overflow: hidden;
+}
+
+.fc .fc-daygrid-body-natural .fc-daygrid-day-events {
+    margin-bottom: 0;
+}
+
+.fc .fc-toolbar {
+    justify-content: space-evenly;
+    background-color: #F8F7FF;
+    color: #393D3F;
+}
+
+.fc .fc-toolbar-chunk .fc-button {
+    border: none;
+    background: #CDBFFF;
+    color: #393D3F;
+}

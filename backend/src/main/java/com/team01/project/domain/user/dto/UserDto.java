@@ -3,6 +3,7 @@ package com.team01.project.domain.user.dto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.team01.project.domain.user.entity.CalendarVisibility;
 import com.team01.project.domain.user.entity.User;
 
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ public class UserDto {
 	private LocalDate birthDay;
 	private LocalDateTime createdDate;
 	private String field;
+	private CalendarVisibility calendarVisibility;
 	private String userIntro;
 	private String image;
 	private String password;
@@ -36,6 +38,7 @@ public class UserDto {
 			.birthDay(user.getBirthDay())
 			.createdDate(user.getCreatedDate())
 			.field(user.getField())
+			.calendarVisibility(user.getCalendarVisibility())
 			.userIntro(user.getUserIntro())
 			.image(user.getImage())
 			.password(user.getUserPassword())

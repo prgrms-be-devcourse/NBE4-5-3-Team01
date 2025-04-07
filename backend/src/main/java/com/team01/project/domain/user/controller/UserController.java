@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.team01.project.domain.follow.controller.dto.FollowResponse;
+import com.team01.project.domain.user.dto.CalendarVisibilityUpdateRequest;
 import com.team01.project.domain.user.dto.SimpleUserResponse;
 import com.team01.project.domain.user.dto.UserDto;
 import com.team01.project.domain.user.entity.User;
@@ -221,16 +223,25 @@ public class UserController {
 	@Operation(summary = "유저 조회 api", description = "아이디가 user-id인 유저의 정보를 조회한다.")
 	@ResponseBody
 	@GetMapping("/{user-id}")
-	public SimpleUserResponse getUserByUserId(@PathVariable(name = "user-id") String userId) {
-		return SimpleUserResponse.from(userService.getUserById(userId));
+	public RsData<SimpleUserResponse> getUserByUserId(@PathVariable(name = "user-id") String userId) {
+		return new RsData<>(
+			"200-15",
+			"유저 정보 조회에 성공했습니다.",
+			SimpleUserResponse.from(userService.getUserById(userId))
+		);
 	}
 
 	@Operation(summary = "유저 조회 api", description = "현재 로그인한 유저의 정보를 조회한다.")
 	@ResponseBody
 	@GetMapping("/byCookie")
-	public SimpleUserResponse getUserByCookie(@CookieValue(name = "accessToken") String accessToken) {
+	public RsData<SimpleUserResponse> getUserByCookie(@CookieValue(name = "accessToken") String accessToken) {
 		String userId = jwtTokenProvider.getUserIdFromToken(accessToken);
-		return SimpleUserResponse.from(userService.getUserById(userId));
+
+		return new RsData<>(
+			"200-15",
+			"유저 정보 조회에 성공했습니다.",
+			SimpleUserResponse.from(userService.getUserById(userId))
+		);
 	}
 
 	@Operation(summary = "Spotify Token 반환", description = "쿠키에 존재하는 Spotify Token 반환한다.")
@@ -263,4 +274,24 @@ public class UserController {
 
 		return new RsData<>("200-1", "아이디 중복 체크", exists);
 	}
+
+	@Operation(summary = "캘린더 공개 여부 수정 api", description = "현재 로그인한 유저의 캘린더 공개 여부를 수정한다.")
+	@ResponseBody
+	@PatchMapping("/calendar-visibility")
+	public RsData<Void> updateCalendarVisibility(
+		@RequestBody(required = false) CalendarVisibilityUpdateRequest requestDto,
+		@AuthenticationPrincipal OAuth2User user
+	) {
+		String userId = user.getName();
+
+		if (requestDto != null && requestDto.calendarVisibility() != null) {
+			userService.updateCalendarVisibility(userId, requestDto.calendarVisibility());
+		}
+
+		return new RsData<>(
+			"200-14",
+			"캘린더 공개 여부 수정이 완료되었습니다."
+		);
+	}
+
 }
