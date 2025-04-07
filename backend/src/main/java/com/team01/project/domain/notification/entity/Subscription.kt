@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 
 @Entity
-data class Subscription(
+class Subscription(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
