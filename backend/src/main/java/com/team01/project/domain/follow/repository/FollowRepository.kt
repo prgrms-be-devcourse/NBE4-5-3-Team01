@@ -1,33 +1,33 @@
-package com.team01.project.domain.follow.repository;
+package com.team01.project.domain.follow.repository
 
-import java.util.List;
-import java.util.Optional;
+import com.team01.project.domain.follow.entity.Follow
+import com.team01.project.domain.follow.entity.type.Status
+import com.team01.project.domain.user.entity.User
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import java.util.*
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+interface FollowRepository : JpaRepository<Follow?, Long?> {
+    fun findByToUserAndFromUser(toUser: User, fromUser: User): Optional<Follow>
 
-import com.team01.project.domain.follow.entity.Follow;
-import com.team01.project.domain.follow.entity.type.Status;
-import com.team01.project.domain.user.entity.User;
+    fun findByFromUserAndStatus(fromUser: User, status: Status): List<Follow>
 
-public interface FollowRepository extends JpaRepository<Follow, Long> {
-	Optional<Follow> findByToUserAndFromUser(User toUser, User fromUser);
+    fun findByFromUser(fromUser: User): List<Follow>
 
-	List<Follow> findByFromUserAndStatus(User fromUser, Status status);
+    fun findByToUserAndStatus(toUser: User, status: Status?): List<Follow>
 
-	List<Follow> findByFromUser(User fromUser);
+    fun existsByToUserAndFromUser(toUser: User, fromUser: User): Boolean
 
-	List<Follow> findByToUserAndStatus(User toUser, Status status);
+    fun existsByToUserAndFromUserAndStatus(toUser: User, fromUser: User, status: Status): Boolean
 
-	boolean existsByToUserAndFromUser(User toUser, User fromUser);
+    fun countByFromUserAndStatus(fromUser: User, status: Status): Long
 
-	boolean existsByToUserAndFromUserAndStatus(User toUser, User fromUser, Status status);
+    fun countByToUserAndStatus(toUser: User, status: Status): Long
 
-	Long countByFromUserAndStatus(User fromUser, Status status);
-
-	Long countByToUserAndStatus(User toUser, Status status);
-
-	@Query("SELECT f.status FROM Follow f WHERE f.toUser = :toUser AND f.fromUser = :fromUser")
-	Optional<Status> findStatusByToUserAndFromUser(@Param("toUser") User toUser, @Param("fromUser") User fromUser);
+    @Query("SELECT f.status FROM Follow f WHERE f.toUser = :toUser AND f.fromUser = :fromUser")
+    fun findStatusByToUserAndFromUser(
+        @Param("toUser") toUser: User,
+        @Param("fromUser") fromUser: User
+    ): Optional<Status>
 }

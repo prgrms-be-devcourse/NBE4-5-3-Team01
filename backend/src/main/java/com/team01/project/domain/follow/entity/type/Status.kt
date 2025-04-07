@@ -1,7 +1,7 @@
-package com.team01.project.domain.follow.entity.type;
+package com.team01.project.domain.follow.entity.type
 
-public enum Status {
-	PENDING,
-	ACCEPT,
-	NONE
+enum class Status {
+    PENDING,
+    ACCEPT,
+    NONE
 }
