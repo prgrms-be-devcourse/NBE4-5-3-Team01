@@ -33,7 +33,6 @@ class Music(
     var uri: String? = null
 ) {
 
-    // 기본 생성자 (JPA를 위한 protected no-arg constructor)
     protected constructor() : this(
         id = "",
         name = "",

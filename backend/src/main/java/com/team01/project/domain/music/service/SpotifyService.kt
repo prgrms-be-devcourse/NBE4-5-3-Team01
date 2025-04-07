@@ -114,16 +114,7 @@ class SpotifyService {
 
             items.map { item ->
                 val track = objectMapper.treeToValue(item, SpotifyTrackResponse::class.java)
-                MusicRequest(
-                    id = track.id,
-                    name = track.name,
-                    singer = track.getArtistsAsString(),
-                    singerId = track.getArtistsIdAsString(),
-                    releaseDate = parseReleaseDate(track.album.releaseDate),
-                    albumImage = track.album.images.firstOrNull()?.url ?: "",
-                    genre = null,
-                    uri = track.uri
-                )
+                track.toMusicRequest(parseReleaseDate(track.album.releaseDate)) // ✅ 여기만 바뀜
             }
         } catch (e: WebClientResponseException) {
             throw SpotifyApiException("Spotify API 요청 오류: ${e.responseBodyAsString}", e)
@@ -144,20 +135,11 @@ class SpotifyService {
                 .block() ?: throw SpotifyApiException("Spotify API 응답이 없습니다.")
 
             val tracks = objectMapper.readTree(jsonResponse).path("tracks")
-            if (!tracks.isArray) throw SpotifyApiException("Spotify에서 트랙 정보를 가져오지 못했습니다.")
+            if (!tracks.isArray) throw SpotifyApiException("Spotify 에서 트랙 정보를 가져오지 못했습니다.")
 
             tracks.map { node ->
                 val track = objectMapper.treeToValue(node, SpotifyTrackResponse::class.java)
-                MusicRequest(
-                    id = track.id,
-                    name = track.name,
-                    singer = track.getArtistsAsString(),
-                    singerId = track.getArtistsIdAsString(),
-                    releaseDate = parseReleaseDate(track.album.releaseDate),
-                    albumImage = track.album.images.firstOrNull()?.url ?: "",
-                    genre = null,
-                    uri = track.uri
-                )
+                track.toMusicRequest(parseReleaseDate(track.album.releaseDate))
             }
         } catch (e: WebClientResponseException) {
             throw SpotifyApiException("Spotify API 요청 오류: ${e.responseBodyAsString}", e)
@@ -209,16 +191,7 @@ class SpotifyService {
                 if (trackNode.isMissingNode || trackNode.isNull) return@mapNotNull null
 
                 val track = objectMapper.treeToValue(trackNode, SpotifyTrackResponse::class.java)
-                MusicRequest(
-                    id = track.id,
-                    name = track.name,
-                    singer = track.getArtistsAsString(),
-                    singerId = track.getArtistsIdAsString(),
-                    releaseDate = parseReleaseDate(track.album.releaseDate),
-                    albumImage = track.album.images.firstOrNull()?.url ?: "",
-                    genre = null,
-                    uri = track.uri
-                )
+                track.toMusicRequest(parseReleaseDate(track.album.releaseDate))
             }
         } catch (e: Exception) {
             throw SpotifyApiException("Playlist 트랙 조회 실패: ${e.message}", e)
@@ -238,5 +211,18 @@ class SpotifyService {
             println("날짜 변환 오류: $releaseDate")
             null
         }
+    }
+
+    private fun SpotifyTrackResponse.toMusicRequest(parsedDate: LocalDate?): MusicRequest {
+        return MusicRequest(
+            id = this.id,
+            name = this.name,
+            singer = this.getArtistsAsString(),
+            singerId = this.getArtistsIdAsString(),
+            releaseDate = parsedDate,
+            albumImage = this.album.images.firstOrNull()?.url ?: "",
+            genre = null,
+            uri = this.uri
+        )
     }
 }

@@ -14,7 +14,7 @@ data class MusicResponse(
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonDeserialize(using = LocalDateDeserializer::class)
-    val releaseDate: LocalDate,
+    val releaseDate: LocalDate?,
 
     val albumImage: String,
     val genre: String?,

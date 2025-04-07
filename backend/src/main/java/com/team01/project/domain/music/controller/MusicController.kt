@@ -23,7 +23,7 @@ class MusicController(
 
     @GetMapping("/spotify/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "ID로 Spotify 음악 검색", description = "Spotify에서 특정 ID의 음악을 검색하여 반환")
+    @Operation(summary = "ID로 Spotify 음악 검색", description = "Spotify 에서 특정 ID의 음악을 검색하여 반환")
     fun getMusicFromSpotify(
         @PathVariable id: String,
         @AuthenticationPrincipal user: OAuth2User
@@ -31,23 +31,19 @@ class MusicController(
         val token = user.getAttribute<String>("spotifyToken")
             ?: throw IllegalStateException("Spotify 토큰이 없습니다")
 
-                ?: throw IllegalStateException("Spotify 토큰이 없습니다")
-
         val musicRequest = spotifyService.getTrackWithGenre(id, token)
         return RsData("200-1", "음악 조회 성공", MusicResponse.fromEntity(musicRequest.toEntity()))
     }
 
     @PostMapping("/spotify/{id}")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "ID로 Spotify 음악 저장", description = "Spotify에서 특정 ID의 음악 정보를 가져와 DB에 저장")
+    @Operation(summary = "ID로 Spotify 음악 저장", description = "Spotify 에서 특정 ID의 음악 정보를 가져와 DB에 저장")
     fun saveMusicFromSpotify(
         @PathVariable id: String,
         @AuthenticationPrincipal user: OAuth2User
     ): RsData<String> {
         val token = user.getAttribute<String>("spotifyToken")
             ?: throw IllegalStateException("Spotify 토큰이 없습니다")
-
-                ?: throw IllegalStateException("Spotify 토큰이 없습니다")
 
         val musicRequest = spotifyService.getTrackWithGenre(id, token)
         musicService.saveMusic(musicRequest.toEntity())
@@ -56,15 +52,13 @@ class MusicController(
 
     @PostMapping("/save-all")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "음악 리스트 저장", description = "장르 정보가 없을 경우 Spotify에 조회하여 업데이트")
+    @Operation(summary = "음악 리스트 저장", description = "장르 정보가 없을 경우 Spotify 조회하여 업데이트")
     fun saveAllMusic(
         @RequestBody musicList: List<Music>,
         @AuthenticationPrincipal user: OAuth2User
     ): RsData<String> {
         val token = user.getAttribute<String>("spotifyToken")
             ?: throw IllegalStateException("Spotify 토큰이 없습니다")
-
-                ?: throw IllegalStateException("Spotify 토큰이 없습니다")
 
         val updated = musicList.map { music ->
             if (music.genre.isNullOrEmpty()) {
@@ -80,7 +74,7 @@ class MusicController(
 
     @GetMapping("/spotify/search")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "키워드로 Spotify에서 음악 검색", description = "Spotify에서 키워드로 음악 검색")
+    @Operation(summary = "키워드로 Spotify 음악 검색", description = "Spotify 에서 키워드로 음악 검색")
     fun searchTracks(
         @RequestParam keyword: String,
         @AuthenticationPrincipal user: OAuth2User
@@ -94,7 +88,7 @@ class MusicController(
     }
 
     @GetMapping("/spotify/artist/{artistId}/top-tracks")
-    @Operation(summary = "아티스트 인기곡 조회", description = "Spotify에서 특정 아티스트의 인기곡 반환")
+    @Operation(summary = "아티스트 인기곡 조회", description = "Spotify 에서 특정 아티스트의 인기곡 반환")
     fun getTopTracksByArtist(
         @PathVariable artistId: String,
         @AuthenticationPrincipal user: OAuth2User
@@ -120,7 +114,7 @@ class MusicController(
     }
 
     @GetMapping("/spotify/playlist/{playlistId}")
-    @Operation(summary = "Playlist 트랙 조회", description = "선택된 Playlist의 트랙 목록 반환")
+    @Operation(summary = "Playlist 트랙 조회", description = "선택된 Playlist 트랙 목록 반환")
     fun getTracksFromPlaylist(
         @PathVariable playlistId: String,
         @AuthenticationPrincipal user: OAuth2User
@@ -148,7 +142,7 @@ class MusicController(
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "ID로 음악 조회", description = "DB에서 ID로 음악 조회")
+    @Operation(summary = "ID로 음악 조회", description = "DB 에서 ID로 음악 조회")
     fun getMusicById(@PathVariable id: String): RsData<MusicResponse> {
         val music = musicService.getMusicById(id)
         return RsData("200-5", "ID로 음악 조회 성공", MusicResponse.fromEntity(music))
@@ -156,7 +150,7 @@ class MusicController(
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "ID로 음악 삭제", description = "DB에서 ID로 음악 삭제")
+    @Operation(summary = "ID로 음악 삭제", description = "DB 에서 ID로 음악 삭제")
     fun deleteMusic(@PathVariable id: String): RsData<String> {
         musicService.deleteMusic(id)
         return RsData("204-1", "음악 삭제 완료", null)
