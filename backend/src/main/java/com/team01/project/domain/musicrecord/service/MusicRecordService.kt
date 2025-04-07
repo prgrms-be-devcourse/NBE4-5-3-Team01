@@ -60,7 +60,7 @@ class MusicRecordService(
         // 기록할 MusicId 목록
         val newMusicIdSet = newMusicIds.toSet()
 
-        val musicRecordsToAdd = newMusicIdSet.map{ musicId ->
+        val musicRecordsToAdd = newMusicIdSet.map { musicId ->
             MusicRecord(
                 id = MusicRecordId(calendarDateId, musicId),
                 calendarDate = calendarDate,
@@ -112,7 +112,7 @@ class MusicRecordService(
                     calendarDate = calendarDate,
                     music = musicRepository.findByIdOrThrow(musicId)
                 )
-        }
+            }
 
         // 6. MusicRecord 업데이트
         musicRecordRepository.deleteAll(musicRecordsToDelete)

@@ -38,7 +38,7 @@ class MusicRecordController(
         // OAuth2User에서 사용자 ID를 가져온 후 조회
         val userId = user.name
         val records = musicRecordService.getMusicRecordsByUserAndDateRange(userId, startDate, endDate)
-            .map{ MusicRecordDto.from(it) }
+            .map { MusicRecordDto.from(it) }
 
         return RsData(
             code = "200-1",
