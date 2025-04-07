@@ -35,7 +35,6 @@ class CalendarDateController(
     private val calendarDateService: CalendarDateService,
     private val musicRecordService: MusicRecordService
 ) {
-
     /**
      * 먼슬리 캘린더 조회
      * @param year 연도
@@ -214,5 +213,4 @@ class CalendarDateController(
             .map { MonthlyFetchResponse.SingleCalendarDate.of(calendarDate, it.music) }
             .orElseGet { MonthlyFetchResponse.SingleCalendarDate.from(calendarDate) }
     }
-
 }
