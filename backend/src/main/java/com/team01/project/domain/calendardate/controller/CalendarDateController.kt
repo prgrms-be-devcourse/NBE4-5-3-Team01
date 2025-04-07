@@ -123,7 +123,7 @@ class CalendarDateController(
         val calendarDate = calendarDateService.create(loggedInUserId, date, request.memo)
 
         // 음악 기록 저장
-        musicRecordService.createMusicRecords(calendarDate.id, request.musicIds)
+        musicRecordService.createMusicRecords(calendarDate.id!!, request.musicIds)
 
         return RsData(
             "201-10",
@@ -212,7 +212,7 @@ class CalendarDateController(
     }
 
     private fun mapToSingleCalendarDate(calendarDate: CalendarDate): MonthlyFetchResponse.SingleCalendarDate {
-        val musicRecord = musicRecordService.findOneByCalendarDateId(calendarDate.id)
+        val musicRecord = musicRecordService.findOneByCalendarDateId(calendarDate.id!!)
         return musicRecord
             .map { MonthlyFetchResponse.SingleCalendarDate.of(calendarDate, it.music) }
             .orElseGet { MonthlyFetchResponse.SingleCalendarDate.from(calendarDate) }
