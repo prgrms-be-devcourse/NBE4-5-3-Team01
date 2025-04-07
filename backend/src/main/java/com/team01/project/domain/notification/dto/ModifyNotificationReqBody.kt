@@ -1,11 +1,8 @@
-package com.team01.project.domain.notification.dto;
+package com.team01.project.domain.notification.dto
 
-import java.time.LocalTime;
+import java.time.LocalTime
+import jakarta.validation.constraints.NotNull
 
-import jakarta.validation.constraints.NotNull;
-
-
-public record ModifyNotificationReqBody(
-		@NotNull LocalTime notificationTime
-) {
-}
+data class ModifyNotificationReqBody(
+	@field:NotNull val notificationTime: LocalTime
+)

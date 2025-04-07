@@ -1,27 +1,24 @@
-package com.team01.project.domain.notification.dto;
+package com.team01.project.domain.notification.dto
 
-import java.time.LocalTime;
+import com.team01.project.domain.notification.entity.Notification
+import java.time.LocalTime
 
-import com.team01.project.domain.notification.entity.Notification;
-
-public record NotificationDto(
-		Long id,
-		String userId,
-		String title,
-		String message,
-		LocalTime notificationTime,
-		boolean isEmailEnabled,
-		boolean isPushEnabled
+data class NotificationDto(
+    val id: Long?,
+    val userId: String,
+    val title: String,
+    val message: String,
+    val notificationTime: LocalTime,
+    val isEmailEnabled: Boolean,
+    val isPushEnabled: Boolean
 ) {
-	public NotificationDto(Notification notification) {
-		this(
-				notification.getId(),
-				notification.getUser().getId(),
-				notification.getTitle(),
-				notification.getMessage(),
-				notification.getNotificationTime(),
-				notification.isEmailEnabled(),
-				notification.isPushEnabled()
-		);
-	}
+    constructor(notification: Notification) : this(
+        id = notification.id,
+        userId = notification.user.id,
+        title = notification.title,
+        message = notification.message,
+        notificationTime = notification.notificationTime,
+        isEmailEnabled = notification.isEmailEnabled,
+        isPushEnabled = notification.isPushEnabled
+    )
 }

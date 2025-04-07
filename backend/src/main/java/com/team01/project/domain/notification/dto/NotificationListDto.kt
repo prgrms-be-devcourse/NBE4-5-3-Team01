@@ -1,23 +1,20 @@
-package com.team01.project.domain.notification.dto;
+package com.team01.project.domain.notification.dto
 
-import java.time.LocalDateTime;
+import com.team01.project.domain.notification.entity.NotificationList
+import java.time.LocalDateTime
 
-import com.team01.project.domain.notification.entity.NotificationList;
-
-public record NotificationListDto(
-		Long id,
-		String userId,
-		String message,
-		LocalDateTime notificationTime,
-		boolean isRead
+data class NotificationListDto(
+    val id: Long?,
+    val userId: String,
+    val message: String,
+    val notificationTime: LocalDateTime,
+    val isRead: Boolean
 ) {
-	public NotificationListDto(NotificationList notificationList) {
-		this(
-				notificationList.getId(),
-				notificationList.getUser().getId(),
-				notificationList.getMessage(),
-				notificationList.getNotificationTime(),
-				notificationList.isRead()
-		);
-	}
+    constructor(notificationList: NotificationList) : this(
+        id = notificationList.id,
+        userId = notificationList.user.id,
+        message = notificationList.message,
+        notificationTime = notificationList.notificationTime,
+        isRead = notificationList.isRead
+    )
 }
