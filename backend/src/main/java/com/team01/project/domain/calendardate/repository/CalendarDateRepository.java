@@ -17,8 +17,6 @@ public interface CalendarDateRepository extends JpaRepository<CalendarDate, Long
 
 	boolean existsByUserAndDate(User user, LocalDate date);
 
-	boolean existsByIdAndUser(Long calendarDateId, User user);
-
 	@Query("SELECT c FROM CalendarDate c JOIN FETCH c.user WHERE c.id = :calendarDateId")
 	Optional<CalendarDate> findWithOwnerById(@Param("calendarDateId") Long calendarDateId);
 
