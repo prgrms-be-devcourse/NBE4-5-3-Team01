@@ -51,20 +51,15 @@ class MusicService(
 
     @Transactional(readOnly = true)
     fun getRandomRecentMusic(userId: String): Optional<Music> {
-        val recentCalendarDateIdOpt = musicRecordRepository.findRecentCalendarDateIdByUserId(userId)
+        val recentCalendarDateId = musicRecordRepository
+            .findRecentCalendarDateIdByUserId(userId)
+            .orElse(null) ?: return Optional.empty()
 
-        if (recentCalendarDateIdOpt.isEmpty) {
-            return Optional.empty()
-        }
-
-        val recentCalendarDateId = recentCalendarDateIdOpt.get()
-        val musicIds = musicRecordRepository.findMusicIdsByCalendarDateId(recentCalendarDateId)
-
-        if (musicIds.isEmpty()) {
-            return Optional.empty()
-        }
-
-        val randomMusicId = musicIds.random()
+        val randomMusicId = musicRecordRepository
+            .findMusicIdsByCalendarDateId(recentCalendarDateId)
+            .takeIf { it.isNotEmpty() }
+            ?.random() ?: return Optional.empty()
+        
         return musicRepository.findById(randomMusicId)
     }
 }

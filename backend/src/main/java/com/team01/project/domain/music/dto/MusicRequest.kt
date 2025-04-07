@@ -33,8 +33,4 @@ data class MusicRequest(
     fun toEntity(): Music {
         return Music(id, name, singer, singerId, releaseDate, albumImage, genre, uri)
     }
-
-    fun setGenres(genres: String) {
-        this.genre = genres
-    }
 }
