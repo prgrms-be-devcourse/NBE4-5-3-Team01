@@ -1,8 +1,8 @@
 package com.team01.project.global.app
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.context.annotation.Configuration
 import jakarta.annotation.PostConstruct
+import org.springframework.context.annotation.Configuration
 
 @Configuration
 class AppConfig(
