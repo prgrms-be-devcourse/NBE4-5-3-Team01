@@ -1,9 +1,8 @@
-package com.team01.project.global.config;
+package com.team01.project.global.config
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.context.annotation.Configuration
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 
 @Configuration
 @EnableJpaAuditing
-public class JpaConfig {
-}
+class JpaConfig
