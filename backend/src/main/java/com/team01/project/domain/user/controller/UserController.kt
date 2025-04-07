@@ -33,7 +33,7 @@ import org.springframework.web.multipart.MultipartFile
 @Controller
 class UserController(
     private val jwtTokenProvider: JwtTokenProvider,
-    private val userService: UserService,
+    private val userService: UserService
 ) {
 
     @Operation(summary = "로그인 api", description = "db에서 아이디 조회 후 입력한 비밀번호 검증 후 토큰 반환")

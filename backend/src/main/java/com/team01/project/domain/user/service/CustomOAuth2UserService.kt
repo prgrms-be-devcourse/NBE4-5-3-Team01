@@ -19,13 +19,12 @@ import java.time.LocalTime
 import java.util.Collections
 import java.util.Optional
 
-
 @Service
 class CustomOAuth2UserService(
     private val jwtTokenProvider: JwtTokenProvider,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val userRepository: UserRepository,
-    private val notificationService: NotificationService,
+    private val notificationService: NotificationService
 ) : OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private val delegate = DefaultOAuth2UserService()

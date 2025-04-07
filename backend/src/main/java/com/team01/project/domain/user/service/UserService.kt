@@ -41,7 +41,6 @@ import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import java.util.Base64
 
-
 @Service
 class UserService(
     private val userRepository: UserRepository,
@@ -130,7 +129,10 @@ class UserService(
         val request: HttpEntity<MultiValueMap<String, String>> = HttpEntity(body, headers)
         val restTemplate = RestTemplate()
         val response: ResponseEntity<String> = restTemplate.exchange(
-            spotifyTokenUrl, HttpMethod.POST, request, String::class.java
+            spotifyTokenUrl,
+            HttpMethod.POST,
+            request,
+            String::class.java
         )
 
         return if (response.statusCode == HttpStatus.OK) {
