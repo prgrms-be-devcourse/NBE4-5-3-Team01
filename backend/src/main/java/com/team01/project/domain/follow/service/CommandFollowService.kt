@@ -1,55 +1,47 @@
-package com.team01.project.domain.follow.service;
+package com.team01.project.domain.follow.service
 
-import java.time.LocalTime;
-
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.team01.project.domain.follow.entity.Follow;
-import com.team01.project.domain.follow.repository.FollowRepository;
-import com.team01.project.domain.notification.event.NotificationFollowEvent;
-import com.team01.project.domain.user.entity.User;
-import com.team01.project.domain.user.repository.UserRepository;
-
-import lombok.RequiredArgsConstructor;
+import com.team01.project.domain.follow.entity.Follow
+import com.team01.project.domain.follow.repository.FollowRepository
+import com.team01.project.domain.notification.event.NotificationFollowEvent
+import com.team01.project.domain.user.repository.UserRepository
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalTime
 
 @Service
 @Transactional
-@RequiredArgsConstructor
-public class CommandFollowService {
+class CommandFollowService(
+    private val followRepository: FollowRepository,
+    private val userRepository: UserRepository,
+    private val eventPublisher: ApplicationEventPublisher
+) {
 
-	private final FollowRepository followRepository;
-	private final UserRepository userRepository;
-	private final ApplicationEventPublisher eventPublisher;
+    fun create(fromUserId: String, toUserId: String) {
+        val fromUser = userRepository.getById(fromUserId)
+        val toUser = userRepository.getById(toUserId)
 
-	public void create(String fromUserId, String toUserId) {
-		User fromUser = userRepository.getById(fromUserId);
-		User toUser = userRepository.getById(toUserId);
+        check(!followRepository.existsByToUserAndFromUser(toUser, fromUser)) { "이미 팔로우 요청을 보냈습니다." }
+        followRepository.save(Follow(toUser = toUser, fromUser = fromUser))
 
-		if (followRepository.existsByToUserAndFromUser(toUser, fromUser)) {
-			throw new IllegalStateException("이미 팔로우 요청을 보냈습니다.");
-		}
-		followRepository.save(new Follow(toUser, fromUser));
+        eventPublisher.publishEvent(NotificationFollowEvent(this, LocalTime.now(), toUser, fromUser))
+    }
 
-		eventPublisher.publishEvent(new NotificationFollowEvent(this, LocalTime.now(), toUser, fromUser));
-	}
+    fun delete(fromUserId: String, toUserId: String) {
+        val fromUser = userRepository.getById(fromUserId)
+        val toUser = userRepository.getById(toUserId)
+        val follow = followRepository.findByToUserAndFromUser(toUser, fromUser)
+            .orElseThrow { IllegalArgumentException("팔로우를 찾을 수 없습니다.") }
 
-	public void delete(String fromUserId, String toUserId) {
-		User fromUser = userRepository.getById(fromUserId);
-		User toUser = userRepository.getById(toUserId);
-		Follow follow = followRepository.findByToUserAndFromUser(toUser, fromUser)
-			.orElseThrow(() -> new IllegalArgumentException("팔로우를 찾을 수 없습니다."));
+        followRepository.delete(follow)
+    }
 
-		followRepository.delete(follow);
-	}
+    fun accept(fromUserId: String, toUserId: String) {
+        val fromUser = userRepository.getById(fromUserId)
+        val toUser = userRepository.getById(toUserId)
 
-	public void accept(String fromUserId, String toUserId) {
-		User fromUser = userRepository.getById(fromUserId);
-		User toUser = userRepository.getById(toUserId);
-
-		Follow follow = followRepository.findByToUserAndFromUser(toUser, fromUser)
-			.orElseThrow(() -> new IllegalArgumentException("팔로우를 찾을 수 없습니다."));
-		follow.accept();
-	}
+        val follow = followRepository.findByToUserAndFromUser(toUser, fromUser)
+            .orElseThrow { IllegalArgumentException("팔로우를 찾을 수 없습니다.") }
+        follow.accept()
+    }
 }
