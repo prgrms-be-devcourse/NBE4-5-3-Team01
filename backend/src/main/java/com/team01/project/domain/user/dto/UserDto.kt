@@ -16,7 +16,7 @@ data class UserDto(
     val birthDay: LocalDate?,
     val createdDate: LocalDateTime?,
     val field: String?,
-    val calendarVisibility: CalendarVisibility,
+    val calendarVisibility: CalendarVisibility
 ) {
     companion object {
         fun from(user: User): UserDto {

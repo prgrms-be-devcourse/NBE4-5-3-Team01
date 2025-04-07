@@ -4,9 +4,6 @@ import com.team01.project.domain.follow.controller.dto.FollowResponse
 import com.team01.project.domain.user.dto.CalendarVisibilityUpdateRequest
 import com.team01.project.domain.user.dto.SimpleUserResponse
 import com.team01.project.domain.user.dto.UserDto
-import com.team01.project.domain.user.repository.RefreshTokenRepository
-import com.team01.project.domain.user.repository.UserRepository
-import com.team01.project.domain.user.service.SpotifyRefreshTokenService
 import com.team01.project.domain.user.service.UserService
 import com.team01.project.global.dto.RsData
 import com.team01.project.global.security.JwtTokenProvider
@@ -35,11 +32,8 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping("/user")
 @Controller
 class UserController(
-    private val refreshTokenRepository: RefreshTokenRepository,
     private val jwtTokenProvider: JwtTokenProvider,
-    private val spotifyRefreshTokenService: SpotifyRefreshTokenService,
     private val userService: UserService,
-    private val userRepository: UserRepository
 ) {
 
     @Operation(summary = "로그인 api", description = "db에서 아이디 조회 후 입력한 비밀번호 검증 후 토큰 반환")
