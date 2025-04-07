@@ -1,51 +1,45 @@
-package com.team01.project.domain.musicrecord.controller.dto;
+package com.team01.project.domain.musicrecord.controller.dto
 
-import java.time.LocalDate;
+import com.team01.project.domain.calendardate.entity.CalendarDate
+import com.team01.project.domain.music.entity.Music
+import com.team01.project.domain.musicrecord.entity.MusicRecord
+import java.time.LocalDate
 
-import com.team01.project.domain.calendardate.entity.CalendarDate;
-import com.team01.project.domain.music.entity.Music;
-import com.team01.project.domain.musicrecord.entity.MusicRecord;
+data class MusicRecordDto(
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+    // CalendarDate 관련 정보
+    val calendarDateId: Long,
+    val date: LocalDate,
+    val memo: String,
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class MusicRecordDto {
+    // Music 관련 정보
+    val musicId: String,
+    val musicName: String,
+    val singer: String,
+    val singerId: String,
+    val releaseDate: LocalDate?,
+    val albumImage: String,
+    val genre: String?
 
-	// CalendarDate 관련 정보
-	private Long calendarDateId;
-	private LocalDate date;
-	private String memo;
+) {
+    companion object {
+        // 엔티티 -> DTO 변환 메서드
+		fun from(musicRecord: MusicRecord): MusicRecordDto {
+            val calendarDate: CalendarDate = musicRecord.calendarDate
+            val music: Music = musicRecord.music
 
-	// Music 관련 정보
-	private String musicId;
-	private String musicName;
-	private String singer;
-	private String singerId;
-	private LocalDate releaseDate;
-	private String albumImage;
-	private String genre;
-
-	// 엔티티 -> DTO 변환 메서드
-	public static MusicRecordDto from(MusicRecord musicRecord) {
-		CalendarDate calendarDate = musicRecord.getCalendarDate();
-		Music music = musicRecord.getMusic();
-		return MusicRecordDto.builder()
-				.calendarDateId(calendarDate.getId())
-				.date(calendarDate.getDate())
-				.memo(calendarDate.getMemo())
-				.musicId(music.getId())
-				.musicName(music.getName())
-				.singer(music.getSinger())
-				.singerId(music.getSingerId())
-				.releaseDate(music.getReleaseDate())
-				.albumImage(music.getAlbumImage())
-				.genre(music.getGenre())
-				.build();
-	}
+            return MusicRecordDto(
+                calendarDateId = calendarDate.id!!,
+                date = calendarDate.date,
+                memo = calendarDate.memo,
+                musicId = music.id,
+                musicName = music.name,
+                singer = music.singer,
+                singerId = music.singerId,
+                releaseDate = music.releaseDate,
+                albumImage = music.albumImage,
+                genre = music.genre
+            )
+        }
+    }
 }
