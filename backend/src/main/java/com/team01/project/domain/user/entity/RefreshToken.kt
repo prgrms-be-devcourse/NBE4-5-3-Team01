@@ -1,8 +1,8 @@
 package com.team01.project.domain.user.entity
 
 import jakarta.persistence.*
-import java.time.LocalDateTime
 import org.springframework.data.annotation.CreatedDate
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "REFRESH_TOKEN") // 필요시 주석 해제

@@ -1,10 +1,10 @@
 package com.team01.project.domain.user.service
 
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.util.Collections
-import java.util.HashMap
-import java.util.Optional
+import com.team01.project.domain.notification.service.NotificationService
+import com.team01.project.domain.user.entity.User
+import com.team01.project.domain.user.repository.RefreshTokenRepository
+import com.team01.project.domain.user.repository.UserRepository
+import com.team01.project.global.security.JwtTokenProvider
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
@@ -14,11 +14,9 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import com.team01.project.domain.notification.service.NotificationService
-import com.team01.project.domain.user.entity.User
-import com.team01.project.domain.user.repository.RefreshTokenRepository
-import com.team01.project.domain.user.repository.UserRepository
-import com.team01.project.global.security.JwtTokenProvider
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.util.*
 
 @Service
 class CustomOAuth2UserService(

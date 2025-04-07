@@ -5,6 +5,7 @@ plugins {
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("checkstyle")
+    id("org.jlleitschuh.gradle.ktlint").version("12.1.1")
 }
 
 group = "com.team01"

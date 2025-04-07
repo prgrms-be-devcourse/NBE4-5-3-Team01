@@ -17,12 +17,7 @@ import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -39,7 +34,7 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
-import java.util.Base64
+import java.util.*
 
 @Service
 class UserService(
