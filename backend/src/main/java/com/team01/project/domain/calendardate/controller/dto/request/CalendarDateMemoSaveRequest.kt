@@ -9,6 +9,6 @@ import jakarta.validation.constraints.Size
 data class CalendarDateMemoSaveRequest(
 
     @field:Size(max = 1000, message = "메모는 1000자 이내로 입력해주세요.")
-    val memo: String = "",
+    val memo: String = ""
 
-    )
+)
