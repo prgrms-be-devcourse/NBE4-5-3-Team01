@@ -20,8 +20,8 @@ class Music(
     @Column(name = "singer_id", nullable = false)
     var singerId: String,
 
-    @Column(name = "release_date", nullable = false)
-    var releaseDate: LocalDate,
+    @Column(name = "release_date", nullable = true)
+    var releaseDate: LocalDate? = null,
 
     @Column(name = "album_image", nullable = false)
     var albumImage: String,

@@ -1,368 +1,242 @@
-package com.team01.project.domain.music.service;
+package com.team01.project.domain.music.service
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team01.project.domain.music.dto.MusicRequest;
-import com.team01.project.domain.music.dto.SpotifyArtistResponse;
-import com.team01.project.domain.music.dto.SpotifyPlaylistResponse;
-import com.team01.project.domain.music.dto.SpotifyTrackResponse;
-import com.team01.project.global.exception.SpotifyApiException;
-
-import reactor.core.publisher.Mono;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.team01.project.domain.music.dto.MusicRequest
+import com.team01.project.domain.music.dto.SpotifyArtistResponse
+import com.team01.project.domain.music.dto.SpotifyPlaylistResponse
+import com.team01.project.domain.music.dto.SpotifyTrackResponse
+import com.team01.project.global.exception.SpotifyApiException
+import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction
+import org.springframework.web.reactive.function.client.ExchangeStrategies
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import reactor.core.publisher.Mono
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Service
-public class SpotifyService {
+class SpotifyService {
 
-	private final WebClient webClient;
-	private final ObjectMapper objectMapper;
-	private final Map<String, List<String>> genreCache = new HashMap<>();
+    private val webClient: WebClient = WebClient.builder()
+        .baseUrl("https://api.spotify.com/v1")
+        .filter(errorHandlingFilter())
+        .exchangeStrategies(
+            ExchangeStrategies.builder()
+                .codecs { config -> config.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) }
+                .build()
+        )
+        .build()
 
-	public SpotifyService() {
-		this.webClient = WebClient.builder()
-			.baseUrl("https://api.spotify.com/v1")
-			.filter(errorHandlingFilter())
-			.exchangeStrategies(ExchangeStrategies.builder()
-				.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
-				.build())
-			.build();
-		this.objectMapper = new ObjectMapper();
-	}
+    private val objectMapper = ObjectMapper()
+    private val genreCache: MutableMap<String, List<String>> = mutableMapOf()
 
-	private String extractToken(String accessToken) {
-		return accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-	}
+    private fun extractToken(accessToken: String): String =
+        if (accessToken.startsWith("Bearer ")) accessToken.substring(7) else accessToken
 
-	private ExchangeFilterFunction errorHandlingFilter() {
-		return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-			if (clientResponse.statusCode().is5xxServerError()) {
-				return Mono.error(new RuntimeException("Spotify API 서버 오류 발생"));
-			} else if (clientResponse.statusCode().is4xxClientError()) {
-				return Mono.error(new RuntimeException("Spotify API 요청 오류 발생"));
-			}
-			return Mono.just(clientResponse);
-		});
-	}
+    private fun errorHandlingFilter(): ExchangeFilterFunction =
+        ExchangeFilterFunction.ofResponseProcessor { clientResponse ->
+            when {
+                clientResponse.statusCode().is5xxServerError -> Mono.error(RuntimeException("Spotify API 서버 오류 발생"))
+                clientResponse.statusCode().is4xxClientError -> Mono.error(RuntimeException("Spotify API 요청 오류 발생"))
+                else -> Mono.just(clientResponse)
+            }
+        }
 
-	public SpotifyTrackResponse getTrackInfo(String trackId, String accessToken) {
-		String url = "/tracks/" + trackId + "?market=KR";
-		String token = extractToken(accessToken);
+    fun getTrackInfo(trackId: String, accessToken: String): SpotifyTrackResponse {
+        val token = extractToken(accessToken)
+        return try {
+            webClient.get()
+                .uri("/tracks/$trackId?market=KR")
+                .headers { it.setBearerAuth(token) }
+                .retrieve()
+                .bodyToMono(SpotifyTrackResponse::class.java)
+                .block() ?: throw SpotifyApiException("트랙 정보를 찾을 수 없습니다.")
+        } catch (e: Exception) {
+            throw SpotifyApiException("트랙 정보를 가져오는 중 오류 발생", e)
+        }
+    }
 
-		try {
-			return webClient.get()
-				.uri(url)
-				.headers(headers -> headers.setBearerAuth(token))
-				.retrieve()
-				.bodyToMono(SpotifyTrackResponse.class)
-				.block();
-		} catch (Exception e) {
-			throw new SpotifyApiException("트랙 정보를 가져오는 중 오류 발생", e);
-		}
-	}
+    fun getArtistGenres(artistId: String, accessToken: String): List<String> {
+        genreCache[artistId]?.let { return it }
 
-	public List<String> getArtistGenres(String artistId, String accessToken) {
-		if (genreCache.containsKey(artistId)) {
-			return genreCache.get(artistId);
-		}
+        val token = extractToken(accessToken)
+        return try {
+            val response = webClient.get()
+                .uri("/artists/$artistId")
+                .headers { it.setBearerAuth(token) }
+                .retrieve()
+                .bodyToMono(SpotifyArtistResponse::class.java)
+                .block()
 
-		String url = "/artists/" + artistId;
-		String token = extractToken(accessToken);
+            val genres = response?.genres ?: emptyList()
+            genreCache[artistId] = genres
+            genres
+        } catch (e: Exception) {
+            throw SpotifyApiException("아티스트 장르 정보를 가져오는 중 오류 발생", e)
+        }
+    }
 
-		try {
-			SpotifyArtistResponse response = webClient.get()
-				.uri(url)
-				.headers(headers -> headers.setBearerAuth(token))
-				.retrieve()
-				.bodyToMono(SpotifyArtistResponse.class)
-				.block();
+    fun getTrackWithGenre(trackId: String, accessToken: String): MusicRequest {
+        val track = getTrackInfo(trackId, accessToken)
 
-			List<String> genres = response != null ? response.getGenres() : List.of();
-			genreCache.put(artistId, genres);
-			return genres;
-		} catch (Exception e) {
-			throw new SpotifyApiException("아티스트 장르 정보를 가져오는 중 오류 발생", e);
-		}
-	}
+        val artistIds = track.artists.map { it.id }
+        val allGenres = artistIds.flatMap { getArtistGenres(it, accessToken) }.toSet()
+        val parsedReleaseDate = parseReleaseDate(track.album.releaseDate)
 
-	public MusicRequest getTrackWithGenre(String trackId, String accessToken) {
-		SpotifyTrackResponse track = getTrackInfo(trackId, accessToken);
-		if (track == null) {
-			throw new SpotifyApiException("트랙 정보를 찾을 수 없습니다.");
-		}
+        return MusicRequest(
+            id = track.id,
+            name = track.name,
+            singer = track.getArtistsAsString(),
+            singerId = track.getArtistsIdAsString(),
+            releaseDate = parsedReleaseDate,
+            albumImage = track.album.images.firstOrNull()?.url ?: "",
+            genre = allGenres.joinToString(", "),
+            uri = track.uri
+        )
+    }
 
-		List<String> artistIds = track.getArtists().stream()
-			.map(SpotifyTrackResponse.Artist::getId)
-			.collect(Collectors.toList());
+    fun searchByKeyword(keyword: String, accessToken: String): List<MusicRequest> {
+        val token = extractToken(accessToken)
+        val url = "/search?q=$keyword&type=track&limit=10&market=KR"
 
-		Set<String> allGenres = artistIds.stream()
-			.flatMap(id -> getArtistGenres(id, accessToken).stream())
-			.collect(Collectors.toSet());
+        return try {
+            val jsonResponse = webClient.get()
+                .uri(url)
+                .headers { it.setBearerAuth(token) }
+                .retrieve()
+                .bodyToMono(String::class.java)
+                .block() ?: throw SpotifyApiException("Spotify API 응답이 없습니다.")
 
-		LocalDate parsedReleaseDate = parseReleaseDate(track.getAlbum().getReleaseDate());
+            val root = objectMapper.readTree(jsonResponse)
+            val items = root.path("tracks").path("items")
+            if (!items.isArray) throw SpotifyApiException("Spotify API 응답에서 트랙 정보를 찾을 수 없습니다.")
 
-		return new MusicRequest(
-			track.getId(),
-			track.getName(),
-			track.getArtistsAsString(),
-			track.getArtistsIdAsString(),
-			parsedReleaseDate,
-			track.getAlbum().getImages().get(0).getUrl(),
-			String.join(", ", allGenres),
-			track.getUri()
-		);
-	}
+            items.map { item ->
+                val track = objectMapper.treeToValue(item, SpotifyTrackResponse::class.java)
+                MusicRequest(
+                    id = track.id,
+                    name = track.name,
+                    singer = track.getArtistsAsString(),
+                    singerId = track.getArtistsIdAsString(),
+                    releaseDate = parseReleaseDate(track.album.releaseDate),
+                    albumImage = track.album.images.firstOrNull()?.url ?: "",
+                    genre = null,
+                    uri = track.uri
+                )
+            }
+        } catch (e: WebClientResponseException) {
+            throw SpotifyApiException("Spotify API 요청 오류: ${e.responseBodyAsString}", e)
+        } catch (e: Exception) {
+            throw SpotifyApiException("검색 결과를 처리하는 중 오류 발생: ${e.message}", e)
+        }
+    }
 
-	public List<MusicRequest> searchByKeyword(String keyword, String accessToken) {
-		String url = String.format("/search?q=%s&type=track&limit=10&market=KR", keyword);
-		String token = extractToken(accessToken);
+    fun getTopTracksByArtist(artistId: String, accessToken: String): List<MusicRequest> {
+        val token = extractToken(accessToken)
 
-		try {
-			String jsonResponse = webClient.get()
-				.uri(url)
-				.headers(headers -> headers.setBearerAuth(token))
-				.retrieve()
-				.bodyToMono(String.class)
-				.block();
+        return try {
+            val jsonResponse = webClient.get()
+                .uri("/artists/$artistId/top-tracks?market=KR")
+                .headers { it.setBearerAuth(token) }
+                .retrieve()
+                .bodyToMono(String::class.java)
+                .block() ?: throw SpotifyApiException("Spotify API 응답이 없습니다.")
 
-			if (jsonResponse == null) {
-				throw new SpotifyApiException("Spotify API 응답이 없습니다.");
-			}
+            val tracks = objectMapper.readTree(jsonResponse).path("tracks")
+            if (!tracks.isArray) throw SpotifyApiException("Spotify에서 트랙 정보를 가져오지 못했습니다.")
 
-			JsonNode root = objectMapper.readTree(jsonResponse);
-			JsonNode items = root.path("tracks").path("items");
+            tracks.map { node ->
+                val track = objectMapper.treeToValue(node, SpotifyTrackResponse::class.java)
+                MusicRequest(
+                    id = track.id,
+                    name = track.name,
+                    singer = track.getArtistsAsString(),
+                    singerId = track.getArtistsIdAsString(),
+                    releaseDate = parseReleaseDate(track.album.releaseDate),
+                    albumImage = track.album.images.firstOrNull()?.url ?: "",
+                    genre = null,
+                    uri = track.uri
+                )
+            }
+        } catch (e: WebClientResponseException) {
+            throw SpotifyApiException("Spotify API 요청 오류: ${e.responseBodyAsString}", e)
+        } catch (e: Exception) {
+            throw SpotifyApiException("알 수 없는 오류 발생: ${e.message}", e)
+        }
+    }
 
-			if (!items.isArray()) {
-				throw new SpotifyApiException("Spotify API 응답에서 트랙 정보를 찾을 수 없습니다.");
-			}
+    fun getUserPlaylists(accessToken: String): List<SpotifyPlaylistResponse> {
+        val token = extractToken(accessToken)
 
-			List<MusicRequest> musicRequests = new ArrayList<>();
-			Set<String> artistIds = new HashSet<>();
+        return try {
+            val jsonResponse = webClient.get()
+                .uri("/me/playlists?limit=10")
+                .headers { it.setBearerAuth(token) }
+                .retrieve()
+                .bodyToMono(String::class.java)
+                .block() ?: throw SpotifyApiException("Spotify API 응답이 없습니다.")
 
-			for (JsonNode item : items) {
-				SpotifyTrackResponse track = objectMapper.treeToValue(item, SpotifyTrackResponse.class);
-				artistIds.addAll(
-					track.getArtists().stream().map(SpotifyTrackResponse.Artist::getId).collect(Collectors.toSet()));
-				LocalDate parsedReleaseDate = parseReleaseDate(track.getAlbum().getReleaseDate());
+            val items = objectMapper.readTree(jsonResponse).path("items")
 
-				musicRequests.add(new MusicRequest(
-					track.getId(),
-					track.getName(),
-					track.getArtistsAsString(),
-					track.getArtistsIdAsString(),
-					parsedReleaseDate,
-					track.getAlbum().getImages().get(0).getUrl(),
-					null,
-					track.getUri()
-				));
-			}
+            items.map { item ->
+                val id = item.path("id").asText()
+                val name = item.path("name").asText()
+                val image = item.path("images").firstOrNull()?.path("url")?.asText() ?: ""
+                val trackCount = item.path("tracks").path("total").asInt()
+                SpotifyPlaylistResponse(id, name, image, trackCount)
+            }
+        } catch (e: Exception) {
+            throw SpotifyApiException("사용자의 Playlist 목록 조회 오류: ${e.message}", e)
+        }
+    }
 
-			return musicRequests;
+    fun getTracksFromPlaylist(playlistId: String, accessToken: String): List<MusicRequest> {
+        val token = extractToken(accessToken)
 
-		} catch (WebClientResponseException e) {
-			throw new SpotifyApiException("Spotify API 요청 오류: " + e.getResponseBodyAsString(), e);
-		} catch (Exception e) {
-			throw new SpotifyApiException("검색 결과를 처리하는 중 오류 발생: " + e.getMessage(), e);
-		}
-	}
+        return try {
+            val jsonResponse = webClient.get()
+                .uri("/playlists/$playlistId/tracks?market=KR")
+                .headers { it.setBearerAuth(token) }
+                .retrieve()
+                .bodyToMono(String::class.java)
+                .block() ?: throw SpotifyApiException("Spotify API 응답이 없습니다.")
 
-	public List<MusicRequest> getTopTracksByArtist(String artistId, String accessToken) {
-		String url = "/artists/" + artistId + "/top-tracks?market=KR";
-		String token = extractToken(accessToken);
+            val items = objectMapper.readTree(jsonResponse).path("items")
 
-		try {
-			String jsonResponse = webClient.get()
-				.uri(url)
-				.headers(headers -> headers.setBearerAuth(token))
-				.retrieve()
-				.bodyToMono(String.class)
-				.block();
+            items.mapNotNull { item ->
+                val trackNode = item.path("track")
+                if (trackNode.isMissingNode || trackNode.isNull) return@mapNotNull null
 
-			if (jsonResponse == null) {
-				throw new SpotifyApiException("Spotify API 응답이 없습니다.");
-			}
+                val track = objectMapper.treeToValue(trackNode, SpotifyTrackResponse::class.java)
+                MusicRequest(
+                    id = track.id,
+                    name = track.name,
+                    singer = track.getArtistsAsString(),
+                    singerId = track.getArtistsIdAsString(),
+                    releaseDate = parseReleaseDate(track.album.releaseDate),
+                    albumImage = track.album.images.firstOrNull()?.url ?: "",
+                    genre = null,
+                    uri = track.uri
+                )
+            }
+        } catch (e: Exception) {
+            throw SpotifyApiException("Playlist 트랙 조회 실패: ${e.message}", e)
+        }
+    }
 
-			JsonNode root = objectMapper.readTree(jsonResponse);
-			JsonNode tracks = root.path("tracks");
+    private fun parseReleaseDate(releaseDate: String?): LocalDate? {
+        if (releaseDate.isNullOrBlank()) return null
 
-			if (!tracks.isArray()) {
-				throw new SpotifyApiException("Spotify에서 트랙 정보를 가져오지 못했습니다.");
-			}
-
-			List<MusicRequest> musicRequests = new ArrayList<>();
-
-			for (JsonNode trackNode : tracks) {
-				SpotifyTrackResponse track = objectMapper.treeToValue(trackNode, SpotifyTrackResponse.class);
-
-				LocalDate parsedReleaseDate = parseReleaseDate(track.getAlbum().getReleaseDate());
-				musicRequests.add(new MusicRequest(
-					track.getId(),
-					track.getName(),
-					track.getArtistsAsString(),
-					track.getArtistsIdAsString(),
-					parsedReleaseDate,
-					track.getAlbum().getImages().get(0).getUrl(),
-					null,
-					track.getUri()
-				));
-			}
-
-			return musicRequests;
-
-		} catch (WebClientResponseException e) {
-			throw new SpotifyApiException("Spotify API 요청 오류: " + e.getResponseBodyAsString(), e);
-		} catch (Exception e) {
-			throw new SpotifyApiException("알 수 없는 오류 발생: " + e.getMessage(), e);
-		}
-	}
-
-	public List<SpotifyPlaylistResponse> getUserPlaylists(String accessToken) {
-		String url = "/me/playlists?limit=10";
-		String token = extractToken(accessToken);
-
-		try {
-			String jsonResponse = webClient.get()
-				.uri(url)
-				.headers(headers -> headers.setBearerAuth(token))
-				.retrieve()
-				.bodyToMono(String.class)
-				.block();
-
-			if (jsonResponse == null) {
-				throw new SpotifyApiException("Spotify API 응답이 없습니다.");
-			}
-
-			JsonNode root = objectMapper.readTree(jsonResponse);
-			JsonNode items = root.path("items");
-
-			List<SpotifyPlaylistResponse> result = new ArrayList<>();
-
-			for (JsonNode item : items) {
-				String id = item.path("id").asText();
-				String name = item.path("name").asText();
-				String image = item.path("images").isArray() && item.path("images").size() > 0
-					? item.path("images").get(0).path("url").asText()
-					: null;
-				int trackCount = item.get("tracks").path("total").asInt();
-
-				result.add(new SpotifyPlaylistResponse(id, name, image, trackCount));
-			}
-
-			return result;
-
-		} catch (Exception e) {
-			throw new SpotifyApiException("사용자의 Playlist 목록 조회 오류: " + e.getMessage(), e);
-		}
-	}
-
-	public List<MusicRequest> getTracksFromPlaylist(String playlistId, String accessToken) {
-		String url = "/playlists/" + playlistId + "/tracks?market=KR";
-		String token = extractToken(accessToken);
-
-		try {
-			String jsonResponse = webClient.get()
-				.uri(url)
-				.headers(headers -> headers.setBearerAuth(token))
-				.retrieve()
-				.bodyToMono(String.class)
-				.block();
-
-			if (jsonResponse == null) {
-				throw new SpotifyApiException("Spotify API 응답이 없습니다.");
-			}
-
-			JsonNode items = objectMapper.readTree(jsonResponse).path("items");
-			List<MusicRequest> result = new ArrayList<>();
-
-			for (JsonNode item : items) {
-				JsonNode trackNode = item.path("track");
-				if (trackNode.isMissingNode() || trackNode.isNull()) {
-					continue;
-				}
-
-				SpotifyTrackResponse track = objectMapper.treeToValue(trackNode, SpotifyTrackResponse.class);
-				LocalDate parsedReleaseDate = parseReleaseDate(track.getAlbum().getReleaseDate());
-
-				result.add(new MusicRequest(
-					track.getId(),
-					track.getName(),
-					track.getArtistsAsString(),
-					track.getArtistsIdAsString(),
-					parsedReleaseDate,
-					track.getAlbum().getImages().get(0).getUrl(),
-					null,
-					track.getUri()
-				));
-			}
-
-			return result;
-
-		} catch (Exception e) {
-			throw new SpotifyApiException("Playlist 트랙 조회 실패: " + e.getMessage(), e);
-		}
-	}
-
-	private LocalDate parseReleaseDate(String releaseDate) {
-		if (releaseDate == null || releaseDate.isBlank()) {
-			return null; // 날짜가 없으면 null 반환
-		}
-
-		try {
-			if (releaseDate.length() == 4) {  // "yyyy"
-				return LocalDate.of(Integer.parseInt(releaseDate), 1, 1);
-			} else if (releaseDate.length() == 7) {  // "yyyy-MM"
-				return LocalDate.parse(releaseDate + "-01", DateTimeFormatter.ISO_DATE);
-			} else {  // "yyyy-MM-dd"
-				return LocalDate.parse(releaseDate, DateTimeFormatter.ISO_DATE);
-			}
-		} catch (Exception e) {
-			System.err.println("날짜 변환 오류: " + releaseDate);
-			return null; // 오류 발생 시 null 반환
-		}
-	}
-
-	// private Map<String, String> fetchArtistGenres(Set<String> artistIds, String accessToken) {
-	// 	String token = extractToken(accessToken);
-	// 	Map<String, String> artistGenres = new HashMap<>();
-	//
-	// 	List<Mono<Map.Entry<String, String>>> requests = artistIds.stream()
-	// 		.map(artistId -> webClient.get()
-	// 			.uri("/artists/" + artistId)
-	// 			.headers(headers -> headers.setBearerAuth(token))
-	// 			.retrieve()
-	// 			.bodyToMono(SpotifyArtistResponse.class)
-	// 			.map(response -> Map.entry(artistId, String.join(", ", response.getGenres())))
-	// 			.onErrorResume(e -> {
-	// 				System.err.println("아티스트 ID: " + artistId + " 장르 조회 실패: " + e.getMessage());
-	// 				return Mono.empty();
-	// 			}))
-	// 		.collect(Collectors.toList());
-	//
-	// 	// 병렬 요청 처리 후 결과 매핑
-	// 	List<Map.Entry<String, String>> results = Mono.zip(requests, objects ->
-	// 			Arrays.stream(objects)
-	// 				.map(o -> (Map.Entry<String, String>)o)
-	// 				.collect(Collectors.toList()))
-	// 		.block();
-	//
-	// 	if (results != null) {
-	// 		results.forEach(entry -> artistGenres.put(entry.getKey(), entry.getValue()));
-	// 	}
-	//
-	// 	return artistGenres;
-	// }
+        return try {
+            when (releaseDate.length) {
+                4 -> LocalDate.of(releaseDate.toInt(), 1, 1)
+                7 -> LocalDate.parse("$releaseDate-01", DateTimeFormatter.ISO_DATE)
+                else -> LocalDate.parse(releaseDate, DateTimeFormatter.ISO_DATE)
+            }
+        } catch (e: Exception) {
+            println("날짜 변환 오류: $releaseDate")
+            null
+        }
+    }
 }
