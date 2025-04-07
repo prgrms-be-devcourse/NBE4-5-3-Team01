@@ -45,13 +45,13 @@ class Music(
     )
 
     fun isSameAs(other: Music): Boolean {
-        return name == other.name &&
-                singer == other.singer &&
-                singerId == other.singerId &&
-                releaseDate == other.releaseDate &&
-                albumImage == other.albumImage &&
-                genre == other.genre &&
-                uri == other.uri
+        return this.name == other.name &&
+            this.singer == other.singer &&
+            this.singerId == other.singerId &&
+            this.releaseDate == other.releaseDate &&
+            this.albumImage == other.albumImage &&
+            this.genre == other.genre &&
+            this.uri == other.uri
     }
 
     fun updateMusic(updatedMusic: Music) {
