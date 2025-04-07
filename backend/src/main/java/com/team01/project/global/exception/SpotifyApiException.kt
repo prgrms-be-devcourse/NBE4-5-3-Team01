@@ -1,12 +1,6 @@
-package com.team01.project.global.exception;
+package com.team01.project.global.exception
 
-public class SpotifyApiException extends RuntimeException {
-
-	public SpotifyApiException(String message) {
-		super(message);
-	}
-
-	public SpotifyApiException(String message, Throwable cause) {
-		super(message, cause);
-	}
+class SpotifyApiException : RuntimeException {
+    constructor(message: String) : super(message)
+    constructor(message: String, cause: Throwable) : super(message, cause)
 }
