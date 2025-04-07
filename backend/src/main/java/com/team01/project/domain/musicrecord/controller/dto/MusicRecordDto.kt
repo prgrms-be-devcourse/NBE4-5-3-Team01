@@ -24,7 +24,7 @@ data class MusicRecordDto(
 ) {
     companion object {
         // 엔티티 -> DTO 변환 메서드
-		fun from(musicRecord: MusicRecord): MusicRecordDto {
+        fun from(musicRecord: MusicRecord): MusicRecordDto {
             val calendarDate: CalendarDate = musicRecord.calendarDate
             val music: Music = musicRecord.music
 
