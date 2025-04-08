@@ -27,13 +27,13 @@ class SwaggerConfig {
             .components(Components()) // 초기 Components 인스턴스 (기본값)
             .info(apiInfo())
             .addSecurityItem(securityRequirement)
-            .components(components)  // 실제 보안 스키마가 포함된 Components 설정
+            .components(components) // 실제 보안 스키마가 포함된 Components 설정
     }
 
     private fun apiInfo(): Info {
         return Info()
-            .title("음악 캘린더 API")        // API의 제목
-            .description("음악 캘린더 서비스에 관한 API 문서화")  // API 설명
-            .version("1.0.0")             // API 버전
+            .title("음악 캘린더 API") // API의 제목
+            .description("음악 캘린더 서비스에 관한 API 문서화") // API 설명
+            .version("1.0.0") // API 버전
     }
 }

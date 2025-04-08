@@ -23,7 +23,7 @@ class CustomUserDetailsService(
 
         return org.springframework.security.core.userdetails.User.builder()
             .username(user.id) // userId를 username으로 설정
-            .password("")      // OAuth 로그인에서는 비밀번호가 필요 없음
+            .password("") // OAuth 로그인에서는 비밀번호가 필요 없음
             .authorities("USER") // 기본 권한 설정
             .build()
     }
