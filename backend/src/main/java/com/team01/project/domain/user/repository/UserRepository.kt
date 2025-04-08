@@ -14,10 +14,5 @@ interface UserRepository : JpaRepository<User, String> {
     @Query("SELECT u FROM User u WHERE u.name LIKE %:q% OR u.originalName LIKE %:q%")
     fun searchUser(@Param("q") name: String): List<User>
 
-    override fun getById(userId: String): User {
-        return findById(userId)
-            .orElseThrow { IllegalArgumentException("유저를 찾을 수 없습니다.") }
-    }
-
     override fun existsById(id: String): Boolean
 }

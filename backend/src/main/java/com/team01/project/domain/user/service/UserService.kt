@@ -13,6 +13,7 @@ import com.team01.project.domain.user.entity.RefreshToken
 import com.team01.project.domain.user.entity.User
 import com.team01.project.domain.user.repository.RefreshTokenRepository
 import com.team01.project.domain.user.repository.UserRepository
+import com.team01.project.domain.user.repository.findByIdOrThrow
 import com.team01.project.global.security.JwtTokenProvider
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
@@ -77,8 +78,7 @@ class UserService(
             SecurityContextHolder.getContext().authentication as OAuth2AuthenticationToken
         val userId = authenticationToken.name
 
-        val user = userRepository.findById(userId)
-            .orElseThrow { RuntimeException("해당 유저를 찾을 수 없습니다.") }
+        val user = userRepository.findByIdOrThrow(userId)
 
         val storedRefreshToken = refreshTokenRepository.findByUser(user)
             .orElseThrow { RuntimeException("리프레시 토큰을 찾을 수 없습니다.") }
@@ -156,7 +156,7 @@ class UserService(
     }
 
     fun search(currentUserId: String, name: String): List<FollowResponse> {
-        val currentUser = userRepository.getById(currentUserId)
+        val currentUser = userRepository.findByIdOrThrow(currentUserId)
         val users = userRepository.searchUser(name)
         return users.filter { it.id != currentUser.id }
             .map {
@@ -169,8 +169,7 @@ class UserService(
     }
 
     fun getUserById(id: String): User {
-        return userRepository.findById(id)
-            .orElseThrow { IllegalArgumentException("해당 ID의 유저 찾을 수 없습니다: $id") }
+        return userRepository.findByIdOrThrow(id)
     }
 
     private fun checkFollow(user: User, currentUser: User): Status {
@@ -178,31 +177,22 @@ class UserService(
     }
 
     @Transactional
-    fun findByUserId(userId: String): User {
-        return userRepository.findById(userId)
-            .orElseThrow { RuntimeException("유저의 ID를 찾을 수 없습니다. $userId") }
-    }
-
-    @Transactional
     fun updateUserIntro(userId: String, userIntro: String) {
-        val existingUser = userRepository.findById(userId)
-            .orElseThrow { RuntimeException("User not found") }
+        val existingUser = userRepository.findByIdOrThrow(userId)
         existingUser.userIntro = userIntro
         userRepository.save(existingUser)
     }
 
     @Transactional
     fun updateProfileName(userId: String, profileName: String) {
-        val existingUser = userRepository.findById(userId)
-            .orElseThrow { RuntimeException("User not found") }
+        val existingUser = userRepository.findByIdOrThrow(userId)
         existingUser.name = profileName
         userRepository.save(existingUser)
     }
 
     @Transactional
     fun uploadImage(userId: String, file: MultipartFile): String {
-        val existingUser = userRepository.findById(userId)
-            .orElseThrow { RuntimeException("User not found") }
+        val existingUser = userRepository.findByIdOrThrow(userId)
         return try {
             val fileBytes = file.bytes
             val base64Image = Base64.getEncoder().encodeToString(fileBytes)
@@ -216,7 +206,7 @@ class UserService(
 
     @Transactional
     fun updateCalendarVisibility(userId: String, newCalendarVisibility: CalendarVisibility) {
-        val user = userRepository.getById(userId)
+        val user = userRepository.findByIdOrThrow(userId)
         user.updateCalendarVisibility(newCalendarVisibility)
     }
 
