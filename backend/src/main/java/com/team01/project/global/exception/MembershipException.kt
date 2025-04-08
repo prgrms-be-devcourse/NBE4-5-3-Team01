@@ -8,7 +8,7 @@ enum class MembershipErrorCode(
     MEMBERSHIP_NOT_FOUND("404-2", "요금제 정보가 없습니다."),
     NOT_PREMIUM("400-1", "프리미엄 요금제가 아닙니다."),
     UNAUTHORIZED("401-1", "로그인 정보가 없습니다."),
-    ALREADY_PREMIUM("400-2", "이미 프리미엄 요금제를 사용 중입니다."),
+    ALREADY_PREMIUM("400-2", "이미 프리미엄 요금제를 사용 중입니다.")
 }
 
 class MembershipException(

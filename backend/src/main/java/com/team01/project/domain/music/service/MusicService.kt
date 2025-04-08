@@ -59,7 +59,7 @@ class MusicService(
             .findMusicIdsByCalendarDateId(recentCalendarDateId)
             .takeIf { it.isNotEmpty() }
             ?.random() ?: return Optional.empty()
-        
+
         return musicRepository.findById(randomMusicId)
     }
 }

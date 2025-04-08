@@ -107,5 +107,4 @@ class MembershipController(
         membershipService.updateMembership(id, request)
         return RsData("200-7", "멤버십 정보가 수정되었습니다.", null)
     }
-
 }

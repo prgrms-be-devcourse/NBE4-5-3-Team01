@@ -20,9 +20,9 @@ class MembershipScheduler(
         val expiredUsers = userRepository.findAll().filter {
             val m = it.membership
             m != null &&
-                    m.grade == "premium" &&
-                    !m.autoRenew &&
-                    m.endDate?.isBefore(today) == true
+                m.grade == "premium" &&
+                !m.autoRenew &&
+                m.endDate?.isBefore(today) == true
         }
 
         expiredUsers.forEach { user ->

@@ -64,7 +64,7 @@ open class User(
     open var notifications: MutableList<Notification> = mutableListOf(),
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    open var membership: Membership? = null,
+    open var membership: Membership? = null
 ) {
 
     fun updateCalendarVisibility(newCalendarVisibility: CalendarVisibility) {
