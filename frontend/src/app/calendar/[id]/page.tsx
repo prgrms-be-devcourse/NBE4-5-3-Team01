@@ -177,7 +177,7 @@ export default function MusicDetailPage() {
               "spotify-music-record",
               JSON.stringify(musicRecord)
             );
-            router.push("/calendar/spotify-player");
+            router.push("/calendar/spotify-player/premium");
           }}
         >
           ▶️ 이날의 플레이리스트 듣기
@@ -192,7 +192,7 @@ export default function MusicDetailPage() {
               "spotify-music-record",
               JSON.stringify(musicRecord)
             );
-            router.push("/player");
+            router.push("/calendar/spotify-player/free");
           }}
         >
           ▶️ Spotify에서 플레이리스트 듣기
