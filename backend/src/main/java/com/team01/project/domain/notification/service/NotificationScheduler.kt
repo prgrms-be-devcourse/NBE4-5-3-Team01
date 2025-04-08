@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.util.Date
 import java.util.concurrent.ScheduledFuture
 
 @Service
@@ -76,7 +75,9 @@ class NotificationScheduler(
             .withSecond(0)
             .withNano(0)
 
-        val scheduledTime = Date.from(notificationDateTime.atZone(ZoneId.systemDefault()).toInstant())
+        val scheduledInstant = notificationDateTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
 
         val notifications = notificationService.getNotificationsByTime(notificationTime)
             .filter { it.isEmailEnabled || it.isPushEnabled }
@@ -86,12 +87,12 @@ class NotificationScheduler(
             return
         }
 
-        val futureTask = taskScheduler.schedule({
+        val futureTask: ScheduledFuture<*> = taskScheduler.schedule({
             sendNotifications(notifications, notificationDateTime)
-        }, scheduledTime)
+        }, scheduledInstant)
 
         insertTaskInOrder(futureTask, notificationTime)
-        println("알림 전송 예약 시각: $scheduledTime")
+        println("알림 전송 예약 시각: $notificationDateTime")
     }
 
     private fun insertTaskInOrder(futureTask: ScheduledFuture<*>, notificationTime: LocalTime) {
@@ -147,7 +148,9 @@ class NotificationScheduler(
             .withSecond(0)
             .withNano(0)
 
-        val scheduledTime = Date.from(notificationDateTime.atZone(ZoneId.systemDefault()).toInstant())
+        val scheduledInstant = notificationDateTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
 
         val notification = Notification.builder()
             .user(user)
@@ -156,12 +159,12 @@ class NotificationScheduler(
             .message(message)
             .build()
 
-        val futureTask = separateTaskScheduler.schedule({
+        val futureTask: ScheduledFuture<*> = separateTaskScheduler.schedule({
             sendNotification(notification, notificationDateTime)
-        }, scheduledTime)
+        }, scheduledInstant)
 
         insertTaskInOrder(futureTask, notificationTime)
-        println("알림 전송 예약 시각: $scheduledTime")
+        println("알림 전송 예약 시각: $notificationDateTime")
     }
 
     @Async
