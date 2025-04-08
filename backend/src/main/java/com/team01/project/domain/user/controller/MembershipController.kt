@@ -1,6 +1,6 @@
 package com.team01.project.domain.user.controller
 
-import MembershipResponse
+import MembershipDto
 import com.team01.project.domain.user.service.MembershipService
 import com.team01.project.global.dto.RsData
 import com.team01.project.global.exception.MembershipErrorCode
@@ -10,7 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -27,7 +30,7 @@ class MembershipController(
     )
     fun getMyMembership(
         @AuthenticationPrincipal user: OAuth2User
-    ): RsData<MembershipResponse> {
+    ): RsData<MembershipDto> {
         val userId = user.getAttribute<String>("id")
             ?: throw MembershipException(MembershipErrorCode.UNAUTHORIZED)
 
@@ -84,4 +87,25 @@ class MembershipController(
             RsData("200-5", "이미 멤버십이 존재합니다.", null)
         }
     }
+
+    @GetMapping("/admin")
+    @Operation(
+        summary = "[관리자 전용] 모든 사용자 멤버십 조회",
+        description = "전체 유저의 멤버십 정보 리스트를 반환합니다."
+    )
+    fun getAllMemberships(): RsData<List<Map<String, Any>>> {
+        val memberships = membershipService.getAllMemberships()
+        return RsData("200-6", "전체 멤버십 정보 조회 성공", memberships)
+    }
+
+    @PatchMapping("/admin/{id}")
+    @Operation(summary = "멤버십 정보 수정", description = "관리자가 멤버십 정보를 수정합니다.")
+    fun updateMembership(
+        @PathVariable id: String,
+        @RequestBody request: MembershipDto
+    ): RsData<String> {
+        membershipService.updateMembership(id, request)
+        return RsData("200-7", "멤버십 정보가 수정되었습니다.", null)
+    }
+
 }

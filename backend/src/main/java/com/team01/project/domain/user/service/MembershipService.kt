@@ -1,6 +1,6 @@
 package com.team01.project.domain.user.service
 
-import MembershipResponse
+import MembershipDto
 import com.team01.project.domain.user.entity.Membership
 import com.team01.project.domain.user.repository.UserRepository
 import com.team01.project.global.exception.MembershipErrorCode
@@ -12,14 +12,14 @@ import java.time.LocalDate
 class MembershipService(
     private val userRepository: UserRepository
 ) {
-    fun getCurrentUserMembership(userId: String): MembershipResponse {
+    fun getCurrentUserMembership(userId: String): MembershipDto {
         val user = userRepository.findById(userId)
             .orElseThrow { MembershipException(MembershipErrorCode.USER_NOT_FOUND) }
 
         val membership = user.membership
             ?: throw MembershipException(MembershipErrorCode.MEMBERSHIP_NOT_FOUND)
 
-        return MembershipResponse(
+        return MembershipDto(
             grade = membership.grade,
             startDate = membership.startDate,
             endDate = membership.endDate,
@@ -74,5 +74,37 @@ class MembershipService(
         user.membership = membership
         userRepository.save(user)
         return true
+    }
+
+    fun getAllMemberships(): List<Map<String, Any>> {
+        return userRepository.findAll().mapNotNull { user ->
+            val membership = user.membership ?: return@mapNotNull null
+
+            mapOf(
+                "id" to membership.id,
+                "userId" to user.id,
+                "userName" to user.name,
+                "grade" to membership.grade,
+                "startDate" to membership.startDate.toString(),
+                "endDate" to membership.endDate.toString(),
+                "months" to membership.count,
+                "autoRenew" to membership.autoRenew
+            )
+        }
+    }
+
+    fun updateMembership(id: String, dto: MembershipDto) {
+        val user = userRepository.findById(id)
+            .orElseThrow { MembershipException(MembershipErrorCode.USER_NOT_FOUND) }
+
+        val membership = user.membership
+            ?: throw MembershipException(MembershipErrorCode.MEMBERSHIP_NOT_FOUND)
+
+        membership.grade = dto.grade
+        membership.startDate = dto.startDate
+        membership.endDate = dto.endDate
+        membership.autoRenew = dto.autoRenew
+
+        userRepository.save(user)
     }
 }
