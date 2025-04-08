@@ -38,7 +38,7 @@ class MembershipService(
             throw MembershipException(MembershipErrorCode.NOT_PREMIUM)
         }
 
-        membership.grade = "basic"
+//        membership.grade = "basic"
         membership.autoRenew = false
 
         userRepository.save(user)
