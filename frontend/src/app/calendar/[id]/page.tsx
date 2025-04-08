@@ -9,25 +9,11 @@ import {
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-
-interface Music {
-  id: string;
-  name: string;
-  singer: string;
-  singerId: string;
-  releaseDate: string;
-  albumImage: string;
-  genre: string;
-  uri: string;
-}
-
-interface MusicRecord {
-  id: number;
-  date: string;
-  memo: string;
-  musics: Music[];
-}
+import { useParams, useRouter } from "next/navigation";
+import { MusicRecord } from "@/types/musicRecord";
+import { AxiosError } from "axios";
+import { useGlobalAlert } from "@/components/GlobalAlert";
+import { fetchMusicRecords } from "@/lib/api/musicRecord";
 
 function getSpotifyAccessToken(): string | null {
   if (typeof document === "undefined") return null;
@@ -39,8 +25,6 @@ function getSpotifyAccessToken(): string | null {
   return match ? decodeURIComponent(match.split("=")[1]) : null;
 }
 
-const BASE_URL = "http://localhost:8080/api/v1";
-
 export default function MusicDetailPage() {
   const [musicRecord, setMusicRecord] = useState<MusicRecord>();
   const [currentYear, setCurrentYear] = useState<number>(
@@ -50,42 +34,41 @@ export default function MusicDetailPage() {
     new Date().getMonth() + 1
   );
   const [currentDay, setCurrentDay] = useState<number>(new Date().getDay());
-  const searchParams = useSearchParams();
-  const [isReadOnly, setIsReadOnly] = useState(false);
+  const [calendarPermission, setCalendarPermission] = useState<string | null>();
   const [isPremium, setIsPremium] = useState<boolean | null>(null);
+  const { setAlert } = useGlobalAlert();
 
   const params = useParams();
   const router = useRouter();
 
   useEffect(() => {
-    if (!searchParams.has("readOnly")) {
-      setIsReadOnly(false);
-    } else {
-      const value = searchParams.get("readOnly");
-      setIsReadOnly(value === null || value === "true");
+    async function initMusicRecords() {
+      try {
+        const response = await fetchMusicRecords(params.id);
+
+        const musicRecord: MusicRecord = response.data.data;
+        const [year, month, day] = musicRecord.date.split("-");
+
+        setMusicRecord(musicRecord);
+        setCurrentYear(parseInt(year, 10));
+        setCurrentMonth(parseInt(month, 10));
+        setCurrentDay(parseInt(day, 10));
+        setCalendarPermission(musicRecord.calendarPermission);
+      } catch (error) {
+        if (error instanceof AxiosError)
+          setAlert({
+            code: error.response!.status.toString(),
+            message: error.response!.data.msg,
+          });
+
+        setTimeout(() => {
+          router.push("/calendar");
+        }, 2000); // 2초 대기 후 이동
+        return;
+      }
     }
-  }, [searchParams]);
 
-  useEffect(() => {
-    const fetchMusicRecords = async () => {
-      const res = await fetch(BASE_URL + `/calendar/${params.id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      const data: MusicRecord = await res.json();
-      const [year, month, day] = data.date.split("-");
-
-      setMusicRecord(data);
-      setCurrentYear(parseInt(year, 10));
-      setCurrentMonth(parseInt(month, 10));
-      setCurrentDay(parseInt(day, 10));
-    };
-
-    fetchMusicRecords();
+    initMusicRecords();
 
     const checkPremiumStatus = async () => {
       const token = getSpotifyAccessToken();
@@ -109,8 +92,10 @@ export default function MusicDetailPage() {
     checkPremiumStatus();
   }, []);
 
-  const handleButtonClick = () => {
-    router.push(`/calendar/record?id=${musicRecord!.id}`);
+  const handleEditButtonClick = () => {
+    if (musicRecord) {
+      router.push(`/calendar/record?id=${musicRecord.id}`);
+    }
   };
 
   return (
@@ -119,10 +104,10 @@ export default function MusicDetailPage() {
         <h2 className="text-lg text-[#393D3F]">
           {currentYear}년 {currentMonth}월 {currentDay}일
         </h2>
-        {!isReadOnly && (
+        {calendarPermission === "EDIT" && (
           <button
             className="text-lg text-[#393D3F] bg-[#C8B6FF] rounded-lg px-2"
-            onClick={handleButtonClick}
+            onClick={handleEditButtonClick}
           >
             수정하기
           </button>
