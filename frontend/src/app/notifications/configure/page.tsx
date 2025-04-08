@@ -6,19 +6,10 @@ import axios from "axios";
 import styles from "@/components/style/notificationSettingConfigure.module.css";
 import Checkbox from "./checkbox";
 import Link from "next/link";
-
-interface NotificationDto {
-  id: number;
-  userId: string;
-  title: string;
-  message: string;
-  notificationTime: string;
-  isEmailEnabled: boolean;
-  isPushEnabled: boolean;
-}
+import { Notification } from "@/types/notification";
 
 const NotificationCreate = () => {
-  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
