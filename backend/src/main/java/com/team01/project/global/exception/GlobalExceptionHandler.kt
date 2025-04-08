@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 class GlobalExceptionHandler {
 
     @ExceptionHandler(PermissionDeniedException::class)
-    fun handlePermissionDeniedException(ex: PermissionDeniedException): ResponseEntity<RsData<*>> {
+    fun handlePermissionDeniedException(ex: PermissionDeniedException): ResponseEntity<RsData<Unit>> {
         return generateResponse(ex.statusCode, ex.nonNullMessage)
     }
 
     @ExceptionHandler(CalendarDateAlreadyExistsException::class)
     fun handleCalendarDateAlreadyExistsException(
         ex: CalendarDateAlreadyExistsException
-    ): ResponseEntity<RsData<*>> {
+    ): ResponseEntity<RsData<Unit>> {
         return generateResponse(ex.statusCode, ex.nonNullMessage)
     }
 
@@ -24,15 +24,16 @@ class GlobalExceptionHandler {
         return statusCode.substringBefore("-").toIntOrNull() ?: 500
     }
 
-    private fun generateRsData(statusCode: String, message: String): RsData<*> {
-        return RsData<Any>(
+    private fun generateRsData(statusCode: String, message: String): RsData<Unit> {
+        return RsData(
             statusCode,
             message
         )
     }
 
-    private fun generateResponse(statusCode: String, message: String): ResponseEntity<RsData<*>> {
+    private fun generateResponse(statusCode: String, message: String): ResponseEntity<RsData<Unit>> {
         val rsData = generateRsData(statusCode, message)
+
         return ResponseEntity
             .status(parseStatusCode(statusCode))
             .body(rsData)
