@@ -101,7 +101,7 @@ class UserController(
     @GetMapping("/getUsers")
     fun getUser(@AuthenticationPrincipal oAuth2User: org.springframework.security.oauth2.core.user.OAuth2User): RsData<UserDto> {
         val userId = oAuth2User.name
-        val user = userService.findByUserId(userId)
+        val user = userService.getUserById(userId)
         return RsData("200-1", "유저 정보 조회 완료.", UserDto.from(user))
     }
 

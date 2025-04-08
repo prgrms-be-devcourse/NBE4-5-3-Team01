@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import java.time.LocalDate
-import java.util.*
+import java.util.Optional
 
 interface CalendarDateRepository : JpaRepository<CalendarDate, Long> {
     fun findByUserAndDateBetween(user: User, start: LocalDate, end: LocalDate): List<CalendarDate>
@@ -17,14 +17,4 @@ interface CalendarDateRepository : JpaRepository<CalendarDate, Long> {
     fun findWithOwnerById(@Param("calendarDateId") calendarDateId: Long): Optional<CalendarDate>
 
     fun findByUserIdAndDate(userId: String, date: LocalDate): Optional<CalendarDate>
-
-    fun findByIdOrThrow(calendarDateId: Long): CalendarDate =
-        findById(calendarDateId).orElseThrow {
-            IllegalArgumentException("해당 ID의 캘린더 기록을 찾을 수 없습니다: $calendarDateId")
-        }
-
-    fun findWithOwnerByIdOrThrow(calendarDateId: Long): CalendarDate =
-        findWithOwnerById(calendarDateId).orElseThrow {
-            IllegalArgumentException("해당 ID의 캘린더 기록을 찾을 수 없습니다: $calendarDateId")
-        }
 }
