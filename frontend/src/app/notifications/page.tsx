@@ -6,17 +6,10 @@ import Link from "next/link";
 import styles from "@/components/style/notification.module.css";
 import { format, differenceInDays, isToday, isYesterday } from "date-fns";
 import { ko } from "date-fns/locale";
-
-interface NotificationDto {
-  id: number;
-  userId: number;
-  message: string;
-  notificationTime: string;
-  isRead: boolean;
-}
+import { NotificationsDto } from "@/types/notification";
 
 const Notifications = () => {
-  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
+  const [notifications, setNotifications] = useState<NotificationsDto[]>([]);
   const [filterType, setFilterType] = useState("All");
   const unreadCount = notifications.filter(
     (notification) => !notification.isRead

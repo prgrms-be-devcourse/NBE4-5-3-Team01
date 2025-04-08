@@ -4,19 +4,10 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "@/components/style/notificationSettingEdit.module.css";
 import Link from "next/link";
-
-interface NotificationDto {
-  id: number;
-  userId: string;
-  title: string;
-  message: string;
-  notificationTime: string;
-  isEmailEnabled: boolean;
-  isPushEnabled: boolean;
-}
+import { Notification } from "@/types/notification";
 
 const NotificationEdit = () => {
-  const [notifications, setNotifications] = useState<NotificationDto[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [editingNotificationId, setEditingNotificationId] = useState<
     number | null
   >(null);
