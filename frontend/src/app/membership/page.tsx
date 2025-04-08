@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
-import { Card } from '@/components/ui/card'
 import PricingPage from './PricingPage'
 import SubscriptionPage from './SubscriptionPage'
 import { useGlobalAlert } from '@/components/GlobalAlert'
@@ -29,7 +28,6 @@ export default function MembershipPage() {
                     withCredentials: true,
                 })
 
-                console.log(initRes)
                 const { code, msg, data } = membershipRes.data
                 setAlert({ code, message: msg })
                 setGrade(data.grade)
