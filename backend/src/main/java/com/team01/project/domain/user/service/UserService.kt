@@ -13,6 +13,7 @@ import com.team01.project.domain.user.entity.RefreshToken
 import com.team01.project.domain.user.entity.User
 import com.team01.project.domain.user.repository.RefreshTokenRepository
 import com.team01.project.domain.user.repository.UserRepository
+import com.team01.project.domain.user.repository.findByIdOrThrow
 import com.team01.project.global.security.JwtTokenProvider
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
@@ -156,7 +157,7 @@ class UserService(
     }
 
     fun search(currentUserId: String, name: String): List<FollowResponse> {
-        val currentUser = userRepository.getById(currentUserId)
+        val currentUser = userRepository.findByIdOrThrow(currentUserId)
         val users = userRepository.searchUser(name)
         return users.filter { it.id != currentUser.id }
             .map {
@@ -216,7 +217,7 @@ class UserService(
 
     @Transactional
     fun updateCalendarVisibility(userId: String, newCalendarVisibility: CalendarVisibility) {
-        val user = userRepository.getById(userId)
+        val user = userRepository.findByIdOrThrow(userId)
         user.updateCalendarVisibility(newCalendarVisibility)
     }
 

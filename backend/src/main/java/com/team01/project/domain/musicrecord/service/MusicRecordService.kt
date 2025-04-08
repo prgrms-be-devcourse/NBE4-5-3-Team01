@@ -10,6 +10,7 @@ import com.team01.project.domain.musicrecord.entity.MusicRecord
 import com.team01.project.domain.musicrecord.entity.MusicRecordId
 import com.team01.project.domain.musicrecord.repository.MusicRecordRepository
 import com.team01.project.domain.user.repository.UserRepository
+import com.team01.project.domain.user.repository.findByIdOrThrow
 import com.team01.project.global.exception.PermissionDeniedException
 import com.team01.project.global.permission.CalendarPermission
 import com.team01.project.global.permission.PermissionService
@@ -84,7 +85,7 @@ class MusicRecordService(
     fun updateMusicRecords(calendarDateId: Long, loggedInUserId: String, newMusicIds: List<String>) {
         val calendarDate = calendarDateRepository.findWithOwnerByIdOrThrow(calendarDateId)
         val calendarOwner = calendarDate.user
-        val loggedInUser = userRepository.getById(loggedInUserId)
+        val loggedInUser = userRepository.findByIdOrThrow(loggedInUserId)
 
         val calendarPermission = permissionService.checkPermission(calendarOwner, loggedInUser)
 
