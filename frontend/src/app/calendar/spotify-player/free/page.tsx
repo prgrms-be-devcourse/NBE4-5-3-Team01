@@ -1,24 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-interface Music {
-  id: string;
-  name: string;
-  singer: string;
-  singerId: string;
-  releaseDate: string;
-  albumImage: string;
-  genre: string;
-  uri: string;
-}
-
-interface MusicRecord {
-  id: number;
-  date: string;
-  memo: string;
-  musics: Music[];
-}
+import { MusicRecord } from "@/types/musicRecord";
 
 export default function SpotifyFreePlayerPage() {
   const [musicRecord, setMusicRecord] = useState<MusicRecord | null>(null);

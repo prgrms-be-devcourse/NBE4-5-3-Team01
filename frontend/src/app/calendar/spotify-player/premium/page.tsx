@@ -2,24 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { loadSpotifyPlayer } from "./player";
-
-interface Music {
-  id: string;
-  name: string;
-  singer: string;
-  singerId: string;
-  releaseDate: string;
-  albumImage: string;
-  genre: string;
-  uri: string;
-}
-
-interface MusicRecord {
-  id: number;
-  date: string;
-  memo: string;
-  musics: Music[];
-}
+import { MusicRecord } from "@/types/musicRecord";
 
 function getSpotifyAccessToken(): string | null {
   if (typeof document === "undefined") return null;
