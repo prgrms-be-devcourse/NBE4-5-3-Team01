@@ -38,5 +38,4 @@ class GlobalExceptionHandler {
             .status(parseStatusCode(statusCode))
             .body(rsData)
     }
-
 }
