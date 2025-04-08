@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/membership")
+@RequestMapping("/membership")
 @Tag(name = "Membership", description = "멤버십 관련 API")
 class MembershipController(
     private val membershipService: MembershipService
