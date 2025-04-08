@@ -102,3 +102,57 @@
     width: 100%;
     text-align: center;
 }
+
+/* ===== SubscriptionInfo Custom Styles (이미지 기능 전용) ===== */
+
+.premium-feature-image {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    min-height: 200px;
+}
+
+@media (min-width: 768px) {
+    .premium-feature-image {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.feature-card {
+    position: relative;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+    transform: scale(1.015);
+}
+
+.feature-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.9);
+}
+
+.feature-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: #ffffff;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(3px);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.feature-card:hover .feature-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+}

@@ -10,10 +10,10 @@ import { useGlobalAlert } from '@/components/GlobalAlert'
 export default function MembershipPage() {
     const API_URL = "http://localhost:8080/api/v1";
 
-    const [grade, setGrade] = useState<string | null>(null)
-    const [loading, setLoading] = useState(true)
-    const effectRan = useRef(false)
-    const { setAlert } = useGlobalAlert()
+    const [grade, setGrade] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const effectRan = useRef(false);
+    const { setAlert } = useGlobalAlert();
 
     useEffect(() => {
         if (effectRan.current) return
@@ -26,10 +26,10 @@ export default function MembershipPage() {
                     headers: { 'Content-Type': 'application/json' },
                     withCredentials: true,
                 })
-                const userId = userRes.data.id
+                const user = userRes.data
 
                 // 2. 기본 멤버십 설정 (null일 경우에만 backend에서 자동 처리됨)
-                const initRes = await axios.post(`${API_URL}/membership/init`, userId, {
+                const initRes = await axios.post(`${API_URL}/membership/init`, user, {
                     withCredentials: true,
                 })
 
@@ -39,7 +39,8 @@ export default function MembershipPage() {
                 })
                 const { code, msg, data } = membershipRes.data
                 setAlert({ code, message: msg })
-                setGrade(data.grade)
+                // setGrade(data.grade)
+                setGrade("premium")
             } catch (err) {
                 console.error('멤버십 처리 실패:', err)
                 setAlert({ code: '500-3', message: '멤버십 정보를 불러오지 못했어요.' })
@@ -56,11 +57,9 @@ export default function MembershipPage() {
     }
 
     return (
-        <Card className="m-10 bg-white border-0 p-0">
-            <div className="p-6 space-y-8">
-                {grade === 'basic' && <PricingPage />}
-                {grade === 'premium' && <SubscriptionPage />}
-            </div>
-        </Card>
+        <div>
+            {grade === 'basic' && <PricingPage />}
+            {grade === 'premium' && <SubscriptionPage />}
+        </div>
     )
 }
