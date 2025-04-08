@@ -1,6 +1,7 @@
 package com.team01.project.domain.user.controller
 
 import com.team01.project.domain.follow.controller.dto.FollowResponse
+import com.team01.project.domain.notification.service.NotificationService
 import com.team01.project.domain.user.dto.CalendarVisibilityUpdateRequest
 import com.team01.project.domain.user.dto.SimpleUserResponse
 import com.team01.project.domain.user.dto.UserDto
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -27,13 +29,15 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
+import java.time.LocalTime
 
 @Tag(name = "Users", description = "유저 API")
 @RequestMapping("/user")
 @Controller
 class UserController(
     private val jwtTokenProvider: JwtTokenProvider,
-    private val userService: UserService
+    private val userService: UserService,
+    private val notificationService: NotificationService
 ) {
 
     @Operation(summary = "로그인 api", description = "db에서 아이디 조회 후 입력한 비밀번호 검증 후 토큰 반환")
@@ -180,6 +184,12 @@ class UserController(
     fun userSignUp(@RequestBody body: UserDto): RsData<UserDto> {
         val savedUser = userService.addUser(body)
         val userDto = UserDto.from(savedUser)
+
+        notificationService.createDefaultNotifications(savedUser)
+        log.info("${savedUser.name}님의 알림이 생성되었습니다.")
+
+        notificationService.initLoginNotifications(LocalTime.now(), savedUser)
+
         return RsData("200-1", "등록된 유저", userDto)
     }
 
