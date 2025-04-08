@@ -1,6 +1,6 @@
 import java.time.LocalDate
 
-data class MembershipResponse(
+data class MembershipDto(
     val grade: String,
     val startDate: LocalDate?,
     val endDate: LocalDate?,
