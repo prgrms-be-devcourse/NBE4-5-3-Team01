@@ -1,6 +1,7 @@
 "use client";
 
 import "@/app/membership/style.css";
+import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { Card } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 
 export default function PricingPage() {
+    const router = useRouter();
     const pricingPlans = [
         {
             title: "Basic",
@@ -108,7 +110,10 @@ export default function PricingPage() {
                                             현재 사용 중인 요금제
                                         </Button>
                                     ) : (
-                                        <button className="w-full h-12 shiny-button justify-center">
+                                        <button
+                                            className="w-full h-12 shiny-button justify-center"
+                                            onClick={() => router.push("/membership/payment")}
+                                        >
                                             <span className="shiny-text">이 요금제로 업그레이드</span>
                                             <span className="shiny-icon">
                                                 <FontAwesomeIcon icon={faArrowRight} />

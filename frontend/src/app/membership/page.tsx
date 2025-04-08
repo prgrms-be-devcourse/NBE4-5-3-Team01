@@ -21,26 +21,18 @@ export default function MembershipPage() {
 
         const fetchMembership = async () => {
             try {
-                // 1. 유저 정보 먼저 가져오기
-                const userRes = await axios.get(`${API_URL}/user/byCookie`, {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true,
-                })
-                const user = userRes.data
-
-                // 2. 기본 멤버십 설정 (null일 경우에만 backend에서 자동 처리됨)
-                const initRes = await axios.post(`${API_URL}/membership/init`, user, {
+                const initRes = await axios.post(`${API_URL}/membership/init`, {}, {
                     withCredentials: true,
                 })
 
-                // 3. 멤버십 정보 조회
                 const membershipRes = await axios.get(`${API_URL}/membership/my`, {
                     withCredentials: true,
                 })
+
+                console.log(initRes)
                 const { code, msg, data } = membershipRes.data
                 setAlert({ code, message: msg })
-                // setGrade(data.grade)
-                setGrade("premium")
+                setGrade(data.grade)
             } catch (err) {
                 console.error('멤버십 처리 실패:', err)
                 setAlert({ code: '500-3', message: '멤버십 정보를 불러오지 못했어요.' })

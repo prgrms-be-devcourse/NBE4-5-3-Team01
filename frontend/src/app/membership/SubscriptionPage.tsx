@@ -2,6 +2,7 @@
 
 import "@/app/membership/style.css";
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from 'next/navigation';
 import axios from "axios";
 import Link from "next/link"
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ export default function SubscriptionInfo() {
     const [membership, setMembership] = useState<MembershipData | null>(null);
 
     const effectRan = useRef(false);
+    const router = useRouter();
+
     const { setAlert } = useGlobalAlert();
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState<{
@@ -73,17 +76,9 @@ export default function SubscriptionInfo() {
             cancelText: "유지하기",
             onConfirm: async () => {
                 try {
-                    // 1. 유저 정보 먼저 가져오기
-                    const userRes = await axios.get(`${API_URL}/user/byCookie`, {
-                        headers: { 'Content-Type': 'application/json' },
+                    const res = await axios.post(`${API_URL}/membership/cancel`, {}, {
                         withCredentials: true,
                     });
-                    const user = userRes.data;
-                    console.log(user);
-
-                    const res = await axios.post(`${API_URL}/membership/cancel`, user, { withCredentials: true });
-                    console.log(res.data);
-
                     const { code, msg, data } = res.data;
 
                     if (code.startsWith("2")) {
@@ -181,6 +176,7 @@ export default function SubscriptionInfo() {
                         ) : (
                             <Button
                                 className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold text-sm px-5 py-2 rounded-md shadow hover:brightness-110 transition cursor-pointer"
+                                onClick={() => router.push("/membership/payment")}
                             >
                                 프리미엄 다시 시작하기
                             </Button>
