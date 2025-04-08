@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.team01.project.global.security.JwtTokenProvider;
-
 @SpringBootTest
 public class JwtTokenProviderTest {
 

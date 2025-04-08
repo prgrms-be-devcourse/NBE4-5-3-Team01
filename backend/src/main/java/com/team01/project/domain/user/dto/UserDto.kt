@@ -6,10 +6,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class UserDto(
-    val id: String?,
+    val id: String,
     val password: String?,
-    val email: String?,
-    val name: String?,
+    val email: String,
+    val name: String,
     val originalName: String?,
     val userIntro: String?,
     val image: String?,
