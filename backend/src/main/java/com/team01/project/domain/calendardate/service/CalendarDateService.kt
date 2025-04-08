@@ -3,6 +3,7 @@ package com.team01.project.domain.calendardate.service
 import com.team01.project.domain.calendardate.controller.dto.response.CalendarDateFetchResponse
 import com.team01.project.domain.calendardate.entity.CalendarDate
 import com.team01.project.domain.calendardate.repository.CalendarDateRepository
+import com.team01.project.domain.calendardate.repository.findWithOwnerByIdOrThrow
 import com.team01.project.domain.musicrecord.service.MusicRecordService
 import com.team01.project.domain.notification.event.NotificationRecordEvent
 import com.team01.project.domain.user.repository.UserRepository
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
-import java.util.*
+import java.util.Optional
 
 @Service
 @Transactional
