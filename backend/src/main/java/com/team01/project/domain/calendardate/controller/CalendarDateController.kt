@@ -7,7 +7,7 @@ import com.team01.project.domain.calendardate.controller.dto.response.CalendarDa
 import com.team01.project.domain.calendardate.controller.dto.response.CalendarDateFetchResponse
 import com.team01.project.domain.calendardate.controller.dto.response.MonthlyFetchResponse
 import com.team01.project.domain.calendardate.entity.CalendarDate
-import com.team01.project.domain.calendardate.extension.idOrThrow
+import com.team01.project.domain.calendardate.entity.idOrThrow
 import com.team01.project.domain.calendardate.service.CalendarDateService
 import com.team01.project.domain.musicrecord.service.MusicRecordService
 import com.team01.project.global.dto.RsData
