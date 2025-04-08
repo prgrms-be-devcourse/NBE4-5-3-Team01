@@ -36,7 +36,10 @@ class MembershipController(
     }
 
     @PostMapping("/cancel")
-    @Operation(summary = "요금제 해지", description = "현재 사용 중인 프리미엄 요금제를 해지합니다.")
+    @Operation(
+        summary = "요금제 해지",
+        description = "현재 사용 중인 프리미엄 요금제를 해지합니다."
+    )
     fun cancelMembership(
         @AuthenticationPrincipal user: OAuth2User
     ): RsData<String> {
@@ -46,4 +49,20 @@ class MembershipController(
         membershipService.cancelMembership(userId)
         return RsData("200-2", "요금제가 정상적으로 해지되었습니다.", null)
     }
+
+    @PostMapping("/upgrade")
+    @Operation(
+        summary = "요금제 업그레이드",
+        description = "현재 요금제를 프리미엄으로 변경합니다."
+    )
+    fun upgradeMembership(
+        @AuthenticationPrincipal user: OAuth2User
+    ): RsData<String> {
+        val userId = user.getAttribute<String>("id")
+            ?: throw MembershipException(MembershipErrorCode.UNAUTHORIZED)
+
+        membershipService.upgradeToPremium(userId)
+        return RsData("200-3", "프리미엄 요금제로 업그레이드되었습니다.", null)
+    }
+
 }
