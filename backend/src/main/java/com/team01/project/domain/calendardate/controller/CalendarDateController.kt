@@ -7,6 +7,7 @@ import com.team01.project.domain.calendardate.controller.dto.response.CalendarDa
 import com.team01.project.domain.calendardate.controller.dto.response.CalendarDateFetchResponse
 import com.team01.project.domain.calendardate.controller.dto.response.MonthlyFetchResponse
 import com.team01.project.domain.calendardate.entity.CalendarDate
+import com.team01.project.domain.calendardate.extension.idOrThrow
 import com.team01.project.domain.calendardate.service.CalendarDateService
 import com.team01.project.domain.musicrecord.service.MusicRecordService
 import com.team01.project.global.dto.RsData
@@ -123,12 +124,12 @@ class CalendarDateController(
         val calendarDate = calendarDateService.create(loggedInUserId, date, request.memo)
 
         // 음악 기록 저장
-        musicRecordService.createMusicRecords(calendarDate.id, request.musicIds)
+        musicRecordService.createMusicRecords(calendarDate.idOrThrow, request.musicIds)
 
         return RsData(
             "201-10",
             "캘린더 생성에 성공했습니다.",
-            CalendarDateCreateResponse(calendarDate.id!!)
+            CalendarDateCreateResponse(calendarDate.idOrThrow)
         )
     }
 
@@ -212,7 +213,7 @@ class CalendarDateController(
     }
 
     private fun mapToSingleCalendarDate(calendarDate: CalendarDate): MonthlyFetchResponse.SingleCalendarDate {
-        val musicRecord = musicRecordService.findOneByCalendarDateId(calendarDate.id)
+        val musicRecord = musicRecordService.findOneByCalendarDateId(calendarDate.idOrThrow)
         return musicRecord
             .map { MonthlyFetchResponse.SingleCalendarDate.of(calendarDate, it.music) }
             .orElseGet { MonthlyFetchResponse.SingleCalendarDate.from(calendarDate) }
