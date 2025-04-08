@@ -78,8 +78,7 @@ class UserService(
             SecurityContextHolder.getContext().authentication as OAuth2AuthenticationToken
         val userId = authenticationToken.name
 
-        val user = userRepository.findById(userId)
-            .orElseThrow { RuntimeException("해당 유저를 찾을 수 없습니다.") }
+        val user = userRepository.findByIdOrThrow(userId)
 
         val storedRefreshToken = refreshTokenRepository.findByUser(user)
             .orElseThrow { RuntimeException("리프레시 토큰을 찾을 수 없습니다.") }
@@ -170,8 +169,7 @@ class UserService(
     }
 
     fun getUserById(id: String): User {
-        return userRepository.findById(id)
-            .orElseThrow { IllegalArgumentException("해당 ID의 유저 찾을 수 없습니다: $id") }
+        return userRepository.findByIdOrThrow(id)
     }
 
     private fun checkFollow(user: User, currentUser: User): Status {
@@ -180,24 +178,21 @@ class UserService(
 
     @Transactional
     fun updateUserIntro(userId: String, userIntro: String) {
-        val existingUser = userRepository.findById(userId)
-            .orElseThrow { RuntimeException("User not found") }
+        val existingUser = userRepository.findByIdOrThrow(userId)
         existingUser.userIntro = userIntro
         userRepository.save(existingUser)
     }
 
     @Transactional
     fun updateProfileName(userId: String, profileName: String) {
-        val existingUser = userRepository.findById(userId)
-            .orElseThrow { RuntimeException("User not found") }
+        val existingUser = userRepository.findByIdOrThrow(userId)
         existingUser.name = profileName
         userRepository.save(existingUser)
     }
 
     @Transactional
     fun uploadImage(userId: String, file: MultipartFile): String {
-        val existingUser = userRepository.findById(userId)
-            .orElseThrow { RuntimeException("User not found") }
+        val existingUser = userRepository.findByIdOrThrow(userId)
         return try {
             val fileBytes = file.bytes
             val base64Image = Base64.getEncoder().encodeToString(fileBytes)
