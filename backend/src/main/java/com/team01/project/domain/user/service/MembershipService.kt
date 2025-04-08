@@ -1,6 +1,7 @@
 package com.team01.project.domain.user.service
 
 import MembershipResponse
+import com.team01.project.domain.user.entity.Membership
 import com.team01.project.domain.user.repository.UserRepository
 import com.team01.project.global.exception.MembershipErrorCode
 import com.team01.project.global.exception.MembershipException
@@ -61,5 +62,17 @@ class MembershipService(
         membership.count += 1
 
         userRepository.save(user)
+    }
+
+    fun initMembership(userId: String): Boolean {
+        val user = userRepository.findById(userId)
+            .orElseThrow { MembershipException(MembershipErrorCode.USER_NOT_FOUND) }
+
+        if (user.membership != null) return false
+
+        val membership = Membership.default(user)
+        user.membership = membership
+        userRepository.save(user)
+        return true
     }
 }

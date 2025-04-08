@@ -65,4 +65,23 @@ class MembershipController(
         return RsData("200-3", "프리미엄 요금제로 업그레이드되었습니다.", null)
     }
 
+    @PostMapping("/init")
+    @Operation(
+        summary = "기본 멤버십 생성",
+        description = "멤버십이 존재하지 않을 경우 basic 등급으로 생성합니다."
+    )
+    fun initMembership(
+        @AuthenticationPrincipal user: OAuth2User
+    ): RsData<String> {
+        val userId = user.getAttribute<String>("id")
+            ?: throw MembershipException(MembershipErrorCode.UNAUTHORIZED)
+
+        val created = membershipService.initMembership(userId)
+
+        return if (created) {
+            RsData("200-4", "기본 멤버십이 생성되었습니다.", null)
+        } else {
+            RsData("200-5", "이미 멤버십이 존재합니다.", null)
+        }
+    }
 }

@@ -32,8 +32,4 @@ data class Membership(
             return Membership(user = user)
         }
     }
-
-    fun increaseCount() {
-        count += 1
-    }
 }
