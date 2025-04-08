@@ -38,8 +38,8 @@ class PermissionService(
         // [2] 팔로워 공개인 경우 현재 인증된 유저가 캘린더 소유자의 팔로워라면 조회 가능
         // [3] 비공개인 경우 현재 인증된 유저가 캘린더 소유자라면 조회 가능
         return isPublicCalendar(calendarOwner) ||
-                (isFollowerOnlyCalendar(calendarOwner) && isFollower(loggedInUser, calendarOwner)) ||
-                isCalendarOwner(calendarOwner, loggedInUser)
+            (isFollowerOnlyCalendar(calendarOwner) && isFollower(loggedInUser, calendarOwner)) ||
+            isCalendarOwner(calendarOwner, loggedInUser)
     }
 
     /**
@@ -65,7 +65,6 @@ class PermissionService(
     }
 
     private fun isCalendarOwner(calendarOwner: User, loggedInUser: User): Boolean {
-        return calendarOwner == loggedInUser // ==: .equals() 호출 -> 내용 비교
-                                             // ===: 참조 비교
+        return calendarOwner == loggedInUser // equals() 호출 -> 내용 비교
     }
 }
