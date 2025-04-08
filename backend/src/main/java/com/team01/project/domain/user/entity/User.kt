@@ -28,14 +28,14 @@ import java.time.LocalDateTime
 open class User(
     @Id
     @Column(name = "user_id")
-    open var id: String = "",
+    open var id: String,
 
     open var userPassword: String? = null,
 
     @Email
-    open var email: String? = null,
+    open var email: String,
 
-    open var name: String? = null,
+    open var name: String,
 
     open var originalName: String? = null,
 

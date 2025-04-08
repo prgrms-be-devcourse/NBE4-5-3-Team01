@@ -6,6 +6,7 @@ import com.team01.project.domain.follow.controller.dto.FollowResponse
 import com.team01.project.domain.follow.entity.type.Status
 import com.team01.project.domain.follow.repository.FollowRepository
 import com.team01.project.domain.notification.service.NotificationService
+import com.team01.project.domain.user.dto.SimpleUserResponse
 import com.team01.project.domain.user.dto.UserDto
 import com.team01.project.domain.user.entity.CalendarVisibility
 import com.team01.project.domain.user.entity.RefreshToken
@@ -158,7 +159,13 @@ class UserService(
         val currentUser = userRepository.getById(currentUserId)
         val users = userRepository.searchUser(name)
         return users.filter { it.id != currentUser.id }
-            .map { FollowResponse.of(it, checkFollow(it, currentUser), checkFollow(currentUser, it)) }
+            .map {
+                FollowResponse(
+                    user = SimpleUserResponse.from(it),
+                    isFollowing = checkFollow(it, currentUser),
+                    isFollower = checkFollow(currentUser, it)
+                )
+            }
     }
 
     fun getUserById(id: String): User {
@@ -266,7 +273,7 @@ class UserService(
     fun addUser(userDto: UserDto): User {
         val encodedPassword = passwordEncoder.encode(userDto.password)
         val user = User(
-            id = userDto.id ?: throw IllegalArgumentException("User id is required"),
+            id = userDto.id,
             email = userDto.email,
             name = userDto.name,
             originalName = userDto.originalName,
