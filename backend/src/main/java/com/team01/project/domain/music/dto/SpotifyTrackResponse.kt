@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SpotifyTrackResponse(
+    @JsonProperty("id")
     val id: String,
+
+    @JsonProperty("name")
     val name: String,
 
     @JsonProperty("uri")
@@ -14,10 +17,11 @@ data class SpotifyTrackResponse(
     @JsonProperty("artists")
     val artists: List<Artist>,
 
+    @JsonProperty("album")
     val album: Album
 ) {
     fun getArtistsAsString(): String {
-        return artists.joinToString(", ") { it.name }
+        return artists.joinToString(", ") { it.name ?: "이름 없음" }
     }
 
     fun getArtistsIdAsString(): String {
@@ -26,10 +30,11 @@ data class SpotifyTrackResponse(
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class Album(
+        @JsonProperty("name")
         val name: String,
 
         @JsonProperty("release_date")
-        val releaseDate: String,
+        val releaseDate: String?,
 
         @JsonProperty("images")
         val images: List<Image>
@@ -37,12 +42,16 @@ data class SpotifyTrackResponse(
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class Artist(
+        @JsonProperty("id")
         val id: String,
-        val name: String
+
+        @JsonProperty("name")
+        val name: String?
     )
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class Image(
+        @JsonProperty("url")
         val url: String
     )
 }
