@@ -36,7 +36,7 @@ class NotificationService(
     @Transactional(readOnly = true)
     fun getModifiableNotification(userId: String): List<Notification> {
         return notificationRepository.findByUserId(userId)
-            .filter { it.title in listOf("DAILY CHALLENGE", "BUILD PLAYLIST", "YEAR HISTORY") }
+            .filter { it.title in listOf("DAILY CHALLENGE", "BUILD PLAYLIST", "YEAR HISTORY", "DAILY RECAP") }
     }
 
     @Transactional
@@ -74,6 +74,7 @@ class NotificationService(
                 "DAILY CHALLENGE" -> LocalTime.of(21, 0)
                 "YEAR HISTORY" -> LocalTime.of(9, 0)
                 "BUILD PLAYLIST" -> LocalTime.of(18, 0)
+                "DAILY RECAP" -> LocalTime.of(23, 50)
                 else -> null
             }
 

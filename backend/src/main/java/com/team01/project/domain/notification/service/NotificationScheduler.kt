@@ -1,5 +1,6 @@
 package com.team01.project.domain.notification.service
 
+import com.team01.project.domain.calendardate.repository.CalendarDateRepository
 import com.team01.project.domain.notification.entity.Notification
 import com.team01.project.domain.notification.event.NotificationFollowEvent
 import com.team01.project.domain.notification.event.NotificationInitEvent
@@ -22,7 +23,8 @@ class NotificationScheduler(
     private val notificationService: NotificationService,
     private val notificationSender: NotificationSender,
     private val taskScheduler: ThreadPoolTaskScheduler,
-    private val separateTaskScheduler: ThreadPoolTaskScheduler
+    private val separateTaskScheduler: ThreadPoolTaskScheduler,
+    private val calendarDateRepository: CalendarDateRepository
 ) {
 
     private val scheduledTasks: MutableList<CustomScheduledTask> = mutableListOf()
@@ -106,6 +108,12 @@ class NotificationScheduler(
     }
 
     private fun sendNotification(notification: Notification, notificationTime: LocalDateTime) {
+        if (notification.title == "DAILY RECAP" &&
+            calendarDateRepository.findByUserIdAndDate(notification.user.id, notificationTime.toLocalDate()).isEmpty
+        ) {
+            notification.message = "${notification.user.name}님, 오늘은 기록하지 못하셨네요. 내일은 꼭 함께해요 ✨"
+        }
+
         if (notification.isPushEnabled) {
             notificationSender.sendPush(notification.user, notification.title, notification.message, notificationTime)
         }
