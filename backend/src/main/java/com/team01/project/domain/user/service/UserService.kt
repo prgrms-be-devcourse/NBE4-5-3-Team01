@@ -273,9 +273,9 @@ class UserService(
     fun addUser(userDto: UserDto): User {
         val encodedPassword = passwordEncoder.encode(userDto.password)
         val user = User(
-            id = userDto.id ?: throw IllegalArgumentException("User id is required"),
-            email = userDto.email ?: throw IllegalArgumentException("User email is required"),
-            name = userDto.name ?: throw IllegalArgumentException("User name is required"),
+            id = userDto.id,
+            email = userDto.email,
+            name = userDto.name,
             originalName = userDto.originalName,
             field = userDto.field,
             userPassword = encodedPassword,
