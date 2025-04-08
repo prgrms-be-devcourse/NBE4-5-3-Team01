@@ -20,6 +20,24 @@ class GlobalExceptionHandler {
         return generateResponse(ex.statusCode, ex.nonNullMessage)
     }
 
+    @ExceptionHandler(MembershipException::class)
+    fun handleMembershipException(e: MembershipException): RsData<Nothing> {
+        return RsData(
+            code = e.errorCode.code,
+            msg = e.errorCode.message,
+            data = null
+        )
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleUnexpectedException(e: Exception): RsData<Nothing> {
+        return RsData(
+            code = "500",
+            msg = "예상치 못한 서버 오류가 발생했습니다.",
+            data = null
+        )
+    }
+
     private fun parseStatusCode(statusCode: String): Int {
         return statusCode.substringBefore("-").toIntOrNull() ?: 500
     }
