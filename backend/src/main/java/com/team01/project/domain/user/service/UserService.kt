@@ -179,12 +179,6 @@ class UserService(
     }
 
     @Transactional
-    fun findByUserId(userId: String): User {
-        return userRepository.findById(userId)
-            .orElseThrow { RuntimeException("유저의 ID를 찾을 수 없습니다. $userId") }
-    }
-
-    @Transactional
     fun updateUserIntro(userId: String, userIntro: String) {
         val existingUser = userRepository.findById(userId)
             .orElseThrow { RuntimeException("User not found") }
