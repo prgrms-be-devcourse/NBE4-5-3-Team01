@@ -17,12 +17,14 @@ class MembershipScheduler(
     @Transactional
     fun downgradeExpiredMemberships() {
         val today = LocalDate.now()
+        log.info("⭐ 멤버십 스케줄러 실행: {}", today)
+
         val expiredUsers = userRepository.findAll().filter {
             val m = it.membership
             m != null &&
-                m.grade == "premium" &&
-                !m.autoRenew &&
-                m.endDate?.isBefore(today) == true
+                    m.grade == "premium" &&
+                    !m.autoRenew &&
+                    m.endDate?.isBefore(today) == true
         }
 
         expiredUsers.forEach { user ->
