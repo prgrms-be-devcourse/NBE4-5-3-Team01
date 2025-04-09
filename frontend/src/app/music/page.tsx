@@ -20,6 +20,7 @@ export default function MusicPage() {
   const [recentTracks, setRecentTracks] = useState([]);
   const [moodTracks, setMoodTracks] = useState([]);
   const [selectedMood, setSelectedMood] = useState("");
+  const [membershipGrade, setMembershipGrade] = useState("basic");
 
   const [isLoading, setIsLoading] = useState(false);
   const { setAlert } = useGlobalAlert();
@@ -33,20 +34,17 @@ export default function MusicPage() {
       try {
         setIsLoading(true);
 
-        // setAlert({ code: "200", message: "test" });
-        // setAlert({ code: "204", message: "test" });
-        // setAlert({ code: "400", message: "test" });
-        // setAlert({ code: "500", message: "test" });
-        // setAlert({ code: "", message: "test" });
+        const result = await fetchUser();
 
-        const fetchedUserId = await fetchUser();
-        const fetchedArtist = await fetchRandomMusic(fetchedUserId);
+        if (result.grade === "premium") {
+          const fetchedArtist = await fetchRandomMusic(result.id);
 
-        if (!fetchedArtist || !fetchedArtist.id) {
-          setAlert({ code: "401", message: "최근 음악 없음, 빈 리스트 반환" });
-          setRecentTracks([]);
-        } else {
-          await fetchRecentTracks(fetchedArtist.id, fetchedArtist.name);
+          if (!fetchedArtist || !fetchedArtist.id) {
+            setAlert({ code: "401", message: "최근 음악 없음, 빈 리스트 반환" });
+            setRecentTracks([]);
+          } else {
+            await fetchRecentTracks(fetchedArtist.id, fetchedArtist.name);
+          }
         }
 
         const randomMood = getRandomMood();
@@ -63,14 +61,19 @@ export default function MusicPage() {
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get(`${API_URL}/user/byCookie`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const userRes = await axios.get(`${API_URL}/user/byCookie`, {
         withCredentials: true,
-      });
-      setUserName(res.data.nickName || res.data.name);
-      return res.data.id;
+      })
+      const user = userRes.data.data;
+      setUserName(user.nickName || user.name);
+
+      const membershipRes = await axios.get(`${API_URL}/membership/my`, {
+        withCredentials: true,
+      })
+      const membership = membershipRes.data.data;
+      setMembershipGrade(membership?.grade || "basic");
+
+      return { id: user.id, grade: membership.grade };
     } catch (error) {
       setAlert({ code: "500-2", message: "사용자 정보를 가져오지 못했어요." });
       throw error;
@@ -87,8 +90,6 @@ export default function MusicPage() {
       });
 
       const { code, msg, data } = res.data;
-      setAlert({ code: code, message: msg });
-
       if (code.startsWith("200")) {
         return { id: data.singerId, name: data.singer };
       }
@@ -118,8 +119,6 @@ export default function MusicPage() {
       );
 
       const { code, msg, data } = res.data;
-      setAlert({ code: code, message: msg });
-
       if (code.startsWith("200")) {
         setRecentTracks(data);
       }
@@ -139,8 +138,6 @@ export default function MusicPage() {
       });
 
       const { code, msg, data } = res.data;
-      setAlert({ code: code, message: msg });
-
       if (code.startsWith("200")) {
         setMoodTracks(data);
       }
@@ -192,7 +189,9 @@ export default function MusicPage() {
         </div>
         <div className="relative">
           {isLoading && <LoadingScreen />}
-          <RecentTracks singer={singer} tracks={recentTracks} />
+          {membershipGrade === "premium" && (
+            <RecentTracks singer={singer} tracks={recentTracks} />
+          )}
           <MoodTracks mood={selectedMood} tracks={moodTracks} />
         </div>
       </div>

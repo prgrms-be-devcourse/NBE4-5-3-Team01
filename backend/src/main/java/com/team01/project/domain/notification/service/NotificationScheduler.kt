@@ -1,5 +1,6 @@
 package com.team01.project.domain.notification.service
 
+import com.team01.project.domain.calendardate.repository.CalendarDateRepository
 import com.team01.project.domain.notification.entity.Notification
 import com.team01.project.domain.notification.event.NotificationFollowEvent
 import com.team01.project.domain.notification.event.NotificationInitEvent
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.util.Date
 import java.util.concurrent.ScheduledFuture
 
 @Service
@@ -23,7 +23,8 @@ class NotificationScheduler(
     private val notificationService: NotificationService,
     private val notificationSender: NotificationSender,
     private val taskScheduler: ThreadPoolTaskScheduler,
-    private val separateTaskScheduler: ThreadPoolTaskScheduler
+    private val separateTaskScheduler: ThreadPoolTaskScheduler,
+    private val calendarDateRepository: CalendarDateRepository
 ) {
 
     private val scheduledTasks: MutableList<CustomScheduledTask> = mutableListOf()
@@ -76,7 +77,9 @@ class NotificationScheduler(
             .withSecond(0)
             .withNano(0)
 
-        val scheduledTime = Date.from(notificationDateTime.atZone(ZoneId.systemDefault()).toInstant())
+        val scheduledInstant = notificationDateTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
 
         val notifications = notificationService.getNotificationsByTime(notificationTime)
             .filter { it.isEmailEnabled || it.isPushEnabled }
@@ -86,12 +89,12 @@ class NotificationScheduler(
             return
         }
 
-        val futureTask = taskScheduler.schedule({
+        val futureTask: ScheduledFuture<*> = taskScheduler.schedule({
             sendNotifications(notifications, notificationDateTime)
-        }, scheduledTime)
+        }, scheduledInstant)
 
         insertTaskInOrder(futureTask, notificationTime)
-        println("알림 전송 예약 시각: $scheduledTime")
+        println("알림 전송 예약 시각: $notificationDateTime")
     }
 
     private fun insertTaskInOrder(futureTask: ScheduledFuture<*>, notificationTime: LocalTime) {
@@ -105,6 +108,12 @@ class NotificationScheduler(
     }
 
     private fun sendNotification(notification: Notification, notificationTime: LocalDateTime) {
+        if (notification.title == "DAILY RECAP" &&
+            calendarDateRepository.findByUserIdAndDate(notification.user.id, notificationTime.toLocalDate()).isEmpty
+        ) {
+            notification.message = "${notification.user.name}님, 오늘은 기록하지 못하셨네요. 내일은 꼭 함께해요 ✨"
+        }
+
         if (notification.isPushEnabled) {
             notificationSender.sendPush(notification.user, notification.title, notification.message, notificationTime)
         }
@@ -147,7 +156,9 @@ class NotificationScheduler(
             .withSecond(0)
             .withNano(0)
 
-        val scheduledTime = Date.from(notificationDateTime.atZone(ZoneId.systemDefault()).toInstant())
+        val scheduledInstant = notificationDateTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
 
         val notification = Notification.builder()
             .user(user)
@@ -156,12 +167,12 @@ class NotificationScheduler(
             .message(message)
             .build()
 
-        val futureTask = separateTaskScheduler.schedule({
+        val futureTask: ScheduledFuture<*> = separateTaskScheduler.schedule({
             sendNotification(notification, notificationDateTime)
-        }, scheduledTime)
+        }, scheduledInstant)
 
         insertTaskInOrder(futureTask, notificationTime)
-        println("알림 전송 예약 시각: $scheduledTime")
+        println("알림 전송 예약 시각: $notificationDateTime")
     }
 
     @Async

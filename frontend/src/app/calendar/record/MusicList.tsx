@@ -3,15 +3,26 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import "./style.css";
+import { Music } from "@/types/musicRecord";
 
-const MAX_MUSIC_COUNT = 20;
+interface MusicListProps {
+  selectedTracks: Music[];
+  onRemoveTrack: (id: string) => void;
+  maxCount: number;
+}
 
-export default function MusicList({ selectedTracks, onRemoveTrack }) {
+export default function MusicList({
+  selectedTracks,
+  onRemoveTrack,
+  maxCount,
+}: MusicListProps) {
   return (
     <div>
       <div className="flex items-center mb-2">
         <h3 className="text-2xl font-semibold ml-1">음악 목록</h3>
-        <span className="text-sm text-gray-500 ml-3">({selectedTracks.length}/{MAX_MUSIC_COUNT})</span>
+        <span className="text-sm text-gray-500 ml-3">
+          ({selectedTracks.length}/{maxCount})
+        </span>
       </div>
 
       <div className="music-list-container">
