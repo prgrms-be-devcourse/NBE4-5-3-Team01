@@ -4,6 +4,7 @@ import com.team01.project.domain.follow.entity.Follow
 import com.team01.project.domain.follow.repository.FollowRepository
 import com.team01.project.domain.notification.event.NotificationFollowEvent
 import com.team01.project.domain.user.repository.UserRepository
+import com.team01.project.domain.user.repository.findByIdOrThrow
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,8 +19,8 @@ class CommandFollowService(
 ) {
 
     fun create(fromUserId: String, toUserId: String) {
-        val fromUser = userRepository.getById(fromUserId)
-        val toUser = userRepository.getById(toUserId)
+        val fromUser = userRepository.findByIdOrThrow(fromUserId)
+        val toUser = userRepository.findByIdOrThrow(toUserId)
 
         check(!followRepository.existsByToUserAndFromUser(toUser, fromUser)) { "이미 팔로우 요청을 보냈습니다." }
         followRepository.save(Follow(toUser = toUser, fromUser = fromUser))
@@ -28,8 +29,8 @@ class CommandFollowService(
     }
 
     fun delete(fromUserId: String, toUserId: String) {
-        val fromUser = userRepository.getById(fromUserId)
-        val toUser = userRepository.getById(toUserId)
+        val fromUser = userRepository.findByIdOrThrow(fromUserId)
+        val toUser = userRepository.findByIdOrThrow(toUserId)
         val follow = followRepository.findByToUserAndFromUser(toUser, fromUser)
             .orElseThrow { IllegalArgumentException("팔로우를 찾을 수 없습니다.") }
 
@@ -37,8 +38,8 @@ class CommandFollowService(
     }
 
     fun accept(fromUserId: String, toUserId: String) {
-        val fromUser = userRepository.getById(fromUserId)
-        val toUser = userRepository.getById(toUserId)
+        val fromUser = userRepository.findByIdOrThrow(fromUserId)
+        val toUser = userRepository.findByIdOrThrow(toUserId)
 
         val follow = followRepository.findByToUserAndFromUser(toUser, fromUser)
             .orElseThrow { IllegalArgumentException("팔로우를 찾을 수 없습니다.") }

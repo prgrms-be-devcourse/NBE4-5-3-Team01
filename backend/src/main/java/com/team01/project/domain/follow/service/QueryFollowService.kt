@@ -8,6 +8,7 @@ import com.team01.project.domain.follow.repository.FollowRepository
 import com.team01.project.domain.user.dto.SimpleUserResponse
 import com.team01.project.domain.user.entity.User
 import com.team01.project.domain.user.repository.UserRepository
+import com.team01.project.domain.user.repository.findByIdOrThrow
 import lombok.RequiredArgsConstructor
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -21,8 +22,8 @@ class QueryFollowService(
 ) {
 
     fun findFollowing(currentUserId: String, userId: String): List<FollowResponse> {
-        val currentUser = userRepository.getById(currentUserId)
-        val user = userRepository.getById(userId)
+        val currentUser = userRepository.findByIdOrThrow(currentUserId)
+        val user = userRepository.findByIdOrThrow(userId)
 
         return followRepository.findByFromUserAndStatus(user, Status.ACCEPT).stream()
             .filter { follow: Follow -> follow.toUser.id != currentUser.id }
@@ -37,8 +38,8 @@ class QueryFollowService(
     }
 
     fun findFollower(currentUserId: String, userId: String): List<FollowResponse> {
-        val currentUser = userRepository.getById(currentUserId)
-        val user = userRepository.getById(userId)
+        val currentUser = userRepository.findByIdOrThrow(currentUserId)
+        val user = userRepository.findByIdOrThrow(userId)
 
         return followRepository.findByToUserAndStatus(user, Status.ACCEPT).stream()
             .filter { follow: Follow -> follow.fromUser.id != currentUser.id }
@@ -53,7 +54,7 @@ class QueryFollowService(
     }
 
     fun findCount(userId: String): CountFollowResponse {
-        val user = userRepository.getById(userId)
+        val user = userRepository.findByIdOrThrow(userId)
         val followingCount = followRepository.countByFromUserAndStatus(user, Status.ACCEPT)
         val followerCount = followRepository.countByToUserAndStatus(user, Status.ACCEPT)
 
@@ -66,7 +67,7 @@ class QueryFollowService(
     }
 
     fun findMyFollowing(currentUserId: String): List<FollowResponse> {
-        val currentUser = userRepository.getById(currentUserId)
+        val currentUser = userRepository.findByIdOrThrow(currentUserId)
 
         return followRepository.findByFromUser(currentUser)
             .stream()
@@ -81,7 +82,7 @@ class QueryFollowService(
     }
 
     fun findPendingList(currentUserId: String): List<FollowResponse> {
-        val currentUser = userRepository.getById(currentUserId)
+        val currentUser = userRepository.findByIdOrThrow(currentUserId)
 
         return followRepository.findByToUserAndStatus(currentUser, Status.PENDING).stream()
             .map { follow: Follow ->

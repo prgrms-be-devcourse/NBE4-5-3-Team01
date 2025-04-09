@@ -31,6 +31,10 @@ export default function CalendarRecordPage() {
 
   const [memo, setMemo] = useState("");
   const [selectedTracks, setSelectedTracks] = useState<any[]>([]);
+  const [membershipGrade, setMembershipGrade] = useState("basic");
+
+  const MAX_TRACK_COUNT = membershipGrade === "premium" ? 50 : 20;
+  const MAX_MEMO_LENGTH = membershipGrade === "premium" ? 500 : 200;
 
   const { setAlert } = useGlobalAlert();
   const [isEditing, setIsEditing] = useState(false);
@@ -43,6 +47,18 @@ export default function CalendarRecordPage() {
   useEffect(() => {
     if (isFetched.current) return;
     isFetched.current = true;
+
+    const fetchUser = async () => {
+      try {
+        const membershipRes = await axios.get(`${API_URL}/membership/my`, {
+          withCredentials: true,
+        })
+        const membership = membershipRes.data.data;
+        setMembershipGrade(membership?.grade || "basic");
+      } catch (error) {
+        setAlert({ code: "500-2", message: "사용자 정보를 가져오지 못했어요." });
+      }
+    };
 
     const fetchInitialData = async () => {
       const data = await fetchRecord(id);
@@ -69,6 +85,7 @@ export default function CalendarRecordPage() {
     };
 
     fetchInitialData();
+    fetchUser();
   }, [trackId, id]);
 
   const fetchTrack = async (trackId: string, musics: any) => {
@@ -94,11 +111,11 @@ export default function CalendarRecordPage() {
           return;
         }
 
-        // ✅ 20개 초과 여부도 밖에서 확인
-        if (musics.length >= 20) {
+        // ✅ 기록 저장 개수 초과 여부도 밖에서 확인
+        if (musics.length >= MAX_TRACK_COUNT) {
           setAlert({
             code: "400-3",
-            message: "음악은 최대 20개까지만 추가할 수 있습니다.",
+            message: `음악은 최대 ${MAX_TRACK_COUNT}개까지만 추가할 수 있습니다.`,
           });
           return;
         }
@@ -125,8 +142,6 @@ export default function CalendarRecordPage() {
       );
 
       const { code, data, msg } = res.data;
-      setAlert({ code, message: msg });
-
       if (code.startsWith("200")) {
         setSelectedTracks(data);
       }
@@ -149,13 +164,7 @@ export default function CalendarRecordPage() {
           },
           withCredentials: true,
         });
-
-        // const { code, msg, data } = res.data;
-        // console.log(res.data);
-        // setAlert({ code: code, message: msg });
-        const code = "200";
-        const data = res.data.data;
-
+        const { code, msg, data } = res.data;
         if (code.startsWith("2")) {
           return data;
         }
@@ -208,15 +217,11 @@ export default function CalendarRecordPage() {
         `${API_URL}/music/save-all`,
         finalTracks,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
           withCredentials: true,
         }
       );
 
       const { code, msg } = saveRes.data;
-      setAlert({ code: code, message: msg });
 
       const musicIds = finalTracks.map((track) => track.id);
 
@@ -232,7 +237,6 @@ export default function CalendarRecordPage() {
             withCredentials: true,
           }
         );
-        setAlert({ code: musicRes.data.code, message: musicRes.data.msg });
 
         const memoRes = await axios.patch(
           `${API_URL}/calendar/${id}/memo`,
@@ -244,7 +248,6 @@ export default function CalendarRecordPage() {
             withCredentials: true,
           }
         );
-        setAlert({ code: memoRes.data.code, message: memoRes.data.msg });
 
         alert("기록이 성공적으로 수정되었습니다!");
         router.push("/calendar");
@@ -261,10 +264,6 @@ export default function CalendarRecordPage() {
             withCredentials: true,
           }
         );
-
-        const { code, msg } = res.data;
-        setAlert({ code: code, message: msg });
-
         alert("새로운 기록이 추가되었습니다!");
         router.push("/calendar");
       }
@@ -344,8 +343,9 @@ export default function CalendarRecordPage() {
           <MusicList
             selectedTracks={selectedTracks}
             onRemoveTrack={handleRemoveTrack}
+            maxCount={membershipGrade === "premium" ? 50 : 20}
           />
-          <MemoInput memo={memo} setMemo={setMemo} />
+          <MemoInput memo={memo} setMemo={setMemo} maxLength={membershipGrade === "premium" ? 500 : 200} />
 
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">

@@ -17,8 +17,14 @@ java {
 }
 
 kotlin {
+    jvmToolchain(21)
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+        freeCompilerArgs.addAll(
+            listOf(
+                "-Xjsr305=strict",
+                "-Xjvm-default=all-compatibility"
+            )
+        )
     }
 }
 

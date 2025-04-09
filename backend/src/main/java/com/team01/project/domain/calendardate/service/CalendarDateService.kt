@@ -3,9 +3,11 @@ package com.team01.project.domain.calendardate.service
 import com.team01.project.domain.calendardate.controller.dto.response.CalendarDateFetchResponse
 import com.team01.project.domain.calendardate.entity.CalendarDate
 import com.team01.project.domain.calendardate.repository.CalendarDateRepository
+import com.team01.project.domain.calendardate.repository.findWithOwnerByIdOrThrow
 import com.team01.project.domain.musicrecord.service.MusicRecordService
 import com.team01.project.domain.notification.event.NotificationRecordEvent
 import com.team01.project.domain.user.repository.UserRepository
+import com.team01.project.domain.user.repository.findByIdOrThrow
 import com.team01.project.global.exception.CalendarDateAlreadyExistsException
 import com.team01.project.global.exception.PermissionDeniedException
 import com.team01.project.global.permission.CalendarPermission
@@ -16,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
-import java.util.*
+import java.util.Optional
 
 @Service
 @Transactional
@@ -38,8 +40,8 @@ class CalendarDateService(
         val start = yearMonth.atDay(1)
         val end = yearMonth.atEndOfMonth()
 
-        val calendarOwner = userRepository.getById(calendarOwnerId)
-        val loggedInUser = userRepository.getById(loggedInUserId)
+        val calendarOwner = userRepository.findByIdOrThrow(calendarOwnerId)
+        val loggedInUser = userRepository.findByIdOrThrow(loggedInUserId)
 
         val calendarPermission = permissionService.checkPermission(calendarOwner, loggedInUser)
 
@@ -56,7 +58,7 @@ class CalendarDateService(
     fun findCalendarDateWithMusics(calendarDateId: Long, loggedInUserId: String): CalendarDateFetchResponse {
         val calendarDate = calendarDateRepository.findWithOwnerByIdOrThrow(calendarDateId)
         val calendarOwner = calendarDate.user
-        val loggedInUser = userRepository.getById(loggedInUserId)
+        val loggedInUser = userRepository.findByIdOrThrow(loggedInUserId)
 
         val calendarPermission = permissionService.checkPermission(calendarOwner, loggedInUser)
 
@@ -73,7 +75,7 @@ class CalendarDateService(
      * 캘린더 생성
      */
     fun create(userId: String, date: LocalDate, memo: String): CalendarDate {
-        val user = userRepository.getById(userId)
+        val user = userRepository.findByIdOrThrow(userId)
 
         if (calendarDateRepository.existsByUserAndDate(user, date)) {
             throw CalendarDateAlreadyExistsException("409-10", "해당 날짜의 캘린더가 이미 존재합니다.")
@@ -97,7 +99,7 @@ class CalendarDateService(
     fun updateMemo(calendarDateId: Long, loggedInUserId: String, memo: String) {
         val calendarDate = calendarDateRepository.findWithOwnerByIdOrThrow(calendarDateId)
         val calendarOwner = calendarDate.user
-        val loggedInUser = userRepository.getById(loggedInUserId)
+        val loggedInUser = userRepository.findByIdOrThrow(loggedInUserId)
 
         val calendarPermission = permissionService.checkPermission(calendarOwner, loggedInUser)
 
