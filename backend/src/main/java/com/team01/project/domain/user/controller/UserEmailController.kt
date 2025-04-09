@@ -16,6 +16,7 @@ import kotlin.random.Random
 @RequestMapping("/userEmail")
 class UserEmailController(
     private val userEmailService: UserEmailService
+
 ) {
 
     @ResponseBody
