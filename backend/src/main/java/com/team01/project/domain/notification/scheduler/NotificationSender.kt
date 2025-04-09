@@ -1,13 +1,15 @@
-package com.team01.project.domain.notification.service
+package com.team01.project.domain.notification.scheduler
 
 import com.team01.project.domain.notification.repository.SubscriptionRepository
+import com.team01.project.domain.notification.service.NotificationListService
+import com.team01.project.domain.notification.service.PushNotificationService
 import com.team01.project.domain.user.entity.User
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
-@Service
+@Component
 class NotificationSender(
     private val javaMailSender: JavaMailSender,
     private val notificationListService: NotificationListService,
