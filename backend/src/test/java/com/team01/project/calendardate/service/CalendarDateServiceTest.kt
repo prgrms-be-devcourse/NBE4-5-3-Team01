@@ -1,183 +1,152 @@
-package com.team01.project.calendardate.service;
+package com.team01.project.calendardate.service
 
-import static com.team01.project.global.permission.CalendarPermission.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import com.team01.project.domain.calendardate.controller.dto.response.CalendarDateFetchResponse
+import com.team01.project.domain.calendardate.entity.CalendarDate
+import com.team01.project.domain.calendardate.repository.CalendarDateRepository
+import com.team01.project.domain.calendardate.service.CalendarDateService
+import com.team01.project.domain.music.entity.Music
+import com.team01.project.domain.musicrecord.service.MusicRecordService
+import com.team01.project.domain.user.entity.User
+import com.team01.project.domain.user.repository.UserRepository
+import com.team01.project.global.permission.CalendarPermission
+import com.team01.project.global.permission.PermissionService
+import com.team01.project.util.TestDisplayNameGenerator
+import io.mockk.every
+import io.mockk.mockk
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayNameGeneration
+import org.junit.jupiter.api.Test
+import org.springframework.context.ApplicationEventPublisher
+import java.time.LocalDate
+import java.time.YearMonth
+import java.util.Optional
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.List;
+@DisplayNameGeneration(TestDisplayNameGenerator::class)
+class CalendarDateServiceTest {
+    private val calendarDateRepository: CalendarDateRepository = mockk()
+    private val userRepository: UserRepository = mockk()
+    private val permissionService: PermissionService = mockk()
+    private val eventPublisher: ApplicationEventPublisher = mockk(relaxed = true)
+    private val musicRecordService: MusicRecordService = mockk()
 
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
+    private val calendarDateService = CalendarDateService(
+        calendarDateRepository,
+        userRepository,
+        permissionService,
+        eventPublisher,
+        musicRecordService
+    )
 
-import com.team01.project.domain.calendardate.controller.dto.response.CalendarDateFetchResponse;
-import com.team01.project.domain.calendardate.entity.CalendarDate;
-import com.team01.project.domain.calendardate.repository.CalendarDateRepository;
-import com.team01.project.domain.calendardate.service.CalendarDateService;
-import com.team01.project.domain.music.entity.Music;
-import com.team01.project.domain.musicrecord.service.MusicRecordService;
-import com.team01.project.domain.user.entity.User;
-import com.team01.project.domain.user.repository.UserRepository;
-import com.team01.project.global.permission.PermissionService;
+    @Test
+    fun `먼슬리 캘린더를 유저 아이디와 날짜로 조회한다`() {
+        // given
+        val mockUserId = "test-user"
+        val mockUser = User(id = mockUserId, email = "email", name = "name")
 
-@ExtendWith(MockitoExtension.class)
-@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-public class CalendarDateServiceTest {
+        val yearMonth = YearMonth.of(2025, 3)
+        val start = yearMonth.atDay(1)
+        val end = yearMonth.atEndOfMonth()
 
-	@Mock
-	private CalendarDateRepository calendarDateRepository;
+        val mockCalendarDates = listOf(
+            CalendarDate(user = mockUser, date = LocalDate.of(2025, 3, 1), memo = "memo 1"),
+            CalendarDate(user = mockUser, date = LocalDate.of(2025, 3, 31), memo = "memo 2")
+        )
 
-	@Mock
-	private UserRepository userRepository;
+        every { userRepository.findById(mockUserId) } returns Optional.of(mockUser)
+        every { permissionService.checkPermission(eq(mockUser), eq(mockUser)) } returns CalendarPermission.EDIT
+        every { calendarDateRepository.findByUserAndDateBetween(mockUser, start, end) } returns mockCalendarDates
 
-	@Mock
-	private ApplicationEventPublisher eventPublisher; // 목 객체
+        // when
+        val result = calendarDateService.findAllByYearAndMonth(mockUserId, mockUserId, yearMonth)
 
-	@Mock
-	private PermissionService permissionService;
+        // then
+        assertThat(result).hasSize(mockCalendarDates.size)
 
-	@Mock
-	private MusicRecordService musicRecordService;
+        result.forEach {
+            assertThat(it.user.id).isEqualTo(mockUserId)
+        }
+    }
 
-	@InjectMocks
-	private CalendarDateService calendarDateService;
+    @Test
+    fun `캘린더를 아이디로 조회한다`() {
+        // given
+        val mockCalendarDateId = 1L
+        val mockUserId = "test-user"
+        val mockUser = User(id = mockUserId, email = "email", name = "name")
+        val mockCalendarDate = getMockCalendarDate()
+        val musics = emptyList<Music>()
+        val mockResponseDto = CalendarDateFetchResponse.of(mockCalendarDate, musics, CalendarPermission.EDIT)
 
-	@Test
-	void 먼슬리_캘린더를_유저_아이디와_날짜로_조회한다() {
+        every { calendarDateRepository.findWithOwnerById(mockCalendarDateId) } returns Optional.of(mockCalendarDate)
+        every { userRepository.findById(mockUserId) } returns Optional.of(mockUser)
+        every { permissionService.checkPermission(any<User>(), any<User>()) } returns CalendarPermission.EDIT
+        every { musicRecordService.findMusicsByCalendarDateId(mockCalendarDateId) } returns musics
 
-		// given
-		String mockUserId = "test-user";
-		User mockUser = User.builder().id(mockUserId).build();
+        // when
+        val result = calendarDateService.findCalendarDateWithMusics(mockCalendarDateId, mockUserId)
 
-		YearMonth yearMonth = YearMonth.of(2025, 3);
-		LocalDate start = yearMonth.atDay(1);
-		LocalDate end = yearMonth.atEndOfMonth();
+        // then
+        assertThat(result).isEqualTo(mockResponseDto)
+    }
 
-		List<CalendarDate> mockCalendarDates = List.of(
-			CalendarDate.builder()
-				.user(mockUser)
-				.date(LocalDate.of(2025, 3, 1))
-				.memo("memo 1")
-				.build(),
-			CalendarDate.builder()
-				.user(mockUser)
-				.date(LocalDate.of(2025, 3, 31))
-				.memo("memo 2")
-				.build()
-		);
+    @Test
+    fun `캘린더 메모를 수정한다`() {
+        // given
+        val mockCalendarDateId = 1L
+        val newMemo = "new memo"
+        val mockUserId = "test-user"
+        val mockUser = User(id = mockUserId, email = "email", name = "name")
+        val mockDate = LocalDate.of(2025, 3, 1)
+        val mockCalendarDate = getMockCalendarDate(mockDate)
 
-		when(userRepository.getById(mockUserId)).thenReturn(mockUser);
-		when(permissionService.checkPermission(mockUser, mockUser)).thenReturn(EDIT);
-		when(calendarDateRepository.findByUserAndDateBetween(mockUser, start, end))
-			.thenReturn(mockCalendarDates);
+        every { calendarDateRepository.findWithOwnerById(mockCalendarDateId) } returns Optional.of(mockCalendarDate)
+        every { userRepository.findById(mockUserId) } returns Optional.of(mockUser)
+        every { permissionService.checkPermission(any<User>(), any<User>()) } returns CalendarPermission.EDIT
 
-		// when
-		List<CalendarDate> result = calendarDateService.findAllByYearAndMonth(mockUserId, mockUserId, yearMonth);
+        // when
+        calendarDateService.updateMemo(mockCalendarDateId, mockUserId, newMemo)
 
-		// then
-		assertThat(result).hasSize(mockCalendarDates.size());
-		result.forEach(calendarDate ->
-			assertThat(calendarDate.getUser().getId()).isEqualTo(mockUserId));
+        // then
+        assertThat(mockCalendarDate.memo).isEqualTo(newMemo)
+    }
 
-	}
+    @Test
+    fun `캘린더를 유저 아이디로 생성한다`() {
+        // given
+        val mockDate = LocalDate.of(2025, 3, 1)
+        val mockMemo = "memo"
+        val mockUserId = "test-user"
+        val mockUser = User(id = mockUserId, email = "email", name = "name")
 
-	@Test
-	void 캘린더를_아이디로_조회한다() {
+        every { userRepository.findById(mockUserId) } returns Optional.of(mockUser)
+        every { calendarDateRepository.existsByUserAndDate(mockUser, mockDate) } returns false
+        every { calendarDateRepository.save(any<CalendarDate>()) } answers { firstArg() }
 
-		// given
-		Long mockCalendarDateId = 1L;
-		String mockUserId = "test-user";
-		CalendarDate mockCalendarDate = getMockCalendarDate();
-		User mockUser = User.builder().id(mockUserId).build();
-		List<Music> musics = List.of();
-		CalendarDateFetchResponse mockResponseDto = CalendarDateFetchResponse.of(mockCalendarDate, musics, EDIT);
+        // when
+        val result = calendarDateService.create(mockUserId, mockDate, mockMemo)
 
-		when(calendarDateRepository.findWithOwnerByIdOrThrow(mockCalendarDateId)).thenReturn(mockCalendarDate);
-		when(userRepository.getById(mockUserId)).thenReturn(mockUser);
-		when(permissionService.checkPermission(any(User.class), any(User.class))).thenReturn(EDIT);
-		when(musicRecordService.findMusicsByCalendarDateId(mockCalendarDateId)).thenReturn(musics);
+        // then
+        assertThat(result).isNotNull
+        assertThat(result.user.id).isEqualTo(mockUserId)
+        assertThat(result.date).isEqualTo(mockDate)
+        assertThat(result.memo).isEqualTo(mockMemo)
+    }
 
-		// when
-		CalendarDateFetchResponse result = calendarDateService.findCalendarDateWithMusics(mockCalendarDateId,
-			mockUserId);
+    private fun getMockCalendarDate(): CalendarDate {
+        return CalendarDate(
+            id = 1,
+            user = User(id = "id", email = "email", name = "name"),
+            date = LocalDate.of(2025, 3, 1),
+            memo = "memo 1"
+        )
+    }
 
-		// then
-		assertNotNull(result);
-		assertEquals(mockResponseDto, result);
-
-	}
-
-	@Test
-	void 캘린더_메모를_수정한다() {
-
-		// given
-		Long mockCalendarDateId = 1L;
-		String newMemo = "new memo";
-		String mockUserId = "test-user";
-		LocalDate mockDate = LocalDate.of(2025, 3, 1);
-		CalendarDate mockCalendarDate = getMockCalendarDate(mockDate);
-		User mockUser = User.builder().id(mockUserId).build();
-
-		when(calendarDateRepository.findWithOwnerByIdOrThrow(mockCalendarDateId)).thenReturn(mockCalendarDate);
-		when(userRepository.getById(mockUserId)).thenReturn(mockUser);
-		when(permissionService.checkPermission(any(User.class), any(User.class))).thenReturn(EDIT);
-
-		// when
-		calendarDateService.updateMemo(mockCalendarDateId, mockUserId, newMemo);
-
-		// then
-		assertEquals(newMemo, mockCalendarDate.getMemo());
-
-	}
-
-	@Test
-	void 캘린더를_유저_아이디로_생성한다() {
-
-		// given
-		LocalDate mockDate = LocalDate.of(2025, 3, 1);
-		String mockMemo = "memo";
-		String mockUserId = "test-user";
-		User mockUser = User.builder().id(mockUserId).build();
-
-		when(userRepository.getById(mockUserId)).thenReturn(mockUser);
-		when(calendarDateRepository.existsByUserAndDate(mockUser, mockDate)).thenReturn(false);
-		when(calendarDateRepository.save(any(CalendarDate.class))).thenAnswer(
-			invocation -> invocation.getArgument(0)
-		);
-
-		// when
-		CalendarDate result = calendarDateService.create(mockUserId, mockDate, mockMemo);
-
-		// then
-		assertNotNull(result);
-		assertEquals(mockUserId, result.getUser().getId());
-		assertEquals(mockDate, result.getDate());
-		assertSame(mockMemo, result.getMemo());
-
-	}
-
-	CalendarDate getMockCalendarDate() {
-		return CalendarDate.builder()
-			.user(new User())
-			.date(LocalDate.of(2025, 3, 1))
-			.memo("memo 1")
-			.build();
-	}
-
-	CalendarDate getMockCalendarDate(LocalDate date) {
-		return CalendarDate.builder()
-			.user(new User())
-			.date(date)
-			.memo("memo 1")
-			.build();
-	}
-
+    private fun getMockCalendarDate(date: LocalDate): CalendarDate {
+        return CalendarDate(
+            id = 1,
+            user = User(id = "id", email = "email", name = "name"),
+            date = date,
+            memo = "memo 1"
+        )
+    }
 }
