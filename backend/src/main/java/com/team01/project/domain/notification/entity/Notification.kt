@@ -26,7 +26,7 @@ class Notification(
     val title: String,
 
     @Column(nullable = false)
-    val message: String,
+    var message: String,
 
     var notificationTime: LocalTime? = null,
 

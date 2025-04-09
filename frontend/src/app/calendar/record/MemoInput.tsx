@@ -2,7 +2,17 @@
 
 import "./style.css";
 
-export default function MemoInput({ memo, setMemo, maxLength }) {
+interface MemoInputProps {
+  memo: string;
+  setMemo: (value: string) => void;
+  maxLength: number;
+}
+
+export default function MemoInput({
+  memo,
+  setMemo,
+  maxLength,
+}: MemoInputProps) {
   return (
     <div>
       <h3 className="text-xl font-semibold mb-2 ml-2">메모</h3>

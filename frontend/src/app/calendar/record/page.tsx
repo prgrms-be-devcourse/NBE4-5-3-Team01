@@ -4,12 +4,16 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import "./style.css";
+
 import MemoInput from "./MemoInput";
 import MusicList from "./MusicList";
 import MusicSearch from "./MusicSearch";
+import RecentlyPlayedList from "./RecentlyPlayedList";
+
 import { Card } from "@/components/ui/card";
 import { useModal } from "@/hooks/useModal";
 import { useGlobalAlert } from "@/components/GlobalAlert";
+import { getSpotifyAccessToken } from "@/app/utils/getSpotifyAccessToken";
 import { useHandleApiError } from "@/lib/useHandleApiError";
 
 const API_URL = "http://localhost:8080/api/v1";
@@ -53,6 +57,9 @@ export default function CalendarRecordPage() {
 
   const MAX_TRACK_COUNT = membershipGrade === "premium" ? 50 : 20;
   const MAX_MEMO_LENGTH = membershipGrade === "premium" ? 500 : 200;
+
+  const [recentTracks, setRecentTracks] = useState<any[]>([]);
+  const [isFetchingRecent, setIsFetchingRecent] = useState(false);
 
   useEffect(() => {
     if (isFetched.current) return;
@@ -160,7 +167,7 @@ export default function CalendarRecordPage() {
 
   const handleSaveRecord = async () => {
     try {
-      if (selectedTracks.length === 0) {
+      if (selectedTracks.length === 0 && recentTracks.length === 0) {
         setAlert({ code: "400-4", message: "음악 기록을 추가해주세요." });
         return;
       }
@@ -177,19 +184,42 @@ export default function CalendarRecordPage() {
       }
 
       const finalMemo = memo.trim();
-      const musicIds = selectedTracks.map((t) => t.id);
 
-      await axios.post(`${API_URL}/music/save-all`, selectedTracks, {
-        withCredentials: true,
+      const allTracks = [...selectedTracks, ...recentTracks];
+
+      // 중복 제거 (id 기준)
+      const uniqueTracksMap = new Map();
+      allTracks.forEach((track) => {
+        if (!uniqueTracksMap.has(track.id)) {
+          uniqueTracksMap.set(track.id, track);
+        }
       });
+      const finalTracks = Array.from(uniqueTracksMap.values());
 
-      if (isEditing && id) {
-        await axios.put(`${API_URL}/calendar/${id}/music`, { musicIds }, { withCredentials: true });
+      console.log("finalTracks", finalTracks);
+
+      const saveRes = await axios.post(
+        `${API_URL}/music/save-all`,
+        finalTracks,
+        {
+          withCredentials: true,
+        }
+      );
+
+      const musicIds = finalTracks.map((track) => track.id);
+
+      if (isEditing) {
+        // 기존 기록 수정
+        await axios.put(
+          `${API_URL}/calendar/${id}/music`,
+          { musicIds: musicIds },
+            { withCredentials: true, }
+        );
 
         await axios.patch(
           `${API_URL}/calendar/${id}/memo`,
           { memo: finalMemo },
-          { withCredentials: true }
+          { withCredentials: true, }
         );
 
         await showAlert({
@@ -226,6 +256,48 @@ export default function CalendarRecordPage() {
     setSelectedTracks((prev) => prev.filter((track) => track.id !== trackId));
   };
 
+  const handleFetchRecentTracks = async () => {
+    setIsFetchingRecent(true);
+    const token = getSpotifyAccessToken();
+
+    const res = await fetch(
+      "https://api.spotify.com/v1/me/player/recently-played?limit=30",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    const rawTracks = data.items.map((item: any) => ({
+      id: item.track.id,
+      name: item.track.name,
+      singer: item.track.artists.map((a: any) => a.name).join(", "),
+      singerId: item.track.artists.map((a: any) => a.id).join(", "),
+      releaseDate: item.track.album.release_date,
+      albumImage: item.track.album.images[0]?.url,
+      genre: null,
+      uri: item.track.uri,
+      playedAt: item.played_at,
+    }));
+
+    // 최신순 정렬 + 중복 제거 후 최대 10곡
+    const uniqueMap = new Map<string, any>();
+    for (const track of rawTracks) {
+      if (!uniqueMap.has(track.id)) uniqueMap.set(track.id, track);
+      if (uniqueMap.size >= 10) break;
+    }
+
+    setRecentTracks(Array.from(uniqueMap.values()));
+    setIsFetchingRecent(false);
+  };
+
+  const handleRemoveRecentTrack = (trackId: string) => {
+    setRecentTracks((prev) => prev.filter((t) => t.id !== trackId));
+  };
+
   return (
     <Card className="m-10 bg-white border-0 p-0">
       <div className="p-6">
@@ -243,6 +315,31 @@ export default function CalendarRecordPage() {
             maxCount={MAX_TRACK_COUNT}
           />
           <MemoInput memo={memo} setMemo={setMemo} maxLength={MAX_MEMO_LENGTH} />
+
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={handleFetchRecentTracks}
+                disabled={isFetchingRecent}
+                className="mb-6 px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600 transition"
+              >
+                {isFetchingRecent
+                  ? "불러오는 중..."
+                  : "Spotify 최근 재생 목록 가져오기 (최대 10곡)"}
+              </button>
+              <h2 className="text-lg font-bold mb-4 text-right">
+                * 최근에 재생한 음악이 Spotify history에 반영되는 데 시간이 좀
+                걸릴 수 있습니다.
+                <br /> * 동일한 음악은 한 번만 표시됩니다.
+                <br /> * 가져온 재생 목록도 캘린더에 기록됩니다.
+              </h2>
+            </div>
+
+            <RecentlyPlayedList
+              selectedTracks={recentTracks}
+              onRemoveTrack={handleRemoveRecentTrack}
+            />
+          </div>
         </div>
       </div>
       {ModalComponent}

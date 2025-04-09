@@ -4,25 +4,37 @@ import { useState, useRef, useEffect } from "react";
 import { searchSpotifyTracks } from "@/app/utils/spotifyApi";
 import "./style.css";
 import { useGlobalAlert } from "@/components/GlobalAlert";
+import { Music } from "@/types/musicRecord";
 
 const MAX_MUSIC_COUNT = 20;
 
-export default function MusicSearch({ onSelectTrack, selectedTracks }) {
+interface MusicSearchProps {
+  onSelectTrack: (track: Music) => void;
+  selectedTracks: Music[];
+}
+
+export default function MusicSearch({
+  onSelectTrack,
+  selectedTracks,
+}: MusicSearchProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<Music[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
   const { setAlert } = useGlobalAlert();
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef(null);
 
   // 🔸 검색 결과 캐시 저장용
-  const latestResultsRef = useRef([]);
+  const latestResultsRef = useRef<Music[]>([]);
   const isKorean = (text: string) => /[ㄱ-ㅎ|가-힣]/.test(text);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+    const handleClickOutside = (event: { target: any }) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
         setResults([]); // 리스트 닫기
         setSelectedIndex(-1);
       }
@@ -38,22 +50,30 @@ export default function MusicSearch({ onSelectTrack, selectedTracks }) {
     }
   };
 
-  const handleSearch = async (event) => {
+  const handleSearch = async (event: { target: { value: any } }) => {
     const keyword = event.target.value;
     setQuery(keyword);
     setSelectedIndex(-1);
 
     if (keyword.length > 2 || (isKorean(query) && query.length >= 2)) {
       const searchResults = await searchSpotifyTracks(keyword);
-      latestResultsRef.current = searchResults;
-      setResults(searchResults);
+      latestResultsRef.current = searchResults.map((track) => ({
+        ...track,
+        genre: track.genre ?? "",
+      }));
+      setResults(
+        searchResults.map((track) => ({
+          ...track,
+          genre: track.genre ?? "",
+        }))
+      );
     } else {
       latestResultsRef.current = [];
       setResults([]);
     }
   };
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = (event: { key: string }) => {
     if (event.key === "ArrowDown") {
       setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1));
     } else if (event.key === "ArrowUp") {
@@ -63,7 +83,7 @@ export default function MusicSearch({ onSelectTrack, selectedTracks }) {
     }
   };
 
-  const handleSelectTrack = (track) => {
+  const handleSelectTrack = (track: Music) => {
     const isDuplicate = selectedTracks.some((t) => t.id === track.id);
     if (isDuplicate) {
       setAlert({
@@ -104,7 +124,9 @@ export default function MusicSearch({ onSelectTrack, selectedTracks }) {
           {results.map((track, index) => (
             <li
               key={track.id}
-              className={`search-item ${index === selectedIndex ? "selected" : ""}`}
+              className={`search-item ${
+                index === selectedIndex ? "selected" : ""
+              }`}
               onClick={() => handleSelectTrack(track)}
             >
               <img src={track.albumImage} alt={track.name} />

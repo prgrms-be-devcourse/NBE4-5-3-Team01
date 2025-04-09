@@ -7,6 +7,7 @@ object NotificationMessages {
         "SHARE MUSIC" to "%s님, 오늘 등록한 음악을 공유해보세요! 🎶", // 음악을 캘린더에 기록 시
         "BUILD PLAYLIST" to "%s님, 회원님이 오늘 등록한 음악을 공유해보세요! 🎶", // 18:00
         "YEAR HISTORY" to "%s님, 1년 전에는 어떤 음악을 기록했는지 확인해보세요!", // 09:00
-        "FOLLOWING" to "%s님이 회원님을 팔로우하기 시작했습니다." // 팔로우 시
+        "FOLLOWING" to "%s님이 회원님을 팔로우하기 시작했습니다.", // 팔로우 시
+        "DAILY RECAP" to "%s님, 오늘도 음악을 기록해주셔서 감사합니다. 내일도 함께해요 ✨" // 23:50
     )
 }

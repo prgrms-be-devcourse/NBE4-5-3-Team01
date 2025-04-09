@@ -3,16 +3,7 @@
 import { useEffect, useState } from "react";
 import { loadSpotifyPlayer } from "./player";
 import { MusicRecord } from "@/types/musicRecord";
-
-function getSpotifyAccessToken(): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith("spotifyAccessToken="));
-
-  return match ? decodeURIComponent(match.split("=")[1]) : null;
-}
+import { getSpotifyAccessToken } from "@/app/utils/getSpotifyAccessToken";
 
 export default function MusicPlayer() {
   const [isPaused, setIsPaused] = useState(true);
