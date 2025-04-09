@@ -6,6 +6,7 @@ import com.team01.project.domain.music.dto.SpotifyArtistResponse
 import com.team01.project.domain.music.dto.SpotifyPlaylistResponse
 import com.team01.project.domain.music.dto.SpotifyTrackResponse
 import com.team01.project.global.exception.SpotifyApiException
+import com.team01.project.global.exception.SpotifyErrorCode
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.ExchangeStrategies
@@ -37,8 +38,8 @@ class SpotifyService {
     private fun errorHandlingFilter(): ExchangeFilterFunction =
         ExchangeFilterFunction.ofResponseProcessor { clientResponse ->
             when {
-                clientResponse.statusCode().is5xxServerError -> Mono.error(RuntimeException("Spotify API 서버 오류 발생"))
-                clientResponse.statusCode().is4xxClientError -> Mono.error(RuntimeException("Spotify API 요청 오류 발생"))
+                clientResponse.statusCode().is5xxServerError -> Mono.error(SpotifyApiException(SpotifyErrorCode.SERVER_ERROR))
+                clientResponse.statusCode().is4xxClientError -> Mono.error(SpotifyApiException(SpotifyErrorCode.INVALID_REQUEST))
                 else -> Mono.just(clientResponse)
             }
         }
@@ -51,9 +52,9 @@ class SpotifyService {
                 .headers { it.setBearerAuth(token) }
                 .retrieve()
                 .bodyToMono(SpotifyTrackResponse::class.java)
-                .block() ?: throw SpotifyApiException("트랙 정보를 찾을 수 없습니다.")
+                .block() ?: throw SpotifyApiException(SpotifyErrorCode.TRACK_NOT_FOUND)
         } catch (e: Exception) {
-            throw SpotifyApiException("트랙 정보를 가져오는 중 오류 발생", e)
+            throw SpotifyApiException(SpotifyErrorCode.UNKNOWN, e)
         }
     }
 
@@ -73,7 +74,7 @@ class SpotifyService {
             genreCache[artistId] = genres
             genres
         } catch (e: Exception) {
-            throw SpotifyApiException("아티스트 장르 정보를 가져오는 중 오류 발생", e)
+            throw SpotifyApiException(SpotifyErrorCode.ARTIST_GENRE_NOT_FOUND, e)
         }
     }
 
@@ -106,20 +107,20 @@ class SpotifyService {
                 .headers { it.setBearerAuth(token) }
                 .retrieve()
                 .bodyToMono(String::class.java)
-                .block() ?: throw SpotifyApiException("Spotify API 응답이 없습니다.")
+                .block() ?: throw SpotifyApiException(SpotifyErrorCode.TRACK_NOT_FOUND)
 
             val root = objectMapper.readTree(jsonResponse)
             val items = root.path("tracks").path("items")
-            if (!items.isArray) throw SpotifyApiException("Spotify API 응답에서 트랙 정보를 찾을 수 없습니다.")
+            if (!items.isArray) throw SpotifyApiException(SpotifyErrorCode.TRACK_NOT_FOUND)
 
             items.map { item ->
                 val track = objectMapper.treeToValue(item, SpotifyTrackResponse::class.java)
-                track.toMusicRequest(parseReleaseDate(track.album.releaseDate)) // ✅ 여기만 바뀜
+                track.toMusicRequest(parseReleaseDate(track.album.releaseDate))
             }
         } catch (e: WebClientResponseException) {
-            throw SpotifyApiException("Spotify API 요청 오류: ${e.responseBodyAsString}", e)
+            throw SpotifyApiException(SpotifyErrorCode.INVALID_REQUEST, e)
         } catch (e: Exception) {
-            throw SpotifyApiException("검색 결과를 처리하는 중 오류 발생: ${e.message}", e)
+            throw SpotifyApiException(SpotifyErrorCode.UNKNOWN, e)
         }
     }
 
@@ -132,19 +133,19 @@ class SpotifyService {
                 .headers { it.setBearerAuth(token) }
                 .retrieve()
                 .bodyToMono(String::class.java)
-                .block() ?: throw SpotifyApiException("Spotify API 응답이 없습니다.")
+                .block() ?: throw SpotifyApiException(SpotifyErrorCode.TRACK_NOT_FOUND)
 
             val tracks = objectMapper.readTree(jsonResponse).path("tracks")
-            if (!tracks.isArray) throw SpotifyApiException("Spotify 에서 트랙 정보를 가져오지 못했습니다.")
+            if (!tracks.isArray) throw SpotifyApiException(SpotifyErrorCode.TRACK_NOT_FOUND)
 
             tracks.map { node ->
                 val track = objectMapper.treeToValue(node, SpotifyTrackResponse::class.java)
                 track.toMusicRequest(parseReleaseDate(track.album.releaseDate))
             }
         } catch (e: WebClientResponseException) {
-            throw SpotifyApiException("Spotify API 요청 오류: ${e.responseBodyAsString}", e)
+            throw SpotifyApiException(SpotifyErrorCode.INVALID_REQUEST, e)
         } catch (e: Exception) {
-            throw SpotifyApiException("알 수 없는 오류 발생: ${e.message}", e)
+            throw SpotifyApiException(SpotifyErrorCode.UNKNOWN, e)
         }
     }
 
@@ -157,7 +158,7 @@ class SpotifyService {
                 .headers { it.setBearerAuth(token) }
                 .retrieve()
                 .bodyToMono(String::class.java)
-                .block() ?: throw SpotifyApiException("Spotify API 응답이 없습니다.")
+                .block() ?: throw SpotifyApiException(SpotifyErrorCode.PLAYLIST_NOT_FOUND)
 
             val items = objectMapper.readTree(jsonResponse).path("items")
 
@@ -169,7 +170,7 @@ class SpotifyService {
                 SpotifyPlaylistResponse(id, name, image, trackCount)
             }
         } catch (e: Exception) {
-            throw SpotifyApiException("사용자의 Playlist 목록 조회 오류: ${e.message}", e)
+            throw SpotifyApiException(SpotifyErrorCode.UNKNOWN, e)
         }
     }
 
@@ -182,7 +183,7 @@ class SpotifyService {
                 .headers { it.setBearerAuth(token) }
                 .retrieve()
                 .bodyToMono(String::class.java)
-                .block() ?: throw SpotifyApiException("Spotify API 응답이 없습니다.")
+                .block() ?: throw SpotifyApiException(SpotifyErrorCode.PLAYLIST_NOT_FOUND)
 
             val items = objectMapper.readTree(jsonResponse).path("items")
 
@@ -194,7 +195,7 @@ class SpotifyService {
                 track.toMusicRequest(parseReleaseDate(track.album.releaseDate))
             }
         } catch (e: Exception) {
-            throw SpotifyApiException("Playlist 트랙 조회 실패: ${e.message}", e)
+            throw SpotifyApiException(SpotifyErrorCode.UNKNOWN, e)
         }
     }
 
@@ -208,8 +209,7 @@ class SpotifyService {
                 else -> LocalDate.parse(releaseDate, DateTimeFormatter.ISO_DATE)
             }
         } catch (e: Exception) {
-            println("날짜 변환 오류: $releaseDate")
-            null
+            throw SpotifyApiException(SpotifyErrorCode.UNKNOWN, IllegalArgumentException("날짜 형식 오류: $releaseDate", e))
         }
     }
 
