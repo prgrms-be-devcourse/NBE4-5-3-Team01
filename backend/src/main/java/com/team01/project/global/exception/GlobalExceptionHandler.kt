@@ -29,6 +29,24 @@ class GlobalExceptionHandler {
         )
     }
 
+    @ExceptionHandler(MusicException::class)
+    fun handleMusicException(e: MusicException): RsData<Nothing> {
+        return RsData(
+            code = e.errorCode.code,
+            msg = e.errorCode.message,
+            data = null
+        )
+    }
+
+    @ExceptionHandler(SpotifyApiException::class)
+    fun handleSpotifyApiException(e: SpotifyApiException): RsData<Nothing> {
+        return RsData(
+            code = e.errorCode.code,
+            msg = e.errorCode.message,
+            data = null
+        )
+    }
+
     @ExceptionHandler(Exception::class)
     fun handleUnexpectedException(e: Exception): RsData<Nothing> {
         return RsData(
