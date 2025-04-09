@@ -107,4 +107,12 @@ class MembershipService(
 
         userRepository.save(user)
     }
+
+    fun updateCustomerKey(userId: String, customerKey: String) {
+        val user = userRepository.findById(userId)
+            .orElseThrow { MembershipException(MembershipErrorCode.USER_NOT_FOUND) }
+
+        user.customerKey = customerKey
+        userRepository.save(user)
+    }
 }
