@@ -6,8 +6,10 @@ import com.team01.project.domain.notification.service.NotificationListService
 import com.team01.project.domain.user.entity.User
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.*
+import org.mockito.BDDMockito.given
+import org.mockito.BDDMockito.then
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
