@@ -6,6 +6,8 @@ import com.team01.project.domain.music.entity.Music
 import com.team01.project.domain.music.service.MusicService
 import com.team01.project.domain.music.service.SpotifyService
 import com.team01.project.global.dto.RsData
+import com.team01.project.global.exception.MusicErrorCode
+import com.team01.project.global.exception.MusicException
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -34,7 +36,7 @@ class MusicController(
         @AuthenticationPrincipal user: OAuth2User
     ): RsData<MusicResponse> {
         val token = user.getAttribute<String>("spotifyToken")
-            ?: throw IllegalStateException("Spotify 토큰이 없습니다")
+            ?: throw MusicException(MusicErrorCode.INVALID_SPOTIFY_TOKEN)
 
         val musicRequest = spotifyService.getTrackWithGenre(id, token)
         return RsData("200-1", "음악 조회 성공", MusicResponse.fromEntity(musicRequest.toEntity()))
@@ -47,7 +49,7 @@ class MusicController(
         @AuthenticationPrincipal user: OAuth2User
     ): RsData<String> {
         val token = user.getAttribute<String>("spotifyToken")
-            ?: throw IllegalStateException("Spotify 토큰이 없습니다")
+            ?: throw MusicException(MusicErrorCode.INVALID_SPOTIFY_TOKEN)
 
         val musicRequest = spotifyService.getTrackWithGenre(id, token)
         musicService.saveMusic(musicRequest.toEntity())
@@ -61,7 +63,7 @@ class MusicController(
         @AuthenticationPrincipal user: OAuth2User
     ): RsData<String> {
         val token = user.getAttribute<String>("spotifyToken")
-            ?: throw IllegalStateException("Spotify 토큰이 없습니다")
+            ?: throw MusicException(MusicErrorCode.INVALID_SPOTIFY_TOKEN)
 
         val updated = musicList.map { music ->
             if (music.genre.isNullOrEmpty()) {
@@ -82,7 +84,7 @@ class MusicController(
         @AuthenticationPrincipal user: OAuth2User
     ): RsData<List<MusicResponse>> {
         val token = user.getAttribute<String>("spotifyToken")
-            ?: throw IllegalStateException("Spotify 토큰이 없습니다")
+            ?: throw MusicException(MusicErrorCode.INVALID_SPOTIFY_TOKEN)
 
         val tracks = spotifyService.searchByKeyword(keyword, token)
         val responses = tracks.map { MusicResponse.fromEntity(it.toEntity()) }
@@ -96,7 +98,7 @@ class MusicController(
         @AuthenticationPrincipal user: OAuth2User
     ): RsData<List<MusicResponse>> {
         val token = user.getAttribute<String>("spotifyToken")
-            ?: throw IllegalStateException("Spotify 토큰이 없습니다")
+            ?: throw MusicException(MusicErrorCode.INVALID_SPOTIFY_TOKEN)
 
         val topTracks = spotifyService.getTopTracksByArtist(artistId, token)
         val responses = topTracks.map { MusicResponse.fromEntity(it.toEntity()) }
@@ -109,7 +111,7 @@ class MusicController(
         @AuthenticationPrincipal user: OAuth2User
     ): RsData<List<SpotifyPlaylistResponse>> {
         val token = user.getAttribute<String>("spotifyToken")
-            ?: throw IllegalStateException("Spotify 토큰이 없습니다")
+            ?: throw MusicException(MusicErrorCode.INVALID_SPOTIFY_TOKEN)
 
         val playlists = spotifyService.getUserPlaylists(token)
         return RsData("200-9", "Playlist 목록 조회 성공", playlists)
@@ -122,12 +124,12 @@ class MusicController(
         @AuthenticationPrincipal user: OAuth2User
     ): RsData<List<MusicResponse>> {
         val token = user.getAttribute<String>("spotifyToken")
-            ?: throw IllegalStateException("Spotify 토큰이 없습니다")
+            ?: throw MusicException(MusicErrorCode.INVALID_SPOTIFY_TOKEN)
 
         val tracks = spotifyService.getTracksFromPlaylist(playlistId, token)
 
         if (tracks.size > 20) {
-            return RsData("400-LIMIT", "20곡 이하의 플레이리스트만 추가할 수 있습니다.", null)
+            throw MusicException(MusicErrorCode.PLAYLIST_LIMIT_EXCEEDED)
         }
 
         val responses = tracks.map { MusicResponse.fromEntity(it.toEntity()) }
