@@ -58,7 +58,7 @@ class MusicRecordServiceTest {
         name = "song 1",
         singer = "singer 1",
         singerId = "singer 1 id",
-        albumImage = "album image 1",
+        albumImage = "album image 1"
     )
 
     private val music2 = Music(
@@ -66,7 +66,7 @@ class MusicRecordServiceTest {
         name = "song 2",
         singer = "singer 2",
         singerId = "singer 2 id",
-        albumImage = "album image 2",
+        albumImage = "album image 2"
     )
 
     private val record1 = MusicRecord(
@@ -124,7 +124,7 @@ class MusicRecordServiceTest {
             name = musicNameToAdd,
             singer = "singer 3",
             singerId = "singer 3 id",
-            albumImage = "album image 3",
+            albumImage = "album image 3"
         )
 
         every { calendarDateRepository.findWithOwnerById(calendarDateId) } returns Optional.of(calendarDate)
