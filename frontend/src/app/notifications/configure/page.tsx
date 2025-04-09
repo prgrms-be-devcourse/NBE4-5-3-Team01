@@ -78,6 +78,7 @@ const NotificationCreate = () => {
     "BUILD PLAYLIST": "나만의 플레이리스트",
     "YEAR HISTORY": "1년 전 음악",
     FOLLOWING: "팔로워",
+    "DAILY RECAP": "일일 요약",
   };
 
   const messageMap: Record<string, string> = {
@@ -86,6 +87,7 @@ const NotificationCreate = () => {
     "BUILD PLAYLIST": "플레이리스트를 만들어보길 추천하는 알림",
     "YEAR HISTORY": "작년 오늘 기록한 음악 알림",
     FOLLOWING: "다른 사용자가 나를 팔로우하기 시작할 때 알림",
+    "DAILY RECAP": "하루 기록 요약 알림",
   };
 
   return (

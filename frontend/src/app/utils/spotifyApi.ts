@@ -6,9 +6,12 @@ const spotifyApi = new SpotifyWebApi();
 
 const fetchSpotifyToken = async () => {
   try {
-    const response = await axios.get("http://localhost:8080/api/v1/user/spotify-token", {
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      "http://localhost:8080/api/v1/user/spotify-token",
+      {
+        withCredentials: true,
+      }
+    );
     const spotifyToken = response.data;
 
     if (spotifyToken) {
@@ -26,7 +29,10 @@ export const searchSpotifyTracks = async (query: string) => {
 
   try {
     const keyword = preprocessKoreanQuery(query);
-    const response = await spotifyApi.searchTracks(keyword, { market: "KR", limit: 5 });
+    const response = await spotifyApi.searchTracks(keyword, {
+      market: "KR",
+      limit: 5,
+    });
 
     return response.tracks.items.map((track) => ({
       id: track.id,
@@ -36,6 +42,7 @@ export const searchSpotifyTracks = async (query: string) => {
       releaseDate: track.album.release_date,
       albumImage: track.album.images[0]?.url,
       genre: null,
+      uri: track.uri,
     }));
   } catch (error) {
     console.error("Spotify 검색 실패:", error);

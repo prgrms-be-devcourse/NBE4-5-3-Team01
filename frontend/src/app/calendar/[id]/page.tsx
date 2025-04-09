@@ -14,16 +14,7 @@ import { MusicRecord } from "@/types/musicRecord";
 import { AxiosError } from "axios";
 import { useGlobalAlert } from "@/components/GlobalAlert";
 import { fetchMusicRecords } from "@/lib/api/musicRecord";
-
-function getSpotifyAccessToken(): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith("spotifyAccessToken="));
-
-  return match ? decodeURIComponent(match.split("=")[1]) : null;
-}
+import { getSpotifyAccessToken } from "@/app/utils/getSpotifyAccessToken";
 
 export default function MusicDetailPage() {
   const [musicRecord, setMusicRecord] = useState<MusicRecord>();
