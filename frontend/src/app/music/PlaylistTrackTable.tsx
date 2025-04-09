@@ -17,12 +17,13 @@ interface Props {
     tracks: Track[];
     playlistId: string;
     playlistName: string;
+    membershipGrade: string;
 }
 
 const API_URL = "http://localhost:8080/api/v1";
 const ITEMS_PER_PAGE = 5;
 
-export default function PlaylistTrackTable({ tracks, playlistId, playlistName }: Props) {
+export default function PlaylistTrackTable({ tracks, playlistId, playlistName, membershipGrade }: Props) {
     const [page, setPage] = useState(1);
 
     const totalPages = Math.ceil(tracks.length / ITEMS_PER_PAGE);
@@ -86,12 +87,12 @@ export default function PlaylistTrackTable({ tracks, playlistId, playlistName }:
                 <h2 className="text-xl font-bold text-[#393D3F]">
                     {playlistName} <span className="text-gray-500 text-sm">({tracks.length}곡)</span>
                 </h2>
-                {tracks.length > 0 && (
+                {tracks.length > 0 && membershipGrade === "premium" && (
                     <button
-                        onClick={() => handleAddPlaylistToCalendar(playlist.id)}
-                        className="btn btn-primary"
+                        onClick={() => handleAddPlaylistToCalendar(playlistId)}
+                        className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-lg shadow-md hover:brightness-105 hover:scale-[1.02] transition-transform duration-200"
                     >
-                        🎶 기록으로 추가
+                        🎶 플레이리스트 전체 기록하기
                     </button>
                 )}
             </div>

@@ -5,6 +5,7 @@ import axios from "axios";
 import { useGlobalAlert } from "@/components/GlobalAlert";
 import PlaylistTrackTable from "./PlaylistTrackTable";
 
+const API_URL = "http://localhost:8080/api/v1";
 const SPOTIFY_URL = "http://localhost:8080/api/v1/music/spotify";
 
 interface Playlist {
@@ -26,6 +27,7 @@ export default function PlaylistSection() {
     const [selectedTracks, setSelectedTracks] = useState<Track[]>([]);
     const [selectedPlaylistId, setSelectedPlaylistId] = useState("");
     const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
+    const [membershipGrade, setMembershipGrade] = useState<string>("");
     const { setAlert } = useGlobalAlert();
 
     useEffect(() => {
@@ -39,8 +41,6 @@ export default function PlaylistSection() {
             });
 
             const { code, msg, data } = res.data;
-            setAlert({ code, message: msg });
-
             if (code.startsWith("200")) {
                 setPlaylists(data);
             }
@@ -52,17 +52,20 @@ export default function PlaylistSection() {
 
     const fetchTracks = async (playlistId: string, name: string) => {
         try {
-            const res = await axios.get(`${SPOTIFY_URL}/playlist/${playlistId}`, {
+            const playlistRes = await axios.get(`${SPOTIFY_URL}/playlist/${playlistId}`, {
                 withCredentials: true,
             });
 
-            const { code, msg, data } = res.data;
-            setAlert({ code, message: msg });
+            const memberRes = await axios.get(`${API_URL}/membership/my`, {
+                withCredentials: true,
+            });
 
+            const { code, msg, data } = playlistRes.data;
             if (code.startsWith("200")) {
                 setSelectedTracks(data);
                 setSelectedPlaylistId(playlistId);
                 setSelectedPlaylistName(name);
+                setMembershipGrade(memberRes.data.data.grade);
             }
         } catch (error) {
             setAlert({ code: "500-7", message: "해당 Playlist의 트랙을 불러올 수 없습니다." });
@@ -96,7 +99,7 @@ export default function PlaylistSection() {
             </div>
 
             {selectedPlaylistId && (
-                <PlaylistTrackTable tracks={selectedTracks} playlistId={selectedPlaylistId} playlistName={selectedPlaylistName} />
+                <PlaylistTrackTable tracks={selectedTracks} playlistId={selectedPlaylistId} playlistName={selectedPlaylistName} membershipGrade={membershipGrade} />
             )}
         </section>
     );

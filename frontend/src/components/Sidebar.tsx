@@ -61,9 +61,8 @@ export default function Sidebar() {
           onMouseLeave={() => setIsHovered(false)}
         >
           <i
-            className={`fa-regular fa-bell fa-lg ${
-              isHovered ? "fa-shake" : ""
-            }`}
+            className={`fa-regular fa-bell fa-lg ${isHovered ? "fa-shake" : ""
+              }`}
           ></i>
         </Link>
         <label htmlFor="nav-toggle">
@@ -131,6 +130,14 @@ export default function Sidebar() {
           </Link>
         </div>
         <hr />
+        <div className="navbutton">
+          <Link href="/membership">
+            <div className="navLink">
+              <i className="fas fa-solid fa-star"></i>
+              <span>Membership</span>
+            </div>
+          </Link>
+        </div>
         <div className="navbutton">
           <Link href="/setting">
             <div className="navLink">

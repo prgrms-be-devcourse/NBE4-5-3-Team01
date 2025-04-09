@@ -8,7 +8,6 @@ import com.team01.project.domain.music.service.SpotifyService
 import com.team01.project.global.dto.RsData
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @Tag(name = "Music", description = "음악 API")
@@ -30,7 +28,6 @@ class MusicController(
 ) {
 
     @GetMapping("/spotify/{id}")
-    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "ID로 Spotify 음악 검색", description = "Spotify 에서 특정 ID의 음악을 검색하여 반환")
     fun getMusicFromSpotify(
         @PathVariable id: String,
@@ -44,7 +41,6 @@ class MusicController(
     }
 
     @PostMapping("/spotify/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "ID로 Spotify 음악 저장", description = "Spotify 에서 특정 ID의 음악 정보를 가져와 DB에 저장")
     fun saveMusicFromSpotify(
         @PathVariable id: String,
@@ -59,7 +55,6 @@ class MusicController(
     }
 
     @PostMapping("/save-all")
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "음악 리스트 저장", description = "장르 정보가 없을 경우 Spotify 조회하여 업데이트")
     fun saveAllMusic(
         @RequestBody musicList: List<Music>,
@@ -81,7 +76,6 @@ class MusicController(
     }
 
     @GetMapping("/spotify/search")
-    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "키워드로 Spotify 음악 검색", description = "Spotify 에서 키워드로 음악 검색")
     fun searchTracks(
         @RequestParam keyword: String,
@@ -141,7 +135,6 @@ class MusicController(
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "모든 음악 조회", description = "DB에 저장된 모든 음악 반환")
     fun getAllMusic(): RsData<List<MusicResponse>> {
         val musicList = musicService.getAllMusic().map { MusicResponse.fromEntity(it) }
@@ -149,7 +142,6 @@ class MusicController(
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "ID로 음악 조회", description = "DB 에서 ID로 음악 조회")
     fun getMusicById(@PathVariable id: String): RsData<MusicResponse> {
         val music = musicService.getMusicById(id)
@@ -157,7 +149,6 @@ class MusicController(
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "ID로 음악 삭제", description = "DB 에서 ID로 음악 삭제")
     fun deleteMusic(@PathVariable id: String): RsData<String> {
         musicService.deleteMusic(id)

@@ -214,9 +214,27 @@ const RecapPage = () => {
   const [selectedTrack, setSelectedTrack] = useState<MusicRecordDto | null>(
     null
   );
+  const [membershipGrade, setMembershipGrade] = useState<string | null>(null);
 
   // view 값이 변경되거나 페이지 마운트 시에 API 호출
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/api/v1/membership/my", {
+          withCredentials: true,
+        });
+        const grade = res.data.data?.grade || "basic";
+        setMembershipGrade(grade);
+
+        if (grade === "premium") {
+          await fetchRecords();
+        }
+      } catch (err) {
+        console.error("멤버십 정보를 가져오지 못했어요.");
+        setMembershipGrade("basic");
+      }
+    };
+
     const fetchRecords = async () => {
       setLoading(true);
       setError(null);
@@ -254,7 +272,7 @@ const RecapPage = () => {
       }
     };
 
-    fetchRecords();
+    fetchData();
   }, [view]);
 
   // API가 이미 기간별 데이터를 반환하지만, 혹시 추가 필터링이 필요한 경우 사용
@@ -436,6 +454,25 @@ const RecapPage = () => {
   const topArtistTracks = filteredData.filter(
     (item) => item.singer === topArtist
   );
+
+  if (membershipGrade !== "premium") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 py-20 bg-white">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
+          프리미엄 회원만 이용할 수 있는 기능이에요!
+        </h1>
+        <p className="text-gray-600 mb-6">
+          통계 기능을 사용하시려면 프리미엄 요금제로 업그레이드 해보세요 😊
+        </p>
+        <button
+          onClick={() => (window.location.href = "/membership")}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition"
+        >
+          프리미엄 요금제 보러가기 →
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div id="recap-bar">
