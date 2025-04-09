@@ -1,4 +1,4 @@
-package com.team01.project.domain.notification.service
+package com.team01.project.domain.notification.scheduler
 
 import java.time.LocalTime
 import java.util.concurrent.ScheduledFuture

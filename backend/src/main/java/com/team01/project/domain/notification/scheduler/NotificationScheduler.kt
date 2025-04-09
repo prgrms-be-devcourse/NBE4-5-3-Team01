@@ -1,4 +1,4 @@
-package com.team01.project.domain.notification.service
+package com.team01.project.domain.notification.scheduler
 
 import com.team01.project.domain.calendardate.repository.CalendarDateRepository
 import com.team01.project.domain.notification.entity.Notification
@@ -6,19 +6,20 @@ import com.team01.project.domain.notification.event.NotificationFollowEvent
 import com.team01.project.domain.notification.event.NotificationInitEvent
 import com.team01.project.domain.notification.event.NotificationRecordEvent
 import com.team01.project.domain.notification.event.NotificationUpdatedEvent
+import com.team01.project.domain.notification.service.NotificationService
 import com.team01.project.domain.user.entity.User
 import jakarta.annotation.PostConstruct
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.concurrent.ScheduledFuture
 
-@Service
+@Component
 class NotificationScheduler(
     private val notificationService: NotificationService,
     private val notificationSender: NotificationSender,
