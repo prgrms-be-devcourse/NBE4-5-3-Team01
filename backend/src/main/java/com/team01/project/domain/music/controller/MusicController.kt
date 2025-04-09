@@ -67,7 +67,6 @@ class MusicController(
             if (music.genre.isNullOrEmpty()) {
                 val musicRequest = spotifyService.getTrackWithGenre(music.id, token)
                 music.genre = musicRequest.genre
-                music.uri = musicRequest.uri
             }
             music
         }
