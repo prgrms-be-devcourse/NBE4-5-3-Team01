@@ -52,11 +52,14 @@ export default function CalendarRecordPage() {
       try {
         const membershipRes = await axios.get(`${API_URL}/membership/my`, {
           withCredentials: true,
-        })
+        });
         const membership = membershipRes.data.data;
         setMembershipGrade(membership?.grade || "basic");
       } catch (error) {
-        setAlert({ code: "500-2", message: "사용자 정보를 가져오지 못했어요." });
+        setAlert({
+          code: "500-2",
+          message: "사용자 정보를 가져오지 못했어요.",
+        });
       }
     };
 
@@ -306,6 +309,8 @@ export default function CalendarRecordPage() {
       singerId: item.track.artists.map((a: any) => a.id).join(", "),
       releaseDate: item.track.album.release_date,
       albumImage: item.track.album.images[0]?.url,
+      genre: null,
+      uri: item.track.uri,
       playedAt: item.played_at,
     }));
 
@@ -345,7 +350,11 @@ export default function CalendarRecordPage() {
             onRemoveTrack={handleRemoveTrack}
             maxCount={membershipGrade === "premium" ? 50 : 20}
           />
-          <MemoInput memo={memo} setMemo={setMemo} maxLength={membershipGrade === "premium" ? 500 : 200} />
+          <MemoInput
+            memo={memo}
+            setMemo={setMemo}
+            maxLength={membershipGrade === "premium" ? 500 : 200}
+          />
 
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
