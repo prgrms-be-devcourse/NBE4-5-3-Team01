@@ -1,86 +1,82 @@
-package com.team01.project.follow.service;
+package com.team01.project.follow.service
 
-import static com.team01.project.user.entity.UserFixture.유저;
-import static com.team01.project.user.entity.UserFixture.유저_이메일;
-import static org.assertj.core.api.Assertions.assertThat;
+import com.team01.project.common.service.ServiceTest
+import com.team01.project.domain.follow.entity.Follow
+import com.team01.project.domain.follow.entity.type.Status
+import com.team01.project.domain.follow.repository.FollowRepository
+import com.team01.project.domain.follow.service.CommandFollowService
+import com.team01.project.domain.notification.entity.Subscription
+import com.team01.project.domain.notification.repository.SubscriptionRepository
+import com.team01.project.domain.user.entity.User
+import com.team01.project.domain.user.repository.UserRepository
+import com.team01.project.user.entity.UserFixture
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import java.util.*
 
-import java.util.Optional;
+class CommandFollowServiceTest : ServiceTest() {
+    @Autowired
+    private val commandFollowService: CommandFollowService? = null
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+    @Autowired
+    private val followRepository: FollowRepository? = null
 
-import com.team01.project.common.service.ServiceTest;
-import com.team01.project.domain.follow.entity.Follow;
-import com.team01.project.domain.follow.repository.FollowRepository;
-import com.team01.project.domain.follow.service.CommandFollowService;
-import com.team01.project.domain.notification.entity.Subscription;
-import com.team01.project.domain.notification.repository.SubscriptionRepository;
-import com.team01.project.domain.user.entity.User;
-import com.team01.project.domain.user.repository.UserRepository;
+    @Autowired
+    private val userRepository: UserRepository? = null
 
+    @Autowired
+    private val subscriptionRepository: SubscriptionRepository? = null
 
-public class CommandFollowServiceTest extends ServiceTest {
+    @Test
+    fun 팔로우를_생성한다() {
+        // given
+        val 팔로우_보낼_유저 = 유저_저장(UserFixture.유저("asdfasdf"))
+        val 팔로우_받을_유저 = 유저_저장(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
 
-	@Autowired
-	private CommandFollowService commandFollowService;
+        // Subscription 객체 생성
+        val mockSubscription = Subscription.builder()
+            .user(팔로우_받을_유저)
+            .endpoint("endpoint")
+            .p256dh("p256dh")
+            .auth("auth")
+            .build()
 
-	@Autowired
-	private FollowRepository followRepository;
+        subscriptionRepository!!.save(mockSubscription)
 
-	@Autowired
-	private UserRepository userRepository;
+        // when
+        commandFollowService!!.create(팔로우_보낼_유저.id, 팔로우_받을_유저.id)
 
-	@Autowired
-	private SubscriptionRepository subscriptionRepository;
+        // then
+        Assertions.assertThat(팔로우_조회(팔로우_보낼_유저, 팔로우_받을_유저).isPresent).isEqualTo(true)
+    }
 
-	@Test
-	void 팔로우를_생성한다() {
-		// given
-		User 팔로우_보낼_유저 = 유저_저장(유저("asdfasdf"));
-		User 팔로우_받을_유저 = 유저_저장(유저_이메일("qwerqwer", "test1234@gamil.com"));
+    @Test
+    fun 팔로우를_삭제한다() {
+        // given
+        val 팔로우_보낼_유저 = 유저_저장(UserFixture.유저("asdfasdf"))
+        val 팔로우_받을_유저 = 유저_저장(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
+        val 저장된_팔로우 = 팔로우_저장(Follow(0, Status.ACCEPT, 팔로우_받을_유저, 팔로우_보낼_유저))
 
-		// Subscription 객체 생성
-		Subscription mockSubscription = Subscription.builder()
-				.user(팔로우_받을_유저)
-				.endpoint("endpoint")
-				.p256dh("p256dh")
-				.auth("auth")
-				.build();
+        // when
+        commandFollowService!!.delete(팔로우_보낼_유저.id, 팔로우_받을_유저.id)
 
-		subscriptionRepository.save(mockSubscription);
+        // then
+        Assertions.assertThat(
+            팔로우_조회(팔로우_보낼_유저, 팔로우_받을_유저)
+                .isPresent
+        ).isEqualTo(false)
+    }
 
-		// when
-		commandFollowService.create(팔로우_보낼_유저.getId(), 팔로우_받을_유저.getId());
+    private fun 팔로우_저장(follow: Follow): Follow {
+        return followRepository!!.save(follow)
+    }
 
-		// then
-		assertThat(팔로우_조회(팔로우_보낼_유저, 팔로우_받을_유저).isPresent()).isEqualTo(true);
-	}
+    private fun 팔로우_조회(formUser: User, toUser: User): Optional<Follow> {
+        return followRepository!!.findByToUserAndFromUser(toUser, formUser)
+    }
 
-	@Test
-	void 팔로우를_삭제한다() {
-		// given
-		User 팔로우_보낼_유저 = 유저_저장(유저("asdfasdf"));
-		User 팔로우_받을_유저 = 유저_저장(유저_이메일("qwerqwer", "test1234@gamil.com"));
-		Follow 저장된_팔로우 = 팔로우_저장(new Follow(팔로우_받을_유저, 팔로우_보낼_유저));
-
-		// when
-		commandFollowService.delete(팔로우_보낼_유저.getId(), 팔로우_받을_유저.getId());
-
-		// then
-		assertThat(팔로우_조회(팔로우_보낼_유저, 팔로우_받을_유저)
-				.isPresent()).isEqualTo(false);
-	}
-
-	private Follow 팔로우_저장(Follow follow) {
-		return followRepository.save(follow);
-	}
-
-	private Optional<Follow> 팔로우_조회(User formUser, User toUser) {
-		return followRepository.findByToUserAndFromUser(toUser, formUser);
-	}
-
-	private User 유저_저장(User user) {
-		return userRepository.save(user);
-	}
-
+    private fun 유저_저장(user: User): User {
+        return userRepository!!.save(user)
+    }
 }
