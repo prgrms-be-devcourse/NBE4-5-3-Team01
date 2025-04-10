@@ -91,7 +91,7 @@ class FollowController(
     }
 
     @Operation(summary = "내 팔로잉 목록 조회 api", description = "로그인된 유저의 팔로잉 목록을 조회한다.")
-    @GetMapping("my")
+    @GetMapping("/my")
     fun getFollowings(@AuthenticationPrincipal user: OAuth2User): RsData<List<FollowResponse>> {
         return RsData(
             "200-1",
