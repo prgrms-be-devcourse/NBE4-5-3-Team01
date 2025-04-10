@@ -2,11 +2,12 @@ package com.team01.project.domain.music.service
 
 import com.team01.project.domain.music.entity.Music
 import com.team01.project.domain.music.repository.MusicRepository
-import com.team01.project.domain.music.repository.findByIdOrThrow
 import com.team01.project.domain.musicrecord.repository.MusicRecordRepository
+import com.team01.project.global.exception.MusicErrorCode
+import com.team01.project.global.exception.MusicException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.Optional
+import java.util.*
 
 @Service
 class MusicService(
@@ -38,13 +39,14 @@ class MusicService(
 
     @Transactional(readOnly = true)
     fun getMusicById(id: String): Music {
-        return musicRepository.findByIdOrThrow(id)
+        return musicRepository.findById(id)
+            .orElseThrow { MusicException(MusicErrorCode.NOT_FOUND) }
     }
 
     @Transactional
     fun deleteMusic(id: String) {
         if (!musicRepository.existsById(id)) {
-            throw IllegalArgumentException("해당 ID의 음악을 찾을 수 없습니다: $id")
+            throw MusicException(MusicErrorCode.NOT_FOUND)
         }
         musicRepository.deleteById(id)
     }
