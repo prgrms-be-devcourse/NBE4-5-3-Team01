@@ -21,10 +21,11 @@ export default function LoginPage() {
 
       const accessToken = response.data.data.access_token;
       const refreshToken = response.data.data.refresh_token;
+      const spotifyAccessToken = response.data.data.spotify_access_token;
 
       if (response.status === 200) {
         router.push(
-          `/login/callback?access_token=${accessToken}&refresh_token=${refreshToken}&spotify_access_token=null`
+          `/login/callback?access_token=${accessToken}&refresh_token=${refreshToken}&spotify_access_token=${spotifyAccessToken}`
         );
       }
     } catch (error) {

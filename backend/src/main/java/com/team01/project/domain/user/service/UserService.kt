@@ -269,6 +269,7 @@ class UserService(
             originalName = userDto.originalName,
             field = userDto.field,
             userPassword = encodedPassword,
+            loginPlatform = "STAN-001",
             createdDate = LocalDateTime.now()
             // 나머지 필드는 기본값 사용
         )
@@ -280,27 +281,86 @@ class UserService(
         return userRepository.existsById(id)
     }
 
-    fun validLogin(reqMap: Map<String, Any>): Map<String, Any>? {
+    fun validLogin(reqMap: Map<String, Any>, response: HttpServletResponse): Map<String, Any>? {
         val loginId = reqMap["loginId"].toString()
         val userOpt = userRepository.findById(loginId)
         val password = userOpt.map { it.userPassword }.orElse(null)
+
         val isPasswordCorrect = passwordEncoder.matches(reqMap["password"].toString(), password ?: "")
         if (!isPasswordCorrect) {
             return null
         }
+
+        val foundUser = userOpt.orElseThrow()
+
         val jwtToken = jwtTokenProvider.generateJwtToken(loginId, "")
         val refreshToken = jwtTokenProvider.generateRefreshToken(loginId)
-        val foundUser = userRepository.findById(loginId).orElse(null)
-        val saveRefreshToken = RefreshToken(
-            user = foundUser,
-            refreshToken = refreshToken,
-            createdAt = LocalDateTime.now()
-        )
-        refreshTokenRepository.save(saveRefreshToken)
-        return mapOf(
+
+        val existingTokenOpt = refreshTokenRepository.findByUser(foundUser)
+
+        if (existingTokenOpt.isPresent) {
+            val existing = existingTokenOpt.get()
+            existing.refreshToken = refreshToken
+            existing.createdAt = LocalDateTime.now()
+            refreshTokenRepository.save(existing)
+        } else {
+            val newToken = RefreshToken(
+                user = foundUser,
+                refreshToken = refreshToken,
+                createdAt = LocalDateTime.now()
+            )
+            refreshTokenRepository.save(newToken)
+        }
+
+        val spotifyRefreshToken = existingTokenOpt.map { it.spotifyRefreshToken }.orElse(null)
+        if (!spotifyRefreshToken.isNullOrBlank()) {
+            val spotifyAccessToken = requestSpotifyAccessToken(spotifyRefreshToken)
+
+            // 쿠키 설정
+//            val spotifyCookie = Cookie("spotifyAccessToken", spotifyAccessToken).apply {
+//                path = "/"
+//                isHttpOnly = true
+//                maxAge = 3600 // 1시간 (필요에 따라 변경 가능)
+//            }
+//            response.addCookie(spotifyCookie)
+        }
+
+        val result = mutableMapOf(
             "access_token" to jwtToken,
             "refresh_token" to refreshToken
         )
+
+        if (!spotifyRefreshToken.isNullOrBlank()) {
+            val spotifyAccessToken = requestSpotifyAccessToken(spotifyRefreshToken)
+
+            result["spotify_access_token"] = spotifyAccessToken
+        }
+
+        return result
+    }
+
+    private fun requestSpotifyAccessToken(refreshToken: String): String {
+        val body = LinkedMultiValueMap<String, String>().apply {
+            add("grant_type", "refresh_token")
+            add("refresh_token", refreshToken)
+            add("client_id", clientId)
+            add("client_secret", clientSecret)
+        }
+
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+        }
+        val restTemplate = RestTemplate()
+        val request = HttpEntity(body, headers)
+        val response = restTemplate.exchange(spotifyTokenUrl, HttpMethod.POST, request, String::class.java)
+
+        if (response.statusCode != HttpStatus.OK) {
+            throw RuntimeException("Spotify accessToken 재발급 실패: ${response.statusCode}")
+        }
+
+        val json = ObjectMapper().readTree(response.body)
+
+        return json["access_token"]?.asText() ?: throw RuntimeException("Spotify 응답에 access_token 없음")
     }
 
     companion object {

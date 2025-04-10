@@ -80,6 +80,7 @@ class UserServiceTest {
             birthDay = null,
             createdDate = null,
             field = "Test Field",
+            loginPlatform = "STAN-001",
             calendarVisibility = CalendarVisibility.PUBLIC
         )
 
@@ -95,6 +96,7 @@ class UserServiceTest {
             createdDate = LocalDateTime.now(),
             birthDay = null,
             image = null,
+            loginPlatform = userDto.loginPlatform,
             calendarVisibility = CalendarVisibility.PUBLIC,
             refreshTokens = null,
             notifications = mutableListOf()
@@ -111,5 +113,6 @@ class UserServiceTest {
         assertEquals(expectedUser.originalName, actualUser.originalName)
         assertEquals(expectedUser.field, actualUser.field)
         assertEquals(expectedUser.userPassword, actualUser.userPassword)
+        assertEquals(expectedUser.loginPlatform, actualUser.loginPlatform)
     }
 }

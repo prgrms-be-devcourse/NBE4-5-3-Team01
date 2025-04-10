@@ -12,9 +12,6 @@ export default function AuthCallback() {
     const refreshToken = urlParams.get("refresh_token");
     const spotifyAccessToken = urlParams.get("spotify_access_token");
 
-    console.log("JWT Token:", jwtToken);
-    console.log("refresh Token:", refreshToken);
-
     if (jwtToken && refreshToken && spotifyAccessToken) {
       // 토큰들을 쿠키에만 저장
       const cookieOptions = "; path=/; samesite=strict; secure";
