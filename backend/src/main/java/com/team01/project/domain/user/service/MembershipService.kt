@@ -38,28 +38,7 @@ class MembershipService(
             throw MembershipException(MembershipErrorCode.NOT_PREMIUM)
         }
 
-//        membership.grade = "basic"
         membership.autoRenew = false
-
-        userRepository.save(user)
-    }
-
-    fun upgradeToPremium(userId: String) {
-        val user = userRepository.findById(userId)
-            .orElseThrow { MembershipException(MembershipErrorCode.USER_NOT_FOUND) }
-
-        val membership = user.membership
-            ?: throw MembershipException(MembershipErrorCode.MEMBERSHIP_NOT_FOUND)
-
-        if (membership.grade == "premium") {
-            throw MembershipException(MembershipErrorCode.ALREADY_PREMIUM)
-        }
-
-        membership.grade = "premium"
-        membership.startDate = LocalDate.now()
-        membership.endDate = LocalDate.now().plusMonths(1)
-        membership.autoRenew = true
-        membership.count += 1
 
         userRepository.save(user)
     }
@@ -108,11 +87,26 @@ class MembershipService(
         userRepository.save(user)
     }
 
-    fun updateCustomerKey(userId: String, customerKey: String) {
-        val user = userRepository.findById(userId)
+    fun upgradeMembership(customerKey: String, billingKey: String): Boolean {
+        val user = userRepository.findById(customerKey)
             .orElseThrow { MembershipException(MembershipErrorCode.USER_NOT_FOUND) }
 
-        user.customerKey = customerKey
+        val membership = user.membership
+            ?: throw MembershipException(MembershipErrorCode.MEMBERSHIP_NOT_FOUND)
+
+//        if (membership.grade == "premium") {
+//            throw MembershipException(MembershipErrorCode.ALREADY_PREMIUM)
+//        }
+
+        membership.grade = "premium"
+        membership.startDate = LocalDate.now()
+        membership.endDate = LocalDate.now().plusMonths(1)
+        membership.autoRenew = true
+        membership.count += 1
+        membership.billingKey = billingKey
+
         userRepository.save(user)
+
+        return true
     }
 }
