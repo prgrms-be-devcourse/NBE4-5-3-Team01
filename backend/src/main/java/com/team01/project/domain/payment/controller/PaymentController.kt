@@ -23,7 +23,7 @@ class PaymentController(
         @AuthenticationPrincipal user: OAuth2User,
         @RequestBody request: TossPaymentRequest
     ): RsData<String> {
-        val payment = tossService.confirmPayment(request)
+        tossService.confirmPayment(request)
             ?: return RsData("500", "결제 승인 실패", null)
 
         membershipService.saveOneTimePurchase(
@@ -39,7 +39,7 @@ class PaymentController(
         @AuthenticationPrincipal user: OAuth2User,
         @RequestBody request: TossSubscriptionRequest
     ): RsData<String> {
-        val userId = user.getAttribute<String>("id")
+        user.getAttribute<String>("id")
             ?: return RsData("401", "로그인 정보가 유효하지 않습니다.", null)
 
         val billingResponse = tossService.processSubscription(request)
