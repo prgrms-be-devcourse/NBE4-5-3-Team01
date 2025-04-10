@@ -1,311 +1,249 @@
-//package com.team01.project.music.controller;
-//
-//import static org.mockito.Mockito.*;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-//import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-//
-//import java.time.LocalDate;
-//import java.util.Arrays;
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.stream.Collectors;
-//
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import org.springframework.test.web.servlet.MockMvc;
-//import org.springframework.test.web.servlet.ResultActions;
-//import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-//
-//import com.team01.project.domain.music.controller.MusicController;
-//import com.team01.project.domain.music.dto.MusicRequest;
-//import com.team01.project.domain.music.dto.MusicResponse;
-//import com.team01.project.domain.music.entity.Music;
-//import com.team01.project.domain.music.service.MusicService;
-//import com.team01.project.domain.music.service.SpotifyService;
-//
-//@ExtendWith(MockitoExtension.class)
-//public class MusicControllerTest {
-//
-//	private MockMvc mvc;
-//
-//	@Mock
-//	private MusicService musicService;
-//
-//	@Mock
-//	private SpotifyService spotifyService;
-//
-//	@InjectMocks
-//	private MusicController musicController;
-//
-//	private String token;
-//	private List<Music> musicList;
-//
-//	@BeforeEach
-//	void setUp() {
-//		mvc = MockMvcBuilders.standaloneSetup(musicController).build();
-//
-//		// 토큰 값 입력
-//		token = "your-token";
-//
-//		// 테스트용 음악 데이터 저장
-//		musicList = Arrays.asList(
-//			new Music("1R0hxCA5R7z5TiaXBZR7Mf", "SOLO", "JENNIE", LocalDate.parse("2018-11-12"),
-//				"https://i.scdn.co/image/ab67616d0000b273d0b43791d31a569726a34064", "k-pop"),
-//			new Music("1SS0WlKhJewviwEDZ6dWj0", "SPOT!", "ZICO, JENNIE", LocalDate.parse("2024-04-26"),
-//				"https://i.scdn.co/image/ab67616d0000b2731b8ae147aceb9fc130391287", "k-rap, k-pop"),
-//			new Music("30HIJzJEUYcL9Qng15UeBo", "toxic till the end", "ROSÉ", LocalDate.parse("2024-12-06"),
-//				"https://i.scdn.co/image/ab67616d0000b273a9fb6e00986e42ad4764b1f3", "k-pop")
-//		);
-//	}
-//
-//	@Test
-//	@DisplayName("Spotify API에서 특정 음악 정보 조회")
-//	void testGetMusicFromSpotify() throws Exception {
-//		// given - 테스트 데이터 설정
-//		Music testMusic = musicList.get(1);
-//		MusicRequest musicRequest = new MusicRequest(
-//			testMusic.getId(),
-//			testMusic.getName(),
-//			testMusic.getSinger(),
-//			testMusic.getReleaseDate(),
-//			testMusic.getAlbumImage(),
-//			testMusic.getGenre()
-//		);
-//
-//		// SpotifyService Mock 설정
-//		when(spotifyService.getTrackWithGenre(eq(musicRequest.id()), any())).thenReturn(musicRequest);
-//
-//		// 컨트롤러에서 변환되는 응답 예상
-//		MusicResponse expectedResponse = MusicResponse.fromEntity(musicRequest.toEntity());
-//
-//		// when - 실제 요청 실행
-//		ResultActions resultActions = mvc.perform(
-//			get("/music/spotify/" + musicRequest.id())
-//				.header("Authorization", "Bearer " + token))
-//			.andDo(print());
-//
-//		// then - 결과 검증
-//		resultActions
-//			.andExpect(status().isOk())
-//			.andExpect(jsonPath("$.id").value(expectedResponse.id()))
-//			.andExpect(jsonPath("$.name").value(expectedResponse.name()))
-//			.andExpect(jsonPath("$.singer").value(expectedResponse.singer()))
-//			.andExpect(jsonPath("$.releaseDate").value(expectedResponse.releaseDate().toString()))
-//			.andExpect(jsonPath("$.albumImage").value(expectedResponse.albumImage()))
-//			.andExpect(jsonPath("$.genre").value(expectedResponse.genre()));
-//	}
-//
-//	@Test
-//	@DisplayName("Spotify API에서 음악 정보를 가져와 저장")
-//	void testSaveMusicFromSpotify() throws Exception {
-//		// given - 테스트 데이터 설정
-//		MusicRequest musicRequest = new MusicRequest(
-//			"6uPnrBgweGOcwjFL4ItAvV",
-//			"Whiplash",
-//			"aespa",
-//			LocalDate.of(2024, 10, 21),
-//			"https://i.scdn.co/image/ab67616d0000b273e467a8e8d7b0aa92d354aa75",
-//			"k-pop"
-//		);
-//
-//		// SpotifyService Mock 설정
-//		when(spotifyService.getTrackWithGenre(eq(musicRequest.id()), any())).thenReturn(musicRequest);
-//
-//		// 컨트롤러에서 변환되는 예상 데이터
-//		Music expectedMusic = musicRequest.toEntity();
-//
-//		// musicService.saveMusic() Mock 설정
-//		when(musicService.saveMusic(any())).thenReturn(expectedMusic);
-//
-//		// 컨트롤러에서 예상 응답 DTO 리턴
-//		MusicResponse expectedResponse = MusicResponse.fromEntity(expectedMusic);
-//
-//		// when - 실제 요청 실행
-//		ResultActions resultActions = mvc.perform(
-//			post("/music/spotify/" + musicRequest.id())
-//				.header("Authorization", "Bearer " + token))
-//			.andDo(print());
-//
-//		// then - 결과 검증
-//		resultActions
-//			.andExpect(status().isCreated())
-//			.andExpect(jsonPath("$.id").value(expectedResponse.id()))
-//			.andExpect(jsonPath("$.name").value(expectedResponse.name()))
-//			.andExpect(jsonPath("$.singer").value(expectedResponse.singer()))
-//			.andExpect(jsonPath("$.releaseDate").value(expectedResponse.releaseDate().toString()))
-//			.andExpect(jsonPath("$.albumImage").value(expectedResponse.albumImage()))
-//			.andExpect(jsonPath("$.genre").value(expectedResponse.genre()));
-//	}
-//
-//	@Test
-//	@DisplayName("Spotify API에서 키워드로 음악 검색")
-//	void testSearchTracks() throws Exception {
-//		// given - 테스트 데이터 설정
-//		String keyword = "chill";
-//		List<MusicRequest> searchResults = Arrays.asList(
-//			new MusicRequest("1QIUF20HdqMA0CJvkBOHNb", "Chill", "LISA", LocalDate.parse("2025-02-28"),
-//				"https://i.scdn.co/image/ab67616d0000b2738034090e4afb5b053cd3e067", "k-pop"),
-//			new MusicRequest("24QnH4LamDh2UhhmHyXjE8", "Hinoki Wood", "Gia Margaret", LocalDate.parse("2023-05-26"),
-//				"https://i.scdn.co/image/ab67616d0000b273abc81056347f57e2f048b452", ""),
-//			new MusicRequest("4YUiJ6Av2Hp1hiWE9eeAjO", "Chill Kill", "Red Velvet", LocalDate.parse("2023-11-13"),
-//				"https://i.scdn.co/image/ab67616d0000b273d907428ecc02da4077c208d4", "k-pop"),
-//			new MusicRequest("0qpdzfTxAkOREtvvGO5oew", "Chill Baby", "SZA", LocalDate.parse("2024-12-20"),
-//				"https://i.scdn.co/image/ab67616d0000b2737f5a318e3ff35defa8d0e4af", "r&b"),
-//			new MusicRequest("4ppKM7xnkSAwSyKqD4QTY4", "Chill Bae", "Lil Uzi Vert", LocalDate.parse("2024-11-01"),
-//				"https://i.scdn.co/image/ab67616d0000b2730e4e16d910115fead3e83496", "melodic rap")
-//		);
-//
-//		// SpotifyService Mock 설정
-//		when(spotifyService.searchByKeyword(eq(keyword), any())).thenReturn(searchResults);
-//
-//		// when - 실제 요청 실행
-//		ResultActions resultActions = mvc.perform(
-//				get("/music/spotify/search").param("keyword", keyword)
-//					.header("Authorization", "Bearer " + token))
-//			.andDo(print());
-//
-//		// then - 결과 검증
-//		resultActions
-//			.andExpect(status().isOk())
-//			.andExpect(jsonPath("$.size()").value(searchResults.size()));
-//
-//		for (int i = 0; i < searchResults.size(); i++) {
-//			resultActions.andExpect(jsonPath("$[" + i + "].id").value(searchResults.get(i).id()));
-//		}
-//	}
-//
-//	@Test
-//	@DisplayName("Spotify API에서 특정 아티스트의 인기 곡 조회 - 정상 응답 검증")
-//	void testGetTopTracksByArtist() throws Exception {
-//		// given - 테스트 데이터 설정
-//		String artistId = "6YVMFz59CuY7ngCxTxjpxE";
-//		List<MusicRequest> topTracks = Arrays.asList(
-//			new MusicRequest("6uPnrBgweGOcwjFL4ItAvV", "Whiplash", "aespa", LocalDate.parse("2024-10-21"), "https://i.scdn.co/image/ab67616d0000b273e467a8e8d7b0aa92d354aa75", "k-pop"),
-//			new MusicRequest("2VdSktBqFfkW7y6q5Ik4Z4", "Supernova", "aespa", LocalDate.parse("2024-05-27"), "https://i.scdn.co/image/ab67616d0000b2730fc598038040859794c600e2", "k-pop"),
-//			new MusicRequest("5sjnkOfTLCLNfkkchI2re2", "UP - KARINA Solo", "aespa", LocalDate.parse("2024-10-09"), "https://i.scdn.co/image/ab67616d0000b273253096eda3b7826c11c7fab8", "k-pop"),
-//			new MusicRequest("5XWlyfo0kZ8LF7VSyfS4Ew", "Drama", "aespa", LocalDate.parse("2023-11-10"), "https://i.scdn.co/image/ab67616d0000b273c54e39f2ae0dd10731f93c08", "k-pop"),
-//			new MusicRequest("5eWcGfUCrVFMoYskyfkEPE", "Armageddon", "aespa", LocalDate.parse("2024-05-27"), "https://i.scdn.co/image/ab67616d0000b2730fc598038040859794c600e2", "k-pop")
-//		);
-//
-//		// SpotifyService Mock 설정
-//		when(spotifyService.getTopTracksByArtist(eq(artistId), any())).thenReturn(topTracks);
-//
-//		// when - 실제 요청 실행
-//		ResultActions resultActions = mvc.perform(
-//				get("/music/spotify/artist/" + artistId + "/top-tracks")
-//					.header("Authorization", "Bearer " + token))
-//			.andDo(print());
-//
-//		// then - 결과 검증
-//		resultActions
-//			.andExpect(status().isOk())
-//			.andExpect(jsonPath("$.size()").value(topTracks.size()));
-//
-//		for (int i = 0; i < topTracks.size(); i++) {
-//			resultActions.andExpect(jsonPath("$[" + i + "].id").value(topTracks.get(i).id()));
-//		}
-//	}
-//
-//	@Test
-//	@DisplayName("Spotify API에서 특정 아티스트의 인기 곡 조회 - 결과 없음")
-//	void testGetTopTracksByArtistNoResults() throws Exception {
-//		// given - 테스트 데이터 설정
-//		String artistId = "aespa";
-//		List<MusicRequest> topTracks = Collections.emptyList();
-//
-//		// SpotifyService Mock 설정
-//		when(spotifyService.getTopTracksByArtist(eq(artistId), any())).thenReturn(topTracks);
-//
-//		// when - 실제 요청 실행
-//		ResultActions resultActions = mvc.perform(
-//				get("/music/spotify/artist/" + artistId + "/top-tracks")
-//					.header("Authorization", "Bearer " + token))
-//			.andDo(print());
-//
-//		// then - 결과 검증
-//		resultActions
-//			.andExpect(status().isOk())
-//			.andExpect(jsonPath("$.size()").value(0));
-//	}
-//
-//	@Test
-//	@DisplayName("저장된 모든 음악 조회")
-//	void testGetAllMusic() throws Exception {
-//		// given - 테스트 데이터 설정
-//		List<Music> expectedMusicList = musicList;
-//
-//		// MusicResponse 리스트로 변환
-//		List<MusicResponse> expectedResponses = expectedMusicList.stream()
-//			.map(MusicResponse::fromEntity)
-//			.collect(Collectors.toList());
-//
-//		// musicService.getAllMusic() Mock 설정
-//		when(musicService.getAllMusic()).thenReturn(expectedMusicList);
-//
-//		// when - 실제 요청 실행
-//		ResultActions resultActions = mvc
-//			.perform(get("/music"))
-//			.andDo(print());
-//
-//		// then - 결과 검증
-//		resultActions
-//			.andExpect(status().isOk())
-//			.andExpect(jsonPath("$.size()").value(expectedResponses.size()))
-//			.andExpect(jsonPath("$[0].id").value(expectedResponses.get(0).id()))
-//			.andExpect(jsonPath("$[1].id").value(expectedResponses.get(1).id()));
-//	}
-//
-//	@Test
-//	@DisplayName("ID로 특정 음악 조회")
-//	void testGetMusicById() throws Exception {
-//		// given - 테스트 데이터 설정
-//		Music expectedMusic = musicList.get(2);
-//		String id = expectedMusic.getId();
-//
-//		// musicService.getMusicById() Mock 설정
-//		when(musicService.getMusicById(eq(id))).thenReturn(expectedMusic);
-//
-//		// MusicResponse 변환
-//		MusicResponse expectedResponse = MusicResponse.fromEntity(expectedMusic);
-//
-//		// when - 실제 요청 실행
-//		ResultActions resultActions = mvc
-//			.perform(get("/music/" + id))
-//			.andDo(print());
-//
-//		// then - 결과 검증
-//		resultActions
-//			.andExpect(status().isOk())
-//			.andExpect(jsonPath("$.id").value(expectedResponse.id()))
-//			.andExpect(jsonPath("$.name").value(expectedResponse.name()))
-//			.andExpect(jsonPath("$.singer").value(expectedResponse.singer()))
-//			.andExpect(jsonPath("$.releaseDate").value(expectedResponse.releaseDate().toString()))
-//			.andExpect(jsonPath("$.albumImage").value(expectedResponse.albumImage()))
-//			.andExpect(jsonPath("$.genre").value(expectedResponse.genre()));
-//	}
-//
-//	@Test
-//	@DisplayName("ID로 음악 삭제")
-//	void test5() throws Exception {
-//		// given - 테스트 데이터 설정
-//		String id = musicList.get(0).getId();
-//
-//		// musicService.deleteMusic() Mock 설정
-//		doNothing().when(musicService).deleteMusic(eq(id));
-//
-//		// when - 실제 요청 실행
-//		ResultActions resultActions = mvc
-//			.perform(delete("/music/" + id))
-//			.andDo(print());
-//
-//		// then - 결과 검증
-//		resultActions
-//			.andExpect(status().isNoContent());
-//	}
-//}
+package com.team01.project.music.controller
+
+import com.team01.project.domain.music.controller.MusicController
+import com.team01.project.domain.music.dto.MusicRequest
+import com.team01.project.domain.music.dto.SpotifyPlaylistResponse
+import com.team01.project.domain.music.entity.Music
+import com.team01.project.domain.music.service.MusicService
+import com.team01.project.domain.music.service.SpotifyService
+import io.mockk.every
+import io.mockk.mockk
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.springframework.http.MediaType
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.core.user.OAuth2User
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
+import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import java.time.LocalDate
+import java.util.*
+
+class MusicControllerTest {
+
+    private lateinit var mockMvc: MockMvc
+    private lateinit var musicService: MusicService
+    private lateinit var spotifyService: SpotifyService
+    private val token = "test-token"
+
+    @BeforeEach
+    fun setUp() {
+        musicService = mockk()
+        spotifyService = mockk()
+        val controller = MusicController(musicService, spotifyService)
+
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+            .setCustomArgumentResolvers(AuthenticationPrincipalArgumentResolver())
+            .build()
+
+        val oauthUser = mockk<OAuth2User>()
+        every { oauthUser.name } returns "user123"
+        every { oauthUser.getAttribute<String>("spotifyToken") } returns "test-token" // ✅ 추가
+
+        val auth = UsernamePasswordAuthenticationToken(
+            oauthUser,
+            null,
+            listOf(SimpleGrantedAuthority("ROLE_USER"))
+        )
+
+        SecurityContextHolder.getContext().authentication = auth
+    }
+
+    @Test
+    @DisplayName("Spotify 음악 조회")
+    fun getMusicFromSpotify() {
+        val music = Music("id1", "title", "singer", "singerId", LocalDate.now(), "image", "genre", "uri")
+        val musicRequest = music.toRequest()
+        every { spotifyService.getTrackWithGenre("id1", token) } returns musicRequest
+
+        mockMvc.get("/music/spotify/id1")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.data.id") { value("id1") }
+            }
+    }
+
+    @Test
+    @DisplayName("Spotify 음악 저장")
+    fun saveMusicFromSpotify() {
+        val music = Music("id2", "title2", "singer2", "singerId2", LocalDate.now(), "image2", "genre2", "uri2")
+        val musicRequest = music.toRequest()
+
+        every { spotifyService.getTrackWithGenre("id2", "test-token") } returns musicRequest
+        every { spotifyService.searchByKeyword("chill", "test-token") } returns listOf(musicRequest) // ✅ 이거 추가
+        every { musicService.saveMusic(any()) } returns music
+
+        mockMvc.get("/music/spotify/search?keyword=chill")
+            .andExpect {
+                status { isOk() }
+            }
+    }
+
+    @Test
+    @DisplayName("음악 리스트 저장")
+    fun saveAllMusic() {
+        val music = Music("id3", "title3", "singer3", "singerId3", null, "image3", null, null)
+        val updatedRequest = MusicRequest(
+            id = music.id,
+            name = music.name,
+            singer = music.singer,
+            singerId = music.singerId,
+            releaseDate = music.releaseDate,
+            albumImage = music.albumImage,
+            genre = "pop", // 직접 수정
+            uri = music.uri
+        )
+
+        every { spotifyService.getTrackWithGenre(music.id, token) } returns updatedRequest
+        every { musicService.saveAllMusic(any()) } returns listOf(music)
+
+        mockMvc.post("/music/save-all") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+        [
+            {
+                "id": "id3",
+                "name": "title3",
+                "singer": "singer3",
+                "singerId": "singerId3",
+                "releaseDate": null,
+                "albumImage": "image3",
+                "genre": null,
+                "uri": null
+            }
+        ]
+    """.trimIndent()
+        }
+    }
+
+    @Test
+    @DisplayName("키워드로 Spotify 음악 검색")
+    fun searchTracks() {
+        val music = Music("id8", "title8", "singer8", "singerId8", LocalDate.now(), "image8", "genre8", "uri8")
+        val musicRequest = music.toRequest()
+        every { spotifyService.searchByKeyword("chill", token) } returns listOf(musicRequest)
+
+        mockMvc.get("/music/spotify/search?keyword=chill")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.data.size()") { value(1) }
+                jsonPath("$.data[0].id") { value("id8") }
+            }
+    }
+
+    @Test
+    @DisplayName("아티스트 인기곡 조회")
+    fun getTopTracksByArtist() {
+        val music = Music("id9", "title9", "singer9", "singerId9", LocalDate.now(), "image9", "genre9", "uri9")
+        val musicRequest = music.toRequest()
+        every { spotifyService.getTopTracksByArtist("artist123", token) } returns listOf(musicRequest)
+
+        mockMvc.get("/music/spotify/artist/artist123/top-tracks")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.data.size()") { value(1) }
+                jsonPath("$.data[0].id") { value("id9") }
+            }
+    }
+
+    @Test
+    @DisplayName("Spotify 플레이리스트 목록 조회")
+    fun getUserPlaylists() {
+        val playlist = SpotifyPlaylistResponse("playlist1", "Test Playlist", "image-url", 10)
+        every { spotifyService.getUserPlaylists(token) } returns listOf(playlist)
+
+        mockMvc.get("/music/spotify/playlist")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.data.size()") { value(1) }
+                jsonPath("$.data[0].id") { value("playlist1") }
+            }
+    }
+
+    @Test
+    @DisplayName("플레이리스트 트랙 조회")
+    fun getTracksFromPlaylist() {
+        val music = Music("id10", "title10", "singer10", "singerId10", LocalDate.now(), "image10", "genre10", "uri10")
+        val musicRequest = music.toRequest()
+        every { spotifyService.getTracksFromPlaylist("playlist1", token) } returns listOf(musicRequest)
+
+        mockMvc.get("/music/spotify/playlist/playlist1")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.data.size()") { value(1) }
+                jsonPath("$.data[0].id") { value("id10") }
+            }
+    }
+
+    @Test
+    @DisplayName("전체 음악 조회")
+    fun getAllMusic() {
+        val music = Music("id4", "title4", "singer4", "singerId4", LocalDate.now(), "image4", "genre4", "uri4")
+        every { musicService.getAllMusic() } returns listOf(music)
+
+        mockMvc.get("/music")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.data[0].id") { value("id4") }
+            }
+    }
+
+    @Test
+    @DisplayName("ID로 음악 조회")
+    fun getMusicById() {
+        val music = Music("id5", "title5", "singer5", "singerId5", LocalDate.now(), "image5", "genre5", "uri5")
+        every { musicService.getMusicById("id5") } returns music
+
+        mockMvc.get("/music/id5")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.data.id") { value("id5") }
+            }
+    }
+
+    @Test
+    @DisplayName("ID로 음악 삭제")
+    fun deleteMusic() {
+        every { musicService.deleteMusic("id6") } returns Unit
+
+        mockMvc.delete("/music/id6")
+            .andExpect {
+                status { isOk() } // ✅ RsData를 쓰면 항상 isOk()
+                jsonPath("$.code") { value("204-1") }
+                jsonPath("$.msg") { value("음악 삭제 완료") }
+            }
+    }
+
+    @Test
+    @DisplayName("랜덤 최근 음악 조회")
+    fun getRandomRecentMusic() {
+        val music = Music("id7", "title7", "singer7", "singerId7", LocalDate.now(), "image7", "genre7", "uri7")
+        every { musicService.getRandomRecentMusic("user1") } returns Optional.of(music)
+
+        mockMvc.get("/music/recent/random/user1")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.data.id") { value("id7") }
+            }
+    }
+
+    // 확장 함수로 변환 코드 분리
+    private fun Music.toRequest(): MusicRequest {
+        return MusicRequest(
+            id = id,
+            name = name,
+            singer = singer,
+            singerId = singerId,
+            releaseDate = releaseDate,
+            albumImage = albumImage,
+            genre = genre,
+            uri = uri
+        )
+    }
+}
