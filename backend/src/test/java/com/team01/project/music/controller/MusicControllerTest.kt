@@ -118,7 +118,7 @@ class MusicControllerTest {
                 "uri": null
             }
         ]
-    """.trimIndent()
+            """.trimIndent()
         }
     }
 
