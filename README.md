@@ -2,6 +2,14 @@
 프로그래머스 백엔드 데브코스 4기 5회차 1팀 단단한 나뭇가지의 3차 팀 프로젝트입니다.
 
 <br/>
+
+<details open>
+<summary><b style="font-size: 42px;">Music Calendar Platform preview</b></summary>
+<br/>
+<img src="https://github.com/user-attachments/assets/21bccd50-1de3-4739-9057-0636dd9a1aca" width="85%" height="85%"/>
+
+</details>
+
 <br/>
 
 ## 단단한 나뭇가지
