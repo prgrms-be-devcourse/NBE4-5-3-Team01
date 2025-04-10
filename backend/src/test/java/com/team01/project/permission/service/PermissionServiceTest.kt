@@ -33,10 +33,34 @@ class PermissionServiceTest : BehaviorSpec({
                 permission shouldBe CalendarPermission.EDIT
             }
         }
+
+        When("팔로워가 접근하면") {
+            val permission = permissionService.checkPermission(owner, follower)
+
+            Then("VIEW 권한을 가진다") {
+                permission shouldBe CalendarPermission.VIEW
+            }
+        }
+
+        When("제3자가 접근하면") {
+            val permission = permissionService.checkPermission(owner, stranger)
+
+            Then("VIEW 권한을 가진다") {
+                permission shouldBe CalendarPermission.VIEW
+            }
+        }
     }
 
     Given("캘린더 소유자가 캘린더를 팔로워 공개로 설정한 경우") {
         owner.calendarVisibility = CalendarVisibility.FOLLOWER_ONLY
+
+        When("본인이 접근하면") {
+            val permission = permissionService.checkPermission(owner, owner)
+
+            Then("EDIT 권한을 가진다") {
+                permission shouldBe CalendarPermission.EDIT
+            }
+        }
 
         When("팔로잉 요청이 수락된 팔로워가 접근하면") {
             beforeTest {
@@ -79,6 +103,14 @@ class PermissionServiceTest : BehaviorSpec({
         }
 
         When("팔로워가 접근하면") {
+            val permission = permissionService.checkPermission(owner, follower)
+
+            Then("어떠한 권한도 가지지 못한다") {
+                permission shouldBe CalendarPermission.NONE
+            }
+        }
+
+        When("제3자가 접근하면") {
             val permission = permissionService.checkPermission(owner, follower)
 
             Then("어떠한 권한도 가지지 못한다") {
