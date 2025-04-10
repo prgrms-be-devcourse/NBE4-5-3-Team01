@@ -9,7 +9,6 @@ import com.team01.project.domain.notification.entity.Subscription
 import com.team01.project.domain.notification.repository.SubscriptionRepository
 import com.team01.project.domain.user.entity.User
 import com.team01.project.domain.user.repository.UserRepository
-import com.team01.project.user.entity.UserFixture
 import com.team01.project.user.entity.UserFixture.유저
 import com.team01.project.user.entity.UserFixture.유저_이메일
 import org.assertj.core.api.Assertions
@@ -80,7 +79,7 @@ class CommandFollowServiceTest : ServiceTest() {
         val 저장된_팔로우 = 팔로우_저장(Follow(0, Status.PENDING, 팔로우_받을_유저, 팔로우_보낼_유저))
 
         // when
-        commandFollowService!!.accept(팔로우_보낼_유저.id, 팔로우_받을_유저.id);
+        commandFollowService!!.accept(팔로우_보낼_유저.id, 팔로우_받을_유저.id)
 
         // then
         Assertions.assertThat(팔로우_조회(팔로우_보낼_유저, 팔로우_받을_유저).get().status)
