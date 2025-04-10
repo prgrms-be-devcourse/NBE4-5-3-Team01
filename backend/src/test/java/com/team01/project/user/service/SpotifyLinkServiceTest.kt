@@ -1,6 +1,5 @@
 package com.team01.project.user.service
 
-import com.team01.project.domain.user.dto.SpotifyTokenResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
