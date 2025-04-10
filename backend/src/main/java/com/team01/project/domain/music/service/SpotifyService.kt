@@ -200,10 +200,10 @@ class SpotifyService {
     }
 
     private fun parseReleaseDate(releaseDate: String?): LocalDate? {
-        if (releaseDate.isNullOrBlank()) null
+        if (releaseDate.isNullOrBlank()) return null
 
         return try {
-            when (releaseDate?.length) {
+            when (releaseDate.length) {
                 4 -> LocalDate.of(releaseDate.toInt(), 1, 1)
                 7 -> LocalDate.parse("$releaseDate-01", DateTimeFormatter.ISO_DATE)
                 else -> LocalDate.parse(releaseDate, DateTimeFormatter.ISO_DATE)
