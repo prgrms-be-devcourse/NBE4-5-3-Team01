@@ -3,11 +3,11 @@ package com.team01.project.follow.controller
 import com.team01.project.common.acceptance.AcceptanceTest
 import com.team01.project.domain.follow.entity.Follow
 import com.team01.project.domain.follow.entity.type.Status
+import com.team01.project.domain.follow.entity.type.Status.PENDING
 import com.team01.project.domain.follow.repository.FollowRepository
 import com.team01.project.domain.user.repository.UserRepository
 import com.team01.project.global.security.JwtTokenProvider
 import com.team01.project.user.entity.UserFixture
-import io.restassured.RestAssured
 import io.restassured.RestAssured.given
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -47,12 +47,46 @@ class FollowControllerTest : AcceptanceTest() {
         val 팔로우_보낼_유저 = userRepository!!.save(UserFixture.유저("asdfasdf"))
         val 팔로우_받을_유저 = userRepository.save(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
         val accessToken = jwtTokenProvider!!.generateJwtToken(팔로우_보낼_유저.id, "qwerqwer")
-        followRepository!!.save(Follow(0, Status.PENDING, 팔로우_받을_유저, 팔로우_보낼_유저))
+        followRepository!!.save(Follow(0, PENDING, 팔로우_받을_유저, 팔로우_보낼_유저))
 
         val 요청_준비 = given(spec).header("Authorization", "Bearer $accessToken")
 
         // when
         val 응답 = 요청_준비.`when`().delete("/follows/delete/{userId}", 팔로우_받을_유저.id)
+
+        // then
+        응답.then().statusCode(HttpStatus.OK.value())
+    }
+
+    @Test
+    fun 팔로우_요청을_거절하면_200을_반환한다() {
+        // given
+        val 팔로우_받을_유저 = userRepository!!.save(UserFixture.유저("asdfasdf"))
+        val 팔로우_보낼_유저 = userRepository.save(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
+        val accessToken = jwtTokenProvider!!.generateJwtToken(팔로우_받을_유저.id, "qwerqwer")
+        followRepository!!.save(Follow(0, PENDING, 팔로우_받을_유저, 팔로우_보낼_유저))
+
+        val 요청_준비 = given(spec).header("Authorization", "Bearer $accessToken")
+
+        // when
+        val 응답 = 요청_준비.`when`().delete("/follows/reject/{userId}", 팔로우_보낼_유저.id)
+
+        // then
+        응답.then().statusCode(HttpStatus.OK.value())
+    }
+
+    @Test
+    fun 팔로우_요청을_수락하면_200을_반환한다() {
+        // given
+        val 팔로우_받을_유저 = userRepository!!.save(UserFixture.유저("asdfasdf"))
+        val 팔로우_보낼_유저 = userRepository.save(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
+        val accessToken = jwtTokenProvider!!.generateJwtToken(팔로우_받을_유저.id, "qwerqwer")
+        followRepository!!.save(Follow(0, PENDING, 팔로우_받을_유저, 팔로우_보낼_유저))
+
+        val 요청_준비 = given(spec).header("Authorization", "Bearer $accessToken")
+
+        // when
+        val 응답 = 요청_준비.`when`().put("/follows/accept/{userId}", 팔로우_보낼_유저.id)
 
         // then
         응답.then().statusCode(HttpStatus.OK.value())
@@ -89,6 +123,57 @@ class FollowControllerTest : AcceptanceTest() {
 
             // when
             val 응답 = 요청_준비.`when`().get("/follows/follower/{userId}", 팔로우_받을_유저.id)
+
+            // then
+            응답.then().statusCode(HttpStatus.OK.value())
+        }
+
+        @Test
+        fun 팔로우_요청_목록을_조회시_200을_반환한다() {
+            // given
+            val 팔로우_받을_유저 = userRepository!!.save(UserFixture.유저("asdfasdf"))
+            val 팔로우_보낼_유저 = userRepository.save(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
+            val accessToken = jwtTokenProvider!!.generateJwtToken(팔로우_받을_유저.id, "qwerqwer")
+            followRepository!!.save(Follow(0, PENDING, 팔로우_받을_유저, 팔로우_보낼_유저))
+
+            val 요청_준비 = given(spec).header("Authorization", "Bearer $accessToken")
+
+            // when
+            val 응답 = 요청_준비.`when`().get("/follows/my/pending")
+
+            // then
+            응답.then().statusCode(HttpStatus.OK.value())
+        }
+
+        @Test
+        fun 자신의_팔로잉_목록을_조회시_200을_반환한다() {
+            // given
+            val 팔로우_보낼_유저 = userRepository!!.save(UserFixture.유저("asdfasdf"))
+            val 팔로우_받을_유저 = userRepository.save(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
+            val accessToken = jwtTokenProvider!!.generateJwtToken(팔로우_보낼_유저.id, "qwerqwer")
+            followRepository!!.save(Follow(0, Status.ACCEPT, 팔로우_받을_유저, 팔로우_보낼_유저))
+
+            val 요청_준비 = given(spec).header("Authorization", "Bearer $accessToken")
+
+            // when
+            val 응답 = 요청_준비.`when`().get("/follows/my")
+
+            // then
+            응답.then().statusCode(HttpStatus.OK.value())
+        }
+
+        @Test
+        fun 팔로잉과_팔로워_수_조회시_200을_반환한다() {
+            // given
+            val 팔로우_보낼_유저 = userRepository!!.save(UserFixture.유저("asdfasdf"))
+            val 팔로우_받을_유저 = userRepository.save(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
+            val accessToken = jwtTokenProvider!!.generateJwtToken(팔로우_보낼_유저.id, "qwerqwer")
+            followRepository!!.save(Follow(0, Status.ACCEPT, 팔로우_받을_유저, 팔로우_보낼_유저))
+
+            val 요청_준비 = given(spec).header("Authorization", "Bearer $accessToken")
+
+            // when
+            val 응답 = 요청_준비.`when`().get("/follows/count/{userId}", 팔로우_받을_유저.id)
 
             // then
             응답.then().statusCode(HttpStatus.OK.value())
