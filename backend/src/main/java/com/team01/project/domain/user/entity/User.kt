@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor
 import lombok.Builder
 import lombok.Getter
 import lombok.NoArgsConstructor
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -52,6 +53,8 @@ open class User(
     open var createdDate: LocalDateTime? = null,
 
     open var field: String? = null,
+
+    open var loginPlatform: String? = null,
 
     @Column(name = "calendar_visibility", nullable = false)
     @Enumerated(EnumType.STRING)
