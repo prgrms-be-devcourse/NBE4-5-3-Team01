@@ -123,5 +123,4 @@ class MembershipService(
         user.membership = membership
         userRepository.save(user)
     }
-
 }

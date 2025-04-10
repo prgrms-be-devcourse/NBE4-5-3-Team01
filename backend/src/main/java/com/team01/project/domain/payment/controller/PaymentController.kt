@@ -47,7 +47,7 @@ class PaymentController(
 
         val success = membershipService.upgradeMembership(
             customerKey = billingResponse.customerKey,
-            billingKey = billingResponse.billingKey,
+            billingKey = billingResponse.billingKey
         )
 
         return if (success) {

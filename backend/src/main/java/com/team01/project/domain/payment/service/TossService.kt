@@ -122,5 +122,4 @@ class TossService {
             false
         }
     }
-
 }

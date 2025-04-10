@@ -11,7 +11,7 @@ import java.time.LocalDate
 @Component
 class AutoBilling(
     private val userRepository: UserRepository,
-    private val tossService: TossService,
+    private val tossService: TossService
 ) {
     private val log = LoggerFactory.getLogger(AutoBilling::class.java)
 
@@ -53,5 +53,4 @@ class AutoBilling(
             userRepository.save(user)
         }
     }
-
 }
