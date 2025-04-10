@@ -87,12 +87,6 @@ class JwtTokenProvider {
         }
     }
 
-    /**
-     * 주어진 JWT에서 'spotifyToken' 클레임을 추출합니다.
-     *
-     * @param jwtToken 클라이언트로부터 전달받은 JWT 토큰
-     * @return spotifyToken 값이 존재하면 반환, 그렇지 않으면 null
-     */
     fun extractSpotifyToken(jwtToken: String): String? {
         return try {
             val parser: JwtParser = Jwts.parser().setSigningKey(SECRET_KEY).build()
@@ -107,5 +101,16 @@ class JwtTokenProvider {
             log.info("Error parsing JWT:{}", e.message)
             null
         }
+    }
+
+    fun generateStateToken(userId: String): String {
+        val now = Date()
+        val expiryDate = Date(now.time + VALIDITY_IN_MS)
+        return Jwts.builder()
+            .setSubject(userId)
+            .setIssuedAt(now)
+            .setExpiration(expiryDate)
+            .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+            .compact()
     }
 }
