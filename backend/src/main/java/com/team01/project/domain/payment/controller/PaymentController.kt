@@ -17,7 +17,6 @@ class PaymentController(
     private val tossService: TossService,
     private val membershipService: MembershipService
 ) {
-
     @PostMapping("/subscribe")
     fun subscribe(
         @AuthenticationPrincipal user: OAuth2User,
@@ -26,10 +25,15 @@ class PaymentController(
         val userId = user.getAttribute<String>("id")
             ?: return RsData("401", "로그인 정보가 유효하지 않습니다.", null)
 
-        val success = tossService.processSubscription(request)
+        val billingResponse = tossService.processSubscription(request)
+            ?: return RsData("500", "billingKey 발급 실패", null)
+
+        val success = membershipService.upgradeMembership(
+            customerKey = billingResponse.customerKey,
+            billingKey = billingResponse.billingKey,
+        )
 
         return if (success) {
-            membershipService.upgradeToPremium(userId)
             RsData("200", "결제 및 프리미엄 업그레이드 성공", null)
         } else {
             RsData("500", "결제 실패", null)
