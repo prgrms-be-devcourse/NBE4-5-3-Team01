@@ -254,7 +254,7 @@ const Calendar: React.FC = () => {
                   : undefined
               }
             >
-              <span>{calendarOwner?.name ?? "나"}님의 캘린더</span>
+              <span>{calendarOwner?.name ?? "My"} Calendar</span>
               <Image
                 src="/music_calendar.png"
                 alt="설정 아이콘"
