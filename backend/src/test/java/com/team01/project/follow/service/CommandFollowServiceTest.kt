@@ -10,6 +10,8 @@ import com.team01.project.domain.notification.repository.SubscriptionRepository
 import com.team01.project.domain.user.entity.User
 import com.team01.project.domain.user.repository.UserRepository
 import com.team01.project.user.entity.UserFixture
+import com.team01.project.user.entity.UserFixture.유저
+import com.team01.project.user.entity.UserFixture.유저_이메일
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,8 +35,8 @@ class CommandFollowServiceTest : ServiceTest() {
     @Test
     fun 팔로우를_생성한다() {
         // given
-        val 팔로우_보낼_유저 = 유저_저장(UserFixture.유저("asdfasdf"))
-        val 팔로우_받을_유저 = 유저_저장(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
+        val 팔로우_보낼_유저 = 유저_저장(유저("asdfasdf"))
+        val 팔로우_받을_유저 = 유저_저장(유저_이메일("qwerqwer", "test1234@gamil.com"))
 
         // Subscription 객체 생성
 //        val mockSubscription = Subscription.builder()
@@ -56,8 +58,8 @@ class CommandFollowServiceTest : ServiceTest() {
     @Test
     fun 팔로우를_삭제한다() {
         // given
-        val 팔로우_보낼_유저 = 유저_저장(UserFixture.유저("asdfasdf"))
-        val 팔로우_받을_유저 = 유저_저장(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
+        val 팔로우_보낼_유저 = 유저_저장(유저("asdfasdf"))
+        val 팔로우_받을_유저 = 유저_저장(유저_이메일("qwerqwer", "test1234@gamil.com"))
         val 저장된_팔로우 = 팔로우_저장(Follow(0, Status.ACCEPT, 팔로우_받을_유저, 팔로우_보낼_유저))
 
         // when
@@ -73,8 +75,8 @@ class CommandFollowServiceTest : ServiceTest() {
     @Test
     fun 팔로우_요청을_수락한다() {
         // given
-        val 팔로우_보낼_유저 = 유저_저장(UserFixture.유저("asdfasdf"))
-        val 팔로우_받을_유저 = 유저_저장(UserFixture.유저_이메일("qwerqwer", "test1234@gamil.com"))
+        val 팔로우_보낼_유저 = 유저_저장(유저("asdfasdf"))
+        val 팔로우_받을_유저 = 유저_저장(유저_이메일("qwerqwer", "test1234@gamil.com"))
         val 저장된_팔로우 = 팔로우_저장(Follow(0, Status.PENDING, 팔로우_받을_유저, 팔로우_보낼_유저))
 
         // when
