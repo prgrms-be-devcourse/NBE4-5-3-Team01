@@ -3,25 +3,33 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { DatesSetArg } from "@fullcalendar/core";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CalendarDate, Monthly } from "@/types/calendar";
 import { User } from "@/types/user";
 import { FollowCount } from "@/types/follow";
-import { handleDayCellDidMount, handleEventDidMount } from "@/components/calendar/eventHandlers";
+import {
+  handleDayCellDidMount,
+  handleEventDidMount,
+} from "@/components/calendar/eventHandlers";
 import { AxiosError } from "axios";
 import { useGlobalAlert } from "../GlobalAlert";
 import { fetchUser } from "@/lib/api/user";
 import { fetchFollowCount } from "@/lib/api/follow";
 import { fetchMonthlyData } from "@/lib/api/calendar";
 import "@/components/style/calendar.css";
-import LoadingSpinner from '@/components/LoadingSpinner';
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const Calendar: React.FC = () => {
   const [monthly, setMonthly] = useState<CalendarDate[]>([]);
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [selectedMonth, setSelectedMonth] = useState<number>(
+    new Date().getMonth() + 1
+  );
   const [followingCount, setFollowingCount] = useState(0);
   const [followerCount, setFollowerCount] = useState(0);
   const [isCalendarOwner, setIsCalendarOwner] = useState<boolean | null>(null);
@@ -67,7 +75,7 @@ const Calendar: React.FC = () => {
         setIsCalendarOwner(true);
       } else {
         const responseByCookie = await fetchUser(`/user/byCookie`);
-        const responseById = await fetchUser(`/user/${calendarOwnerId}`)
+        const responseById = await fetchUser(`/user/${calendarOwnerId}`);
 
         const currentUser: User = responseByCookie.data.data;
         const calendarOwner: User = responseById.data.data;
@@ -78,7 +86,7 @@ const Calendar: React.FC = () => {
     }
 
     initCalendarOwner();
-  }, [queryString])
+  }, [queryString]);
 
   // 캘린더 소유자의 팔로잉, 팔로워 수 조회
   useEffect(() => {
@@ -94,7 +102,7 @@ const Calendar: React.FC = () => {
     }
 
     initFollowCount();
-  }, [calendarOwner])
+  }, [calendarOwner]);
 
   // 캘린더 소유자의 먼슬리 캘린더 데이터 조회
   useEffect(() => {
@@ -103,19 +111,20 @@ const Calendar: React.FC = () => {
 
       try {
         const response = await fetchMonthlyData(
-            year,
-            month,
-            isCalendarOwner ? undefined : calendarOwner.id
+          year,
+          month,
+          isCalendarOwner ? undefined : calendarOwner.id
         );
 
         const monthly: Monthly = response.data.data;
 
         setMonthly(monthly.monthly);
-      } catch (error) { // 예외 처리
+      } catch (error) {
+        // 예외 처리
         if (error instanceof AxiosError)
           setAlert({
             code: error.response!.status.toString(),
-            message:  error.response!.data.msg,
+            message: error.response!.data.msg,
           });
 
         setTimeout(() => {
@@ -127,20 +136,22 @@ const Calendar: React.FC = () => {
     }
 
     initMonthly(selectedYear, selectedMonth);
-  }, [isCalendarOwner, selectedYear, selectedMonth])
+  }, [isCalendarOwner, selectedYear, selectedMonth]);
 
   // 페이지를 떠날 때 스타일 속성 삭제
   useEffect(() => {
     return () => {
-
       // 기록이 있는 날짜 셀 선택
       const cells = document.querySelectorAll(".fc-daygrid-day.has-record");
 
       cells.forEach((cell) => {
         if (cell instanceof HTMLElement) {
-          const dateNumber = cell.querySelector(".fc-daygrid-day-number") as HTMLElement;
+          const dateNumber = cell.querySelector(
+            ".fc-daygrid-day-number"
+          ) as HTMLElement;
 
-          if (dateNumber) { // 속성 삭제
+          if (dateNumber) {
+            // 속성 삭제
             dateNumber.style.removeProperty("color");
             dateNumber.style.removeProperty("font-weight");
             dateNumber.style.removeProperty("text-shadow");
@@ -153,6 +164,35 @@ const Calendar: React.FC = () => {
     };
   }, [queryString]);
 
+  // 캘린더 다음 달/다음 연도 버튼 비활성화
+  useEffect(() => {
+    const disableFutureButtons = () => {
+      const calendarApi = document.querySelector(".fc") as HTMLElement;
+      if (!calendarApi) return;
+
+      const nextBtn = calendarApi.querySelector(
+        ".fc-next-button"
+      ) as HTMLButtonElement;
+      const nextYearBtn = calendarApi.querySelector(
+        ".fc-nextYear-button"
+      ) as HTMLButtonElement;
+
+      const currentDate = new Date(selectedYear, selectedMonth - 1);
+      const todayDate = new Date(today.getFullYear(), today.getMonth());
+
+      const isSameMonth =
+        currentDate.getFullYear() === todayDate.getFullYear() &&
+        currentDate.getMonth() === todayDate.getMonth();
+
+      const isSameYear = currentDate.getFullYear() === todayDate.getFullYear();
+
+      if (nextBtn) nextBtn.disabled = isSameMonth;
+      if (nextYearBtn) nextYearBtn.disabled = isSameYear;
+    };
+
+    disableFutureButtons();
+  }, [selectedYear, selectedMonth, today]);
+
   // 먼슬리 캘린더에서 연도와 월이 변경된 경우 상태 저장
   const handleDateChange = (arg: DatesSetArg) => {
     setSelectedYear(arg.view.currentStart.getFullYear());
@@ -161,7 +201,8 @@ const Calendar: React.FC = () => {
 
   // 날짜 셀의 내용에서 숫자 뒤에 오는 "일" 삭제
   const handleDayCellContent = (arg: { dayNumberText: string }) => {
-    return (<span className="ml-auto">{arg.dayNumberText.replace("일", "")}</span>
+    return (
+      <span className="ml-auto">{arg.dayNumberText.replace("일", "")}</span>
     );
   };
 
@@ -176,13 +217,15 @@ const Calendar: React.FC = () => {
   const handleDateClick = (arg: { dateStr: string }) => {
     if (monthly) {
       const calendarDate: CalendarDate | undefined = monthly.find(
-          (calendarDate) => calendarDate.date === arg.dateStr
+        (calendarDate) => calendarDate.date === arg.dateStr
       );
 
-      if (!calendarDate && isCalendarOwner) { // 해당 날짜에 기록이 없는 경우 기록 페이지로 이동
+      if (!calendarDate && isCalendarOwner) {
+        // 해당 날짜에 기록이 없는 경우 기록 페이지로 이동
         const [year, month, day] = arg.dateStr.split("-");
         router.push(`/calendar/record?year=${year}&month=${month}&day=${day}`);
-      } else if (calendarDate) { // 해당 날짜에 기록이 있는 경우 상세 페이지로 이동
+      } else if (calendarDate) {
+        // 해당 날짜에 기록이 있는 경우 상세 페이지로 이동
         router.push(`/calendar/${calendarDate.id}`);
       } else {
         setAlert({
@@ -196,32 +239,39 @@ const Calendar: React.FC = () => {
   return (
     <>
       {isCalendarOwner === null ? (
-        <LoadingSpinner message={"캘린더를 불러오는 중..."}/>
-        ) : (
+        <LoadingSpinner message={"캘린더를 불러오는 중..."} />
+      ) : (
         <div className="flex flex-col w-full px-10 justify-center items-center">
           <div
             className="flex justify-end mt-4 mb-4"
             style={{ width: "min(90vh, calc(100vw - 18rem))" }}
           >
             <h2
-              className={`text-xl text-[#393D3F]`}
+              className="text-xl text-[#393D3F] flex items-center space-x-2 cursor-pointer"
               onClick={
                 isCalendarOwner
                   ? () => router.push("/user/calendar-visibility")
                   : undefined
               }
             >
-              {calendarOwner?.name ?? "나"}의 캘린더📆
+              <span>{calendarOwner?.name ?? "나"}님의 캘린더</span>
+              <Image
+                src="/music_calendar.png"
+                alt="설정 아이콘"
+                width={25}
+                height={25}
+              />
             </h2>
+
             <div className="flex space-x-4 ml-4">
               <button
-                className="text-lg text-[#393D3F] bg-[#E8E0FF] rounded-lg px-2"
+                className="text-lg text-[#393D3F] bg-[#E8E0FF] rounded-lg px-4"
                 onClick={handleFollowCountClick}
               >
                 {followerCount} 팔로워
               </button>
               <button
-                className="text-lg text-[#393D3F] bg-[#E8E0FF] rounded-lg px-2"
+                className="text-lg text-[#393D3F] bg-[#E8E0FF] rounded-lg px-4"
                 onClick={handleFollowCountClick}
               >
                 {followingCount} 팔로잉
@@ -256,7 +306,7 @@ const Calendar: React.FC = () => {
               events={events}
               eventDidMount={handleEventDidMount}
               dayCellDidMount={(arg) =>
-                  handleDayCellDidMount(arg, isCalendarOwner)
+                handleDayCellDidMount(arg, isCalendarOwner)
               }
               stickyHeaderDates={true}
               validRange={{
