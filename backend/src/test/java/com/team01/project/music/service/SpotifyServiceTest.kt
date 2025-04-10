@@ -24,7 +24,7 @@ class SpotifyServiceTest {
 
     private val trackId = "30HIJzJEUYcL9Qng15UeBo"
     private val artistId = "6YVMFz59CuY7ngCxTxjpxE"
-    private val playlistId = "37i9dQZF1DXcBWIGoYBM5M"
+//    private val playlistId = "37i9dQZF1DXcBWIGoYBM5M"
 
     @BeforeAll
     fun setUp() {
