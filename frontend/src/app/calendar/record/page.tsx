@@ -14,32 +14,47 @@ import { Card } from "@/components/ui/card";
 import { useGlobalAlert } from "@/components/GlobalAlert";
 import { getSpotifyAccessToken } from "@/app/utils/getSpotifyAccessToken";
 
+const API_URL = "http://localhost:8080/api/v1";
+const SPOTIFY_URL = "http://localhost:8080/api/v1/music/spotify";
+
+interface Track {
+  id: string;
+  name: string;
+  singer: string;
+  albumImage: string;
+  releaseDate?: string;
+  genres?: string;
+}
+
+interface RecordData {
+  memo: string;
+  musics: Track[];
+}
+
 export default function CalendarRecordPage() {
-  const API_URL = "http://localhost:8080/api/v1";
-  const SPOTIFY_URL = "http://localhost:8080/api/v1/music/spotify";
-
   const router = useRouter();
-
   const searchParams = useSearchParams();
+
   const trackId = searchParams.get("trackId");
   const playlistId = searchParams.get("playlistId");
-
   const id = searchParams.get("id");
   const year = searchParams.get("year");
   const month = searchParams.get("month");
   const day = searchParams.get("day");
 
   const [memo, setMemo] = useState("");
-  const [selectedTracks, setSelectedTracks] = useState<any[]>([]);
+  const [selectedTracks, setSelectedTracks] = useState<Track[]>([]);
   const [membershipGrade, setMembershipGrade] = useState("basic");
+  const [isEditing, setIsEditing] = useState(false);
+
+  const { setAlert } = useGlobalAlert();
+  const { handleApiError } = useHandleApiError();
+  const { showAlert, showConfirm, ModalComponent } = useModal();
+
+  const isFetched = useRef(false);
 
   const MAX_TRACK_COUNT = membershipGrade === "premium" ? 50 : 20;
   const MAX_MEMO_LENGTH = membershipGrade === "premium" ? 500 : 200;
-
-  const { setAlert } = useGlobalAlert();
-  const [isEditing, setIsEditing] = useState(false);
-
-  const isFetched = useRef(false);
 
   const [recentTracks, setRecentTracks] = useState<any[]>([]);
   const [isFetchingRecent, setIsFetchingRecent] = useState(false);
@@ -58,10 +73,7 @@ export default function CalendarRecordPage() {
         const membership = membershipRes.data.data;
         setMembershipGrade(membership?.grade || "basic");
       } catch (error) {
-        setAlert({
-          code: "500-2",
-          message: "사용자 정보를 가져오지 못했어요.",
-        });
+        handleApiError(error);
       }
     };
 
@@ -80,7 +92,7 @@ export default function CalendarRecordPage() {
       if (playlistId) {
         if (id === null) {
           await fetchTracksFromPlaylist(playlistId);
-        } else {
+        } else if (playlistId && id) {
           setAlert({
             code: "400-5",
             message: "오늘은 이미 음악이 기록되어 있어 전체 추가는 불가능해요.",
@@ -91,49 +103,35 @@ export default function CalendarRecordPage() {
 
     fetchInitialData();
     fetchUser();
-  }, [trackId, id]);
+  }, []);
 
-  const fetchTrack = async (trackId: string, musics: any) => {
+  const fetchTrack = async (trackId: string, musics: Track[]) => {
     try {
       const res = await axios.get(`${SPOTIFY_URL}/${trackId}`, {
-        headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
 
       const { code, msg, data } = res.data;
       setAlert({ code: code, message: msg });
 
-      if (code.startsWith("2")) {
-        // ✅ 중복 체크 먼저 실행
-        const isDuplicate = musics.some(
-          (track: { id: any }) => track.id === data.id
-        );
-        if (isDuplicate) {
-          setAlert({
-            code: "400-2",
-            message: "이미 추가된 음악입니다.",
-          });
-          return;
-        }
+      if (!code.startsWith("2")) return;
 
-        // ✅ 기록 저장 개수 초과 여부도 밖에서 확인
-        if (musics.length >= MAX_TRACK_COUNT) {
-          setAlert({
-            code: "400-3",
-            message: `음악은 최대 ${MAX_TRACK_COUNT}개까지만 추가할 수 있습니다.`,
-          });
-          return;
-        }
-
-        // ✅ 문제 없을 경우만 추가
-        setSelectedTracks((prev) => [...prev, data]);
+      if (musics.some((t) => t.id === data.id)) {
+        setAlert({ code: "400-2", message: "이미 추가된 음악입니다." });
+        return;
       }
+
+      if (musics.length >= MAX_TRACK_COUNT) {
+        setAlert({
+          code: "400-3",
+          message: `음악은 최대 ${MAX_TRACK_COUNT}개까지만 추가할 수 있습니다.`,
+        });
+        return;
+      }
+
+      setSelectedTracks((prev) => [...prev, data]);
     } catch (error) {
-      setAlert({
-        code: "500-1",
-        message: "음악 정보를 가져오는 데 실패했습니다.",
-      });
-      throw error;
+      handleApiError(error);
     }
   };
 
@@ -146,47 +144,34 @@ export default function CalendarRecordPage() {
         }
       );
 
-      const { code, data, msg } = res.data;
+      const { code, data } = res.data;
       if (code.startsWith("200")) {
         setSelectedTracks(data);
       }
     } catch (error) {
-      console.error(error);
-      setAlert({
-        code: "500-4",
-        message: "플레이리스트 트랙을 불러오지 못했습니다.",
-      });
+      handleApiError(error);
     }
   };
 
-  const fetchRecord = async (id: any) => {
+  const fetchRecord = async (
+    id: string | null
+  ): Promise<RecordData | undefined> => {
     try {
       if (id) {
         setIsEditing(true);
         const res = await axios.get(`${API_URL}/calendar/${id}`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
           withCredentials: true,
         });
-        const { code, msg, data } = res.data;
-        if (code.startsWith("2")) {
-          return data;
-        }
+        const { code, data } = res.data;
+        return code.startsWith("2") ? data : undefined;
       }
     } catch (error) {
-      setAlert({
-        code: "500-2",
-        message: "음악 기록을 불러오는 데 실패했습니다.",
-      });
-      throw error;
+      handleApiError(error);
     }
   };
 
-  // 📌 기록 저장 (신규 or 수정)
   const handleSaveRecord = async () => {
     try {
-      // 📌 음악이 하나도 선택되지 않았다면 알림 표시
       if (selectedTracks.length === 0 && recentTracks.length === 0) {
         setAlert({
           code: "400-4",
@@ -195,7 +180,6 @@ export default function CalendarRecordPage() {
         return;
       }
 
-      // 📌 메모가 비어있다면 확인 요청
       if (!memo.trim()) {
         const confirmSave = window.confirm(
           "메모를 작성하지 않으셨습니다. 그대로 저장하시겠습니까?"
@@ -220,21 +204,15 @@ export default function CalendarRecordPage() {
 
       console.log("finalTracks", finalTracks);
 
-      const saveRes = await axios.post(
-        `${API_URL}/music/save-all`,
-        finalTracks,
-        {
-          withCredentials: true,
-        }
-      );
-
-      const { code, msg } = saveRes.data;
+      await axios.post(`${API_URL}/music/save-all`, finalTracks, {
+        withCredentials: true,
+      });
 
       const musicIds = finalTracks.map((track) => track.id);
 
       if (isEditing) {
         // 기존 기록 수정
-        const musicRes = await axios.put(
+        await axios.put(
           `${API_URL}/calendar/${id}/music`,
           { musicIds: musicIds },
           {
@@ -245,7 +223,7 @@ export default function CalendarRecordPage() {
           }
         );
 
-        const memoRes = await axios.patch(
+        await axios.patch(
           `${API_URL}/calendar/${id}/memo`,
           { memo: finalMemo },
           {
@@ -256,11 +234,12 @@ export default function CalendarRecordPage() {
           }
         );
 
-        alert("기록이 성공적으로 수정되었습니다!");
-        router.push("/calendar");
+        await showAlert({
+          title: "기록 수정",
+          description: "기록이 성공적으로 수정되었습니다!",
+        });
       } else {
-        // 새 기록 추가
-        const res = await axios.post(
+        await axios.post(
           `${API_URL}/calendar`,
           { memo: finalMemo, musicIds },
           {
@@ -271,15 +250,16 @@ export default function CalendarRecordPage() {
             withCredentials: true,
           }
         );
-        alert("새로운 기록이 추가되었습니다!");
-        router.push("/calendar");
+
+        await showAlert({
+          title: "기록 추가",
+          description: "새로운 기록이 추가되었습니다!",
+        });
       }
+
+      router.push("/calendar");
     } catch (error) {
-      setAlert({
-        code: "500-3",
-        message: "음악 기록을 저장하는 중 오류가 발생했습니다.",
-      });
-      throw error;
+      handleApiError(error);
     } finally {
       setIsSaving(false); // 저장 종료
     }
@@ -381,12 +361,12 @@ export default function CalendarRecordPage() {
           <MusicList
             selectedTracks={selectedTracks}
             onRemoveTrack={handleRemoveTrack}
-            maxCount={membershipGrade === "premium" ? 50 : 20}
+            maxCount={MAX_TRACK_COUNT}
           />
           <MemoInput
             memo={memo}
             setMemo={setMemo}
-            maxLength={membershipGrade === "premium" ? 500 : 200}
+            maxLength={MAX_MEMO_LENGTH}
           />
 
           <div className="p-6">
