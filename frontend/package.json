@@ -22,6 +22,7 @@
     "@radix-ui/react-radio-group": "^1.2.3",
     "@radix-ui/react-slot": "^1.1.2",
     "@sun-typeface/suit": "^2.0.5",
+    "@tosspayments/payment-sdk": "^1.9.1",
     "axios": "^1.8.1",
     "chart.js": "^4.4.8",
     "class-variance-authority": "^0.7.1",

@@ -10,6 +10,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoadingEmailAuth, setIsLoadingEmailAuth] = useState(false); // 로딩 상태
 
   // 아이디 중복 확인 성공 여부
   const [isIdAvailable, setIsIdAvailable] = useState(false);
@@ -63,6 +64,7 @@ export default function SignupPage() {
       return;
     }
 
+    setIsLoadingEmailAuth(true); // 로딩 시작
     try {
       const response = await axios.get(
         `http://localhost:8080/api/v1/userEmail/emailAuth?email=${encodeURIComponent(
@@ -79,6 +81,8 @@ export default function SignupPage() {
       console.error("이메일 인증 오류:", error);
       alert("이메일 인증에 실패했습니다. 다시 시도해주세요.");
       setIsEmailVerified(false);
+    } finally {
+      setIsLoadingEmailAuth(false); // 로딩 종료
     }
   };
 
@@ -171,9 +175,14 @@ export default function SignupPage() {
             />
             <button
               onClick={handleEmailAuth}
-              className="ml-2 w-28 px-4 py-3 bg-orange-500 text-white text-sm rounded-md hover:bg-orange-600 transition-colors whitespace-nowrap"
+              disabled={isLoadingEmailAuth}
+              className={`ml-2 w-28 px-4 py-3 text-white text-sm rounded-md transition-colors whitespace-nowrap ${
+                isLoadingEmailAuth
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
             >
-              인증번호 받기
+              {isLoadingEmailAuth ? "전송 중..." : "인증번호 받기"}
             </button>
           </div>
           {/* 비밀번호 */}

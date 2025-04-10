@@ -66,6 +66,13 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("org.junit.platform:junit-platform-commons:1.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.0") // Kotest JUnit5 플랫폼
+    testImplementation("io.kotest:kotest-assertions-core:5.9.0") // Kotest assertions
+    testImplementation("io.kotest:kotest-property:5.9.0") // Optional: property-based testing
+    testImplementation("io.mockk:mockk:1.13.10") // Mocking
 
     // OAuth, security
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -92,6 +99,9 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+
+    systemProperty("kotest.framework.classpath.scanning.config.disable", "true")
+    systemProperty("kotest.framework.classpath.scanning.autoscan.disable", "true")
 }
 
 tasks.withType<JavaCompile> {
