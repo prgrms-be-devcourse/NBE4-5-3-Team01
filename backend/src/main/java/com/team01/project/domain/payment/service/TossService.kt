@@ -1,7 +1,10 @@
 package com.team01.project.domain.payment.service
 
-import com.team01.project.domain.payment.dto.TossBillingResponse
+import com.team01.project.domain.payment.dto.TossPaymentRequest
+import com.team01.project.domain.payment.dto.TossPaymentResponse
 import com.team01.project.domain.payment.dto.TossSubscriptionRequest
+import com.team01.project.domain.payment.dto.TossSubscriptionResponse
+import com.team01.project.global.app.AppConfig.Companion.objectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -23,7 +26,39 @@ class TossService {
     @Value("\${toss.webhook-secret}")
     lateinit var webhookSecret: String
 
-    fun processSubscription(request: TossSubscriptionRequest): TossBillingResponse? {
+    val restTemplate = RestTemplate()
+
+    fun confirmPayment(request: TossPaymentRequest): TossPaymentResponse? {
+        val url = "$baseUrl/v1/payments/confirm"
+
+        val headers = HttpHeaders().apply {
+            contentType = MediaType.APPLICATION_JSON
+            val encoded = Base64.getEncoder().encodeToString("$secretKey:".toByteArray())
+            set("Authorization", "Basic $encoded")
+        }
+
+        val body = mapOf(
+            "paymentKey" to request.paymentKey,
+            "orderId" to request.orderId,
+            "amount" to request.amount
+        )
+
+        val entity = HttpEntity(body, headers)
+
+        return try {
+            val response = restTemplate.postForEntity(url, entity, TossPaymentResponse::class.java)
+            val res = response.body
+
+            println("✅ Toss 응답 내용: ${objectMapper.writeValueAsString(res)}")
+
+            res
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun processSubscription(request: TossSubscriptionRequest): TossSubscriptionResponse? {
         val url = "https://api.tosspayments.com/v1/billing/authorizations/issue"
 
         val headers = HttpHeaders().apply {
@@ -41,11 +76,10 @@ class TossService {
         val entity = HttpEntity(body, headers)
 
         return try {
-            val restTemplate = RestTemplate()
             val response = restTemplate.postForEntity(
                 url,
                 entity,
-                TossBillingResponse::class.java
+                TossSubscriptionResponse::class.java
             )
             response.body
         } catch (e: Exception) {
@@ -81,7 +115,6 @@ class TossService {
         val entity = HttpEntity(body, headers)
 
         return try {
-            val restTemplate = RestTemplate()
             val response = restTemplate.postForEntity(url, entity, Map::class.java)
             response.statusCode.is2xxSuccessful
         } catch (e: Exception) {

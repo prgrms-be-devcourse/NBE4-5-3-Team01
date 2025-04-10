@@ -1,5 +1,6 @@
 package com.team01.project.domain.payment.controller
 
+import com.team01.project.domain.payment.dto.TossPaymentRequest
 import com.team01.project.domain.payment.dto.TossSubscriptionRequest
 import com.team01.project.domain.payment.service.TossService
 import com.team01.project.domain.user.service.MembershipService
@@ -17,6 +18,22 @@ class PaymentController(
     private val tossService: TossService,
     private val membershipService: MembershipService
 ) {
+    @PostMapping("/confirm")
+    fun confirmPayment(
+        @AuthenticationPrincipal user: OAuth2User,
+        @RequestBody request: TossPaymentRequest
+    ): RsData<String> {
+        val payment = tossService.confirmPayment(request)
+            ?: return RsData("500", "결제 승인 실패", null)
+
+        membershipService.saveOneTimePurchase(
+            userId = user.getAttribute("id")!!,
+            orderId = request.orderId
+        )
+
+        return RsData("200", "결제 및 멤버십 등록 성공", null)
+    }
+
     @PostMapping("/subscribe")
     fun subscribe(
         @AuthenticationPrincipal user: OAuth2User,
