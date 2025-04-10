@@ -1,39 +1,34 @@
 package com.team01.project.musicrecord.service
 
-import com.team01.project.domain.calendardate.entity.CalendarDate
+import com.team01.project.calendardate.fixture.CalendarDateFixture
 import com.team01.project.domain.calendardate.repository.CalendarDateRepository
-import com.team01.project.domain.music.entity.Music
 import com.team01.project.domain.music.repository.MusicRepository
 import com.team01.project.domain.musicrecord.entity.MusicRecord
-import com.team01.project.domain.musicrecord.entity.MusicRecordId
 import com.team01.project.domain.musicrecord.repository.MusicRecordRepository
 import com.team01.project.domain.musicrecord.service.MusicRecordService
-import com.team01.project.domain.user.entity.User
 import com.team01.project.domain.user.repository.UserRepository
 import com.team01.project.global.permission.CalendarPermission
 import com.team01.project.global.permission.PermissionService
-import com.team01.project.util.TestDisplayNameGenerator
-import io.mockk.Runs
+import com.team01.project.music.fixture.MusicFixture
+import com.team01.project.musicrecord.fixture.MusicRecordFixture
+import com.team01.project.user.entity.UserFixture
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.matchers.shouldBe
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.verify
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.DisplayNameGeneration
-import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import io.mockk.slot
 import java.util.Optional
 
-@DisplayNameGeneration(TestDisplayNameGenerator::class)
-class MusicRecordServiceTest {
-    private val musicRecordRepository: MusicRecordRepository = mockk()
-    private val calendarDateRepository: CalendarDateRepository = mockk()
-    private val musicRepository: MusicRepository = mockk()
-    private val userRepository: UserRepository = mockk()
-    private val permissionService: PermissionService = mockk()
+class MusicRecordServiceTest: BehaviorSpec ({
+    val musicRecordRepository: MusicRecordRepository = mockk()
+    val calendarDateRepository: CalendarDateRepository = mockk()
+    val musicRepository: MusicRepository = mockk()
+    val userRepository: UserRepository = mockk()
+    val permissionService: PermissionService = mockk()
 
-    private val musicRecordService = MusicRecordService(
+    val musicRecordService = MusicRecordService(
         musicRecordRepository,
         calendarDateRepository,
         musicRepository,
@@ -41,105 +36,107 @@ class MusicRecordServiceTest {
         permissionService
     )
 
-    private val calendarDateId = 1L
-    private val userId = "test-user"
+    val userId = "owner"
+    val user = UserFixture.유저(userId)
 
-    private val user = User(id = userId, email = "email", name = "name")
+    val calendarDateId = 1L
+    val calendarDate = CalendarDateFixture.calendarDate(id = calendarDateId, user = user)
 
-    private val calendarDate = CalendarDate(
-        id = calendarDateId,
-        user = user,
-        date = LocalDate.of(2025, 3, 1),
-        memo = "memo 1"
+    val music1Id = "music 1 id"
+    val music2Id = "music 2 id"
+    val music1 = MusicFixture.music(music1Id)
+    val music2 = MusicFixture.music(music2Id)
+
+    val musicRecords = listOf(
+        MusicRecordFixture.musicRecord(calendarDate = calendarDate, music = music1),
+        MusicRecordFixture.musicRecord(calendarDate = calendarDate, music = music2)
     )
 
-    private val music1 = Music(
-        id = "1",
-        name = "song 1",
-        singer = "singer 1",
-        singerId = "singer 1 id",
-        albumImage = "album image 1"
-    )
-
-    private val music2 = Music(
-        id = "2",
-        name = "song 2",
-        singer = "singer 2",
-        singerId = "singer 2 id",
-        albumImage = "album image 2"
-    )
-
-    private val record1 = MusicRecord(
-        id = MusicRecordId(calendarDateId, "1"),
-        calendarDate = calendarDate,
-        music = music1
-    )
-
-    private val record2 = MusicRecord(
-        id = MusicRecordId(calendarDateId, "2"),
-        calendarDate = calendarDate,
-        music = music2
-    )
-
-    private val musicRecords = listOf(record1, record2)
-
-    @Test
-    fun `기록한 음악 목록을 캘린더 아이디로 조회한다`() {
-        // given
-        every { calendarDateRepository.findById(calendarDateId) } returns Optional.of(calendarDate)
+    // 공통 모킹
+    beforeContainer {
         every { musicRecordRepository.findByCalendarDate(calendarDate) } returns musicRecords
-
-        // when
-        val result = musicRecordService.findMusicsByCalendarDateId(calendarDateId)
-
-        // then
-        assertThat(result).hasSize(musicRecords.size)
-        assertTrue(result.contains(music1))
-        assertTrue(result.contains(music2))
-    }
-
-    @Test
-    fun `음악 기록 하나를 캘린더 아이디로 조회한다`() {
-        // given
-        every { calendarDateRepository.findById(calendarDateId) } returns Optional.of(calendarDate)
-        every { musicRecordRepository.findTopByCalendarDate(calendarDate) } returns Optional.of(musicRecords[0])
-
-        // when
-        val result = musicRecordService.findOneByCalendarDateId(calendarDateId)
-
-        // then
-        assertThat(result.isPresent)
-        assertThat(result.get().music.id).isEqualTo(musicRecords[0].music.id)
-    }
-
-    @Test
-    fun `음악 기록을 업데이트한다`() {
-        // given
-        val commonMusicId: String = musicRecords[0].music.id
-        val musicIdToAdd = "3"
-        val musicNameToAdd = "Song 3"
-        val newMusicIds = listOf(commonMusicId, musicIdToAdd)
-        val musicToAdd = Music(
-            id = musicIdToAdd,
-            name = musicNameToAdd,
-            singer = "singer 3",
-            singerId = "singer 3 id",
-            albumImage = "album image 3"
-        )
-
-        every { calendarDateRepository.findWithOwnerById(calendarDateId) } returns Optional.of(calendarDate)
         every { userRepository.findById(userId) } returns Optional.of(user)
-        every { permissionService.checkPermission(any<User>(), any<User>()) } returns CalendarPermission.EDIT
-        every { musicRecordRepository.findByCalendarDate(calendarDate) } returns musicRecords
-        every { musicRepository.findById(musicIdToAdd) } returns Optional.of(musicToAdd)
-        every { musicRecordRepository.deleteAll(any<List<MusicRecord>>()) } just Runs
-        every { musicRecordRepository.saveAll(any<List<MusicRecord>>()) } returns emptyList()
-
-        // when
-        musicRecordService.updateMusicRecords(calendarDateId, userId, newMusicIds)
-
-        // then
-        verify(exactly = 1) { musicRecordRepository.deleteAll(any<List<MusicRecord>>()) }
-        verify(exactly = 1) { musicRecordRepository.saveAll(any<List<MusicRecord>>()) }
     }
-}
+
+    Given("캘린더 아이디에 해당하는 캘린더가 존재하는 경우") {
+        every { calendarDateRepository.findWithOwnerById(calendarDateId) } returns Optional.of(calendarDate)
+        every { calendarDateRepository.findById(calendarDateId) } returns Optional.of(calendarDate)
+
+        When("캘린더 아이디로 음악 리스트를 조회하면") {
+            val result = musicRecordService.findMusicsByCalendarDateId(calendarDateId)
+
+            Then("해당 캘린더와 함께 기록된 음악 리스트가 반환된다") {
+                result shouldHaveSize musicRecords.size
+            }
+        }
+
+        When("캘린더 아이디로 음악 기록 하나를 조회하면") {
+            beforeTest {
+                every { musicRecordRepository.findTopByCalendarDate(calendarDate) } returns Optional.of(musicRecords[0])
+            }
+
+            val result by lazy {
+                musicRecordService.findOneByCalendarDateId(calendarDateId)
+            }
+
+            Then("음악 기록 하나가 반환된다") {
+                result.shouldBePresent {
+                    it shouldBe musicRecords[0]
+                }
+            }
+        }
+
+        And("음악 아이디에 해당하는 음악이 존재하는 상태에서") {
+            beforeTest {
+                every { musicRepository.findById(any<String>()) } answers {
+                    when (it.invocation.args[0]) {
+                        music1Id -> Optional.of(music1)
+                        music2Id -> Optional.of(music2)
+                        else -> Optional.empty()
+                    }
+                }
+            }
+
+            And("유저가 캘린더 EDIT 권한을 가질 때") {
+                val music3Id = "music 3 id"
+                val music3 = MusicFixture.music(music3Id)
+                val newMusicIds = listOf(music2Id, music3Id)
+                val deletedRecordsSlot = slot<List<MusicRecord>>()
+                val savedRecordsSlot = slot<List<MusicRecord>>()
+
+                beforeTest {
+                    every { permissionService.checkPermission(eq(user), eq(user)) } returns CalendarPermission.EDIT
+                    every { musicRepository.findById(any<String>()) } answers {
+                        when (it.invocation.args[0]) {
+                            music2Id -> Optional.of(music2)
+                            music3Id -> Optional.of(music3)
+                            else -> Optional.empty()
+                        }
+                    }
+                    every { musicRecordRepository.deleteAll(capture(deletedRecordsSlot)) } returns Unit
+                    every { musicRecordRepository.saveAll(capture(savedRecordsSlot)) } answers { savedRecordsSlot.captured }
+                }
+
+                When("음악 기록을 수정하면") {
+                    val result by lazy {
+                        musicRecordService.updateMusicRecords(calendarDateId, userId, newMusicIds)
+                    }
+
+                    Then("새 리스트에 없는 기존 음악 기록은 삭제된다") {
+                        result
+                        deletedRecordsSlot.isCaptured shouldBe true
+                        val deletedIds = deletedRecordsSlot.captured.map { it.music.id }
+                        deletedIds shouldBe listOf(music1Id)
+                    }
+
+                    Then("새 리스트에 추가된 음악만 새롭게 저장된다") {
+                        result
+                        savedRecordsSlot.isCaptured shouldBe true
+                        val savedIds = savedRecordsSlot.captured.map { it.music.id }
+                        savedIds shouldBe listOf(music3Id)
+                    }
+                }
+            }
+        }
+    }
+})
