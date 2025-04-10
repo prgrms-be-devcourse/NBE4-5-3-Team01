@@ -48,6 +48,7 @@ class CustomOAuth2UserService(
                 id = userId,
                 name = oAuth2User.getAttribute<String>("display_name") ?: "",
                 email = oAuth2User.getAttribute<String>("email") ?: "",
+                loginPlatform = "SPOT-001",
                 createdDate = LocalDateTime.now()
             )
 

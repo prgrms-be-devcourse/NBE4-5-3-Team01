@@ -43,8 +43,11 @@ class UserController(
     @Operation(summary = "로그인 api", description = "db에서 아이디 조회 후 입력한 비밀번호 검증 후 토큰 반환")
     @ResponseBody
     @PostMapping("/login")
-    fun login(@RequestBody reqMap: Map<String, Any>): RsData<Map<String, Any>> {
-        return RsData("200-1", "로그인 성공", userService.validLogin(reqMap))
+    fun login(
+        @RequestBody reqMap: Map<String, Any>,
+        response: HttpServletResponse
+    ): RsData<Map<String, Any>> {
+        return RsData("200-1", "로그인 성공", userService.validLogin(reqMap, response))
     }
 
     @ResponseBody
