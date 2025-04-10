@@ -63,6 +63,6 @@ class MembershipSchedulerTest {
         assertThat(expiredPremium.membership!!.grade).isEqualTo("basic")
         assertThat(expiredPremium.membership!!.endDate).isNull()
         assertThat(activePremium.membership!!.grade).isEqualTo("premium") // 유지
-        assertThat(basicUser.membership!!.grade).isEqualTo("basic")       // 유지
+        assertThat(basicUser.membership!!.grade).isEqualTo("basic") // 유지
     }
 }

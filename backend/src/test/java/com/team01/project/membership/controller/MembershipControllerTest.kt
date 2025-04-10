@@ -55,7 +55,9 @@ class MembershipControllerTest {
     fun setupSecurityContext() {
         val attributes = mapOf("id" to "user123")
         val user: OAuth2User = DefaultOAuth2User(
-            listOf(), attributes, "id"
+            listOf(),
+            attributes,
+            "id"
         )
         val auth = UsernamePasswordAuthenticationToken(user, null, user.authorities)
         SecurityContextHolder.getContext().authentication = auth
