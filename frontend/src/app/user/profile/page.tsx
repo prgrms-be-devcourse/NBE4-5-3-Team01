@@ -17,6 +17,7 @@ interface User {
   birthDay: string | null;
   createdDate: string;
   field: string | null;
+  loginPlatform?: string; // 예: "STAN-001", "STAN-002", "SPOT-001"
 }
 
 export default function ProfilePage() {
@@ -81,20 +82,20 @@ export default function ProfilePage() {
         console.log("response.data:", response.data);
 
         // response.data.data에서 사용자 정보 추출
-        const userData = response.data.data;
+        const fetchedData = response.data.data;
+        console.log("처리할 userData:", fetchedData);
 
-        console.log("처리할 userData:", userData);
-
-        const user = {
-          id: userData.id,
-          email: userData.email,
-          name: userData.name,
-          nickName: userData.nickName,
-          userIntro: userData.userIntro,
-          image: userData.image,
-          birthDay: userData.birthDay,
-          createdDate: userData.createdDate,
-          field: userData.field,
+        const user: User = {
+          id: fetchedData.id,
+          email: fetchedData.email,
+          name: fetchedData.name,
+          nickName: fetchedData.nickName,
+          userIntro: fetchedData.userIntro,
+          image: fetchedData.image,
+          birthDay: fetchedData.birthDay,
+          createdDate: fetchedData.createdDate,
+          field: fetchedData.field,
+          loginPlatform: fetchedData.loginPlatform, // loginPlatform 값 설정
         };
 
         setUserData(user);
@@ -109,24 +110,24 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     try {
-      // 백엔드에서 모든 로그아웃 처리 (로컬 + 스포티파이)
-      const response = await axios.get(
-        "http://localhost:8080/api/v1/user/logout",
-        {
-          withCredentials: true,
-        }
-      );
+      const platform = userData?.loginPlatform;
+      const logoutUrl =
+        platform === "STAN-002"
+          ? "http://localhost:8080/api/v1/spotify/logout"
+          : "http://localhost:8080/api/v1/user/logout";
 
-      console.log("리스폰스테이터스", response.status);
+      const response = await axios.get(logoutUrl, {
+        withCredentials: true,
+      });
+
       if (response.status === 200 || response.status === 302) {
-        // 로그인 페이지로 리다이렉트
         router.push("/login");
       } else {
         throw new Error("로그아웃 실패");
       }
     } catch (error) {
       console.error("로그아웃 중 오류 발생:", error);
-      alert("로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.");
+      alert("로그아웃 중 문제가 발생했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -145,7 +146,6 @@ export default function ProfilePage() {
         setUserData((prev) => (prev ? { ...prev, userIntro: bioText } : null));
         // 자기소개 업데이트 시간을 localStorage에 저장
         localStorage.setItem("lastBioUpdate", new Date().toISOString());
-        // router.refresh(); // 페이지 새로고침
         window.location.reload();
       }
     } catch (error) {
@@ -169,7 +169,6 @@ export default function ProfilePage() {
         setUserData((prev) => (prev ? { ...prev, name: nameText } : null));
         // 프로필 이름 업데이트 시간을 localStorage에 저장
         localStorage.setItem("lastNameUpdate", new Date().toISOString());
-        // router.refresh(); // 페이지 새로고침
         window.location.reload();
       }
     } catch (error) {
@@ -213,12 +212,39 @@ export default function ProfilePage() {
         setPreviewUrl(null);
         // 이미지 업데이트 시간을 localStorage에 저장
         localStorage.setItem("lastImageUpdate", new Date().toISOString());
-        // router.refresh(); // 페이지 새로고침
         window.location.reload();
       }
     } catch (error) {
       console.error("이미지 업로드 중 오류 발생:", error);
       alert("이미지 업로드 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
+  };
+
+  const handleSpotifyLink = () => {
+    if (window.confirm("Spotify 계정을 연동하시겠습니까?")) {
+      const jwt = getCookie("accessToken");
+
+      if (!jwt) {
+        alert("로그인이 필요합니다.");
+        return;
+      }
+
+      // ✅ 프론트에서 처리할 redirect URI로 변경
+      const redirectUri = encodeURIComponent(
+        "http://localhost:3000/user/spotify-callback"
+      );
+
+      const scope =
+        "user-read-email user-read-private playlist-read-private user-read-playback-state user-modify-playback-state streaming user-read-recently-played";
+
+      // ✅ Spotify 인증 요청 URL
+      window.location.href =
+        `https://accounts.spotify.com/authorize` +
+        `?client_id=fadbee879e0e4575a2bb28abfe276934` +
+        `&response_type=code` +
+        `&redirect_uri=${redirectUri}` +
+        `&scope=${encodeURIComponent(scope)}` +
+        `&state=${jwt}`; // 이건 accessToken (백엔드에서 다시 디코딩함)
     }
   };
 
@@ -331,7 +357,19 @@ export default function ProfilePage() {
                 </svg>
                 <span className="text-lg">Spotify</span>
               </div>
-              <span className="text-green-500">연결됨</span>
+              {userData?.loginPlatform === "STAN-001" ? (
+                <button
+                  onClick={handleSpotifyLink}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                >
+                  연동하기
+                </button>
+              ) : userData?.loginPlatform === "STAN-002" ||
+                userData?.loginPlatform === "SPOT-001" ? (
+                <span className="text-green-500">연결됨</span>
+              ) : (
+                <span className="text-red-500">연결 안됨</span>
+              )}
             </div>
           </div>
         </section>
