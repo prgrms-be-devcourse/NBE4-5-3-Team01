@@ -58,3 +58,8 @@ push:
   vapid:
     publicKey: "BJSowR6aDh89tu-QupRzNmwjVrr63q2Wbstv536bFya4emx8YigwBkd4Ogbusg6X6uzeNzOkY678PlY9U66xSIU"
     privateKey: "YdObw6wJN_UkDASF6mAMcRkZuT6eGCmBuoU54xH5sa0"
+
+toss:
+  client-key: test_ck_5OWRapdA8dP5dB4NPlyB8o1zEqZK
+  secret-key: test_sk_0RnYX2w532MB1mZpel9K8NeyqApQ
+  webhook-secret: d92e8111a505dbba9da51ef9d76bbf50a462e08c07cef1ad773f22c2db5659ed

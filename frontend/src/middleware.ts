@@ -53,7 +53,9 @@ const isPublicRoute = (pathname: string): boolean => {
     "/_next",
     "/static",
     "/favicon.ico",
-    "/signup"
+    "/signup",
+    "/membership/payment/success",
+    "/membership/payment/fail"
   ];
   return publicPaths.some((path) => pathname.startsWith(path));
 };
