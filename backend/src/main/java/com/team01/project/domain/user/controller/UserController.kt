@@ -210,8 +210,8 @@ class UserController(
         @AuthenticationPrincipal user: org.springframework.security.oauth2.core.user.OAuth2User
     ): RsData<Void> {
         val userId = user.name
-        if (requestDto?.calendarVisibility() != null) {
-            userService.updateCalendarVisibility(userId, requestDto.calendarVisibility())
+        if (requestDto?.calendarVisibility != null) {
+            userService.updateCalendarVisibility(userId, requestDto.calendarVisibility)
         }
         return RsData("200-14", "캘린더 공개 여부 수정이 완료되었습니다.")
     }
