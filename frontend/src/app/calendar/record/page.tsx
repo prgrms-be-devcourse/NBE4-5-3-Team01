@@ -44,6 +44,8 @@ export default function CalendarRecordPage() {
   const [recentTracks, setRecentTracks] = useState<any[]>([]);
   const [isFetchingRecent, setIsFetchingRecent] = useState(false);
 
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     if (isFetched.current) return;
     isFetched.current = true;
@@ -201,6 +203,8 @@ export default function CalendarRecordPage() {
         if (!confirmSave) return;
       }
 
+      setIsSaving(true); // 저장 시작
+
       const finalMemo = memo.trim();
 
       const allTracks = [...selectedTracks, ...recentTracks];
@@ -276,6 +280,8 @@ export default function CalendarRecordPage() {
         message: "음악 기록을 저장하는 중 오류가 발생했습니다.",
       });
       throw error;
+    } finally {
+      setIsSaving(false); // 저장 종료
     }
   };
 
@@ -340,6 +346,33 @@ export default function CalendarRecordPage() {
             완료
           </button>
         </div>
+        {isSaving && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-transparent">
+            <div className="flex items-center space-x-3">
+              <svg
+                className="w-5 h-5 animate-spin text-purple-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8z"
+                />
+              </svg>
+              <span>저장 중입니다...</span>
+            </div>
+          </div>
+        )}
         <div className="space-y-7">
           <MusicSearch
             onSelectTrack={handleSelectTrack}
