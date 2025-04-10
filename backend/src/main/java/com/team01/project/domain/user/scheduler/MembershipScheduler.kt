@@ -13,7 +13,7 @@ class MembershipScheduler(
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    @Scheduled(cron = "0 0 3 * * *") // 매일 새벽 3시
+    @Scheduled(cron = "0 0 4,16 * * *") // 매일 오전 4시, 오후 4시에 실행
     @Transactional
     fun downgradeExpiredMemberships() {
         val today = LocalDate.now()
@@ -32,6 +32,7 @@ class MembershipScheduler(
             m.grade = "basic"
             m.startDate = null
             m.endDate = null
+            m.billingKey = null
 
             log.info("요금제 강등: userId=${user.id}")
         }

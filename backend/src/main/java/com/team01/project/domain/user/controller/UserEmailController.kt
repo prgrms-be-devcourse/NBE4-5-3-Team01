@@ -28,11 +28,8 @@ class UserEmailController(
         }
 
         val verificationCode = generateVerificationCode()
-        // 메일 제목 및 본문 구성
-        val subject = "이메일 인증 코드"
-        val text = "인증 코드는: $verificationCode"
-        // 이메일 전송
-        userEmailService.sendSimpleMessage(email, subject, text)
+
+        userEmailService.sendSimpleMessage(email, verificationCode)
         return RsData("200-1", "이메일 요청 완료", verificationCode)
     }
 
