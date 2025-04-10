@@ -159,7 +159,7 @@ const FollowPage = () => {
 
       {/* 사용자 리스트 */}
       <div className="w-full max-w-2xl mt-8 space-y-4">
-          {users.map((user, index) => {
+          {users?.map((user, index) => {
             const isFollowing = user.isFollowing;
             const isFollower = user.isFollower;
             let buttonText = "팔로우";
