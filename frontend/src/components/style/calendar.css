@@ -1,33 +1,38 @@
 .fc {
-    background-color: #F8F7FF;
-    color: #393D3F;
+  background-color: #f8f7ff;
+  color: #393d3f;
 }
 
 .fc-daygrid-day {
-    background-color: white;
+  background-color: #f3e9fb;
 }
 
 .fc-daygrid-day-number {
-    color: #393D3F !important;
+  color: #393d3f !important;
 }
 
 .fc-daygrid-day-frame {
-    position: relative;
-    overflow: hidden;
+  position: relative;
+  overflow: hidden;
 }
 
 .fc .fc-daygrid-body-natural .fc-daygrid-day-events {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .fc .fc-toolbar {
-    justify-content: space-evenly;
-    background-color: #F8F7FF;
-    color: #393D3F;
+  justify-content: space-evenly;
+  background-color: #f8f7ff;
+  color: #393d3f;
 }
 
 .fc .fc-toolbar-chunk .fc-button {
-    border: none;
-    background: #CDBFFF;
-    color: #393D3F;
+  border: none;
+  background: #e7c6ff;
+  color: #393d3f;
+}
+
+.fc .fc-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }

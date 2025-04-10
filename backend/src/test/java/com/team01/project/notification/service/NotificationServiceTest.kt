@@ -8,6 +8,7 @@ import com.team01.project.domain.user.entity.User
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.anyList
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.web.server.ResponseStatusException
 import java.time.LocalTime
 import java.util.*
@@ -30,10 +32,14 @@ class NotificationServiceTest {
     @Mock
     private lateinit var subscriptionRepository: SubscriptionRepository
 
+    @Mock
+    lateinit var eventPublisher: ApplicationEventPublisher
+
     @InjectMocks
     private lateinit var notificationService: NotificationService
 
-    init {
+    @BeforeEach
+    fun setup() {
         MockitoAnnotations.openMocks(this)
     }
 

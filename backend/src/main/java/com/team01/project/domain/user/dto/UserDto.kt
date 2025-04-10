@@ -16,6 +16,7 @@ data class UserDto(
     val birthDay: LocalDate?,
     val createdDate: LocalDateTime?,
     val field: String?,
+    var loginPlatform: String?,
     val calendarVisibility: CalendarVisibility = CalendarVisibility.PUBLIC
 ) {
     companion object {
@@ -31,6 +32,7 @@ data class UserDto(
                 birthDay = user.birthDay,
                 createdDate = user.createdDate,
                 field = user.field,
+                loginPlatform = user.loginPlatform,
                 calendarVisibility = user.calendarVisibility
             )
         }

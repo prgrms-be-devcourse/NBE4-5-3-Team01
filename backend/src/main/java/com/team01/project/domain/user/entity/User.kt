@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor
 import lombok.Builder
 import lombok.Getter
 import lombok.NoArgsConstructor
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -53,6 +54,8 @@ open class User(
 
     open var field: String? = null,
 
+    open var loginPlatform: String? = null,
+
     @Column(name = "calendar_visibility", nullable = false)
     @Enumerated(EnumType.STRING)
     open var calendarVisibility: CalendarVisibility = CalendarVisibility.PUBLIC,
@@ -64,7 +67,10 @@ open class User(
     open var notifications: MutableList<Notification> = mutableListOf(),
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    open var membership: Membership? = null
+    open var membership: Membership? = null,
+
+    @Column(nullable = true)
+    open var customerKey: String? = null
 ) {
 
     fun updateCalendarVisibility(newCalendarVisibility: CalendarVisibility) {

@@ -38,28 +38,7 @@ class MembershipService(
             throw MembershipException(MembershipErrorCode.NOT_PREMIUM)
         }
 
-//        membership.grade = "basic"
         membership.autoRenew = false
-
-        userRepository.save(user)
-    }
-
-    fun upgradeToPremium(userId: String) {
-        val user = userRepository.findById(userId)
-            .orElseThrow { MembershipException(MembershipErrorCode.USER_NOT_FOUND) }
-
-        val membership = user.membership
-            ?: throw MembershipException(MembershipErrorCode.MEMBERSHIP_NOT_FOUND)
-
-        if (membership.grade == "premium") {
-            throw MembershipException(MembershipErrorCode.ALREADY_PREMIUM)
-        }
-
-        membership.grade = "premium"
-        membership.startDate = LocalDate.now()
-        membership.endDate = LocalDate.now().plusMonths(1)
-        membership.autoRenew = true
-        membership.count += 1
 
         userRepository.save(user)
     }
@@ -105,6 +84,43 @@ class MembershipService(
         membership.endDate = dto.endDate
         membership.autoRenew = dto.autoRenew
 
+        userRepository.save(user)
+    }
+
+    fun upgradeMembership(customerKey: String, billingKey: String): Boolean {
+        val user = userRepository.findById(customerKey)
+            .orElseThrow { MembershipException(MembershipErrorCode.USER_NOT_FOUND) }
+
+        val membership = user.membership
+            ?: throw MembershipException(MembershipErrorCode.MEMBERSHIP_NOT_FOUND)
+
+        if (membership.grade == "premium" && membership.autoRenew) {
+            throw MembershipException(MembershipErrorCode.ALREADY_PREMIUM)
+        }
+
+        membership.grade = "premium"
+        membership.startDate = LocalDate.now()
+        membership.endDate = LocalDate.now().plusMonths(1)
+        membership.autoRenew = true
+        membership.count += 1
+        membership.billingKey = billingKey
+
+        userRepository.save(user)
+
+        return true
+    }
+
+    fun saveOneTimePurchase(userId: String, orderId: String) {
+        val user = userRepository.findById(userId).orElseThrow()
+        val membership = user.membership ?: Membership(user = user)
+
+        membership.grade = "premium"
+        membership.startDate = LocalDate.now()
+        membership.endDate = LocalDate.now().plusMonths(1)
+        membership.autoRenew = false // ❌ 자동 갱신 안 함
+        membership.count += 1
+
+        user.membership = membership
         userRepository.save(user)
     }
 }

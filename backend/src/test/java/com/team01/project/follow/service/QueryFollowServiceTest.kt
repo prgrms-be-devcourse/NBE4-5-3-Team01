@@ -1,108 +1,119 @@
-package com.team01.project.follow.service;
+package com.team01.project.follow.service
 
-import static com.team01.project.user.entity.UserFixture.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import com.team01.project.common.service.ServiceTest
+import com.team01.project.domain.follow.entity.Follow
+import com.team01.project.domain.follow.entity.type.Status
+import com.team01.project.domain.follow.repository.FollowRepository
+import com.team01.project.domain.follow.service.QueryFollowService
+import com.team01.project.domain.user.entity.User
+import com.team01.project.domain.user.repository.UserRepository
+import com.team01.project.user.entity.UserFixture.유저
+import com.team01.project.user.entity.UserFixture.유저_이메일
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.function.Executable
+import org.springframework.beans.factory.annotation.Autowired
 
-import java.util.List;
+class QueryFollowServiceTest : ServiceTest() {
+    @Autowired
+    private val queryFollowService: QueryFollowService? = null
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+    @Autowired
+    private val followRepository: FollowRepository? = null
 
-import com.team01.project.common.service.ServiceTest;
-import com.team01.project.domain.follow.controller.dto.CountFollowResponse;
-import com.team01.project.domain.follow.controller.dto.FollowResponse;
-import com.team01.project.domain.follow.entity.Follow;
-import com.team01.project.domain.follow.repository.FollowRepository;
-import com.team01.project.domain.follow.service.QueryFollowService;
-import com.team01.project.domain.user.entity.User;
-import com.team01.project.domain.user.repository.UserRepository;
+    @Autowired
+    private val userRepository: UserRepository? = null
 
-public class QueryFollowServiceTest extends ServiceTest {
+    @Test
+    fun 팔로잉_목록을_조회한다() {
+        // given
+        val 로그인_유저: User = userRepository!!.save(유저("asdf"))
+        val 메인_유저: User = userRepository.save(유저("asdfasdf"))
+        val 유저들 = 유저_전체_생성()
+        팔로우_전체_생성(메인_유저, 유저들)
 
-	@Autowired
-	private QueryFollowService queryFollowService;
+        // when
+        val followings = queryFollowService!!.findFollowing(로그인_유저.id, 메인_유저.id)
 
-	@Autowired
-	private FollowRepository followRepository;
+        // then
+        assertThat(followings.size).isEqualTo(2)
+    }
 
-	@Autowired
-	private UserRepository userRepository;
+    @Test
+    fun 팔로워_목록을_조회한다() {
+        // given
+        val 로그인_유저: User = userRepository!!.save(유저("asdf"))
+        val 메인_유저: User = userRepository.save(유저("asdfasdf"))
+        val 유저들 = 유저_전체_생성()
+        팔로우_전체_생성(메인_유저, 유저들)
 
-	@Test
-	void 팔로잉_목록을_조회한다() {
-		// given
-		User 로그인_유저 = userRepository.save(유저("asdf"));
-		User 메인_유저 = userRepository.save(유저("asdfasdf"));
-		List<User> 유저들 = 유저_전체_생성();
-		팔로우_전체_생성(메인_유저, 유저들);
+        // when
+        val followers = queryFollowService!!.findFollower(로그인_유저.id, 메인_유저.id)
 
-		// when
-		List<FollowResponse> followings = queryFollowService.findFollowing(로그인_유저.getId(), 메인_유저.getId());
+        // then
+        assertThat(followers.size).isEqualTo(2)
+    }
 
-		// then
-		assertThat(followings.size()).isEqualTo(2);
-	}
+    @Test
+    fun 팔로잉_팔로워_수를_조회한다() {
+        // given
+        val 메인_유저: User = userRepository!!.save(유저("asdfasdf"))
+        val 유저들 = 유저_전체_생성()
+        팔로우_전체_생성(메인_유저, 유저들)
 
-	@Test
-	void 팔로워_목록을_조회한다() {
-		// given
-		User 로그인_유저 = userRepository.save(유저("asdf"));
-		User 메인_유저 = userRepository.save(유저("asdfasdf"));
-		List<User> 유저들 = 유저_전체_생성();
-		팔로우_전체_생성(메인_유저, 유저들);
+        // when
+        val count = queryFollowService!!.findCount(메인_유저.id)
 
-		// when
-		List<FollowResponse> followers = queryFollowService.findFollower(로그인_유저.getId(), 메인_유저.getId());
+        // then
+        Assertions.assertAll(
+            Executable { assertThat(count.followerCount).isEqualTo(2) },
+            Executable { assertThat(count.followingCount).isEqualTo(2) }
+        )
+    }
 
-		// then
-		assertThat(followers.size()).isEqualTo(2);
-	}
+    @Test
+    fun 요청_받은_팔로우를_조회한다() {
+        // given
+        val 로그인_유저: User = userRepository!!.save(유저("asdf"))
+        val 유저들 = 유저_전체_생성()
+        followRepository!!.save(Follow(0, Status.PENDING, 로그인_유저, 유저들[0]))
+        followRepository.save(Follow(0, Status.ACCEPT, 로그인_유저, 유저들[1]))
 
-	@Test
-	void 팔로잉_팔로워_수를_조회한다() {
-		// given
-		User 메인_유저 = userRepository.save(유저("asdfasdf"));
-		List<User> 유저들 = 유저_전체_생성();
-		팔로우_전체_생성(메인_유저, 유저들);
+        // when
+        val pendingFollowers = queryFollowService!!.findPendingList(로그인_유저.id)
 
-		// when
-		CountFollowResponse count = queryFollowService.findCount(메인_유저.getId());
+        // then
+        assertThat(pendingFollowers.size).isEqualTo(1)
+    }
 
-		// then
-		assertAll(
-			() -> assertThat(count.followerCount).isEqualTo(2),
-			() -> assertThat(count.followingCount).isEqualTo(2)
-		);
-	}
+    @Test
+    fun 로그인_유저의_팔로잉_목록을_조회한다() {
+        // given
+        val 로그인_유저: User = userRepository!!.save(유저("asdf"))
+        val 유저들 = 유저_전체_생성()
+        팔로우_전체_생성(로그인_유저, 유저들)
 
-	// @Test
-	// void 맞팔로우_여부를_확인한다() {
-	// 	// given
-	// 	User 메인_유저 = userRepository.save(유저("asdfasdf"));
-	// 	User 서브_유저 = userRepository.save(유저_이메일("qwerqewr", "test@gamil.com"));
-	// 	팔로우_전체_생성(메인_유저, List.of(서브_유저));
-	//
-	// 	// when
-	// 	Boolean response = queryFollowService.checkMutualFollow(메인_유저.getId(), 서브_유저.getId());
-	//
-	// 	// then
-	// 	assertThat(response).isTrue();
-	// }
+        // when
+        val myFollowings = queryFollowService!!.findMyFollowing(로그인_유저.id)
 
-	private void 팔로우_전체_생성(User mainUser, List<User> users) {
-		for (User user : users) {
-			followRepository.save(new Follow(mainUser, user)).accept();
-			followRepository.save(new Follow(user, mainUser)).accept();
-		}
-	}
+        // then
+        assertThat(myFollowings.size).isEqualTo(2)
+    }
 
-	private List<User> 유저_전체_생성() {
-		return userRepository.saveAll(
-			List.of(
-				유저_이메일("qwerqwer", "qwer@gmail.com"),
-				유저_이메일("zxcvzxcv", "zxcv@gamil.com")
-			)
-		);
-	}
+    private fun 팔로우_전체_생성(mainUser: User, users: List<User>) {
+        for (user in users) {
+            followRepository!!.save(Follow(0, Status.ACCEPT, mainUser, user))
+            followRepository.save(Follow(0, Status.ACCEPT, user, mainUser))
+        }
+    }
+
+    private fun 유저_전체_생성(): List<User> {
+        return userRepository!!.saveAll(
+            java.util.List.of(
+                유저_이메일("qwerqwer", "qwer@gmail.com"),
+                유저_이메일("zxcvzxcv", "zxcv@gamil.com")
+            )
+        )
+    }
 }

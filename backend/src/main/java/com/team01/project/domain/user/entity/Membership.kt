@@ -23,6 +23,9 @@ data class Membership(
 
     var autoRenew: Boolean = false,
 
+    var billingKey: String? = null,
+    var failCount: Int = 0,
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     val user: User
