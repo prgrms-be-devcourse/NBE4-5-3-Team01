@@ -24,7 +24,7 @@ import io.mockk.slot
 import io.mockk.verify
 import java.util.Optional
 
-class MusicRecordServiceTest: BehaviorSpec ({
+class MusicRecordServiceTest : BehaviorSpec({
     val musicRecordRepository: MusicRecordRepository = mockk()
     val calendarDateRepository: CalendarDateRepository = mockk()
     val musicRepository: MusicRepository = mockk()

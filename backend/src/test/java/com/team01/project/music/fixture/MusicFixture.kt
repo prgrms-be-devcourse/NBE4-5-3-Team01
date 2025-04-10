@@ -9,7 +9,7 @@ object MusicFixture {
             name = "title",
             singer = "singer",
             singerId = "default singer id",
-            albumImage = "https://example.com/default.jpg",
+            albumImage = "https://example.com/default.jpg"
         )
     }
 }

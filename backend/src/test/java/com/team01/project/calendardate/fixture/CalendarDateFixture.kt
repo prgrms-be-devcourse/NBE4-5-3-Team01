@@ -18,6 +18,7 @@ object CalendarDateFixture {
             id = id,
             user = user,
             date = date,
-            memo = memo)
+            memo = memo
+        )
     }
 }

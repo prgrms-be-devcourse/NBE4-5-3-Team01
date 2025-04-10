@@ -26,7 +26,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Optional
 
-class CalendarDateServiceTest: BehaviorSpec({
+class CalendarDateServiceTest : BehaviorSpec({
     val calendarDateRepository: CalendarDateRepository = mockk()
     val userRepository: UserRepository = mockk()
     val permissionService: PermissionService = mockk()
@@ -148,7 +148,6 @@ class CalendarDateServiceTest: BehaviorSpec({
                     result
                     calendarDate1.memo shouldBe newMemo
                 }
-
             }
         }
     }
