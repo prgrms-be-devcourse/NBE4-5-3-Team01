@@ -39,14 +39,14 @@ class CommandFollowServiceTest : ServiceTest() {
         val 팔로우_받을_유저 = 유저_저장(유저_이메일("qwerqwer", "test1234@gamil.com"))
 
         // Subscription 객체 생성
-//        val mockSubscription = Subscription.builder()
-//            .user(팔로우_받을_유저)
-//            .endpoint("endpoint")
-//            .p256dh("p256dh")
-//            .auth("auth")
-//            .build()
-//
-//        subscriptionRepository!!.save(mockSubscription)
+        val mockSubscription = Subscription.builder()
+            .user(팔로우_받을_유저)
+            .endpoint("endpoint")
+            .p256dh("p256dh")
+            .auth("auth")
+            .build()
+
+        subscriptionRepository!!.save(mockSubscription)
 
         // when
         commandFollowService!!.create(팔로우_보낼_유저.id, 팔로우_받을_유저.id)
