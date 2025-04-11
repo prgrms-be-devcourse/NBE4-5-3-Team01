@@ -3,87 +3,119 @@ package com.team01.project.permission.service
 import com.team01.project.domain.follow.entity.type.Status
 import com.team01.project.domain.follow.repository.FollowRepository
 import com.team01.project.domain.user.entity.CalendarVisibility
-import com.team01.project.domain.user.entity.User
 import com.team01.project.global.permission.CalendarPermission
 import com.team01.project.global.permission.PermissionService
-import com.team01.project.util.TestDisplayNameGenerator
+import com.team01.project.user.entity.UserFixture
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.DisplayNameGeneration
-import org.junit.jupiter.api.Test
 import java.util.Optional
 
-@DisplayNameGeneration(TestDisplayNameGenerator::class)
-class PermissionServiceTest {
-    private val followRepository: FollowRepository = mockk()
-    private val permissionService = PermissionService(followRepository)
+class PermissionServiceTest : BehaviorSpec({
+    val followRepository = mockk<FollowRepository>()
+    val permissionService = PermissionService(followRepository)
 
-    private val calendarOwner = User(
-        id = "calendar owner",
-        email = "owner email",
-        name = "owner name",
-        calendarVisibility = CalendarVisibility.FOLLOWER_ONLY // 팔로워에게 공개
-    )
+    val owner = UserFixture.유저("owner")
+    val follower = UserFixture.유저("follower")
+    val stranger = UserFixture.유저("stranger")
 
-    private val loggedInUser = User(
-        id = "logged in user",
-        email = "user email",
-        name = "user name"
-    )
+    beforeTest { clearAllMocks() }
 
-    @Test
-    fun `오너라서 캘린더를 수정할 권한이 있다`() {
-        // when
-        val calendarPermission = permissionService.checkPermission(calendarOwner, calendarOwner)
+    Given("캘린더 소유자가 캘린더를 전체 공개로 설정한 경우") {
+        owner.calendarVisibility = CalendarVisibility.PUBLIC
 
-        // then
-        assertEquals(CalendarPermission.EDIT, calendarPermission)
+        When("본인이 접근하면") {
+            val permission = permissionService.checkPermission(owner, owner)
+
+            Then("EDIT 권한을 가진다") {
+                permission shouldBe CalendarPermission.EDIT
+            }
+        }
+
+        When("팔로워가 접근하면") {
+            val permission = permissionService.checkPermission(owner, follower)
+
+            Then("VIEW 권한을 가진다") {
+                permission shouldBe CalendarPermission.VIEW
+            }
+        }
+
+        When("제3자가 접근하면") {
+            val permission = permissionService.checkPermission(owner, stranger)
+
+            Then("VIEW 권한을 가진다") {
+                permission shouldBe CalendarPermission.VIEW
+            }
+        }
     }
 
-    @Test
-    fun `오너가 아니라서 캘린더를 수정할 권한이 없다`() {
-        // given
-        every { followRepository.findStatusByToUserAndFromUser(calendarOwner, loggedInUser) } returns Optional.of(Status.ACCEPT)
+    Given("캘린더 소유자가 캘린더를 팔로워 공개로 설정한 경우") {
+        owner.calendarVisibility = CalendarVisibility.FOLLOWER_ONLY
 
-        // when
-        val calendarPermission = permissionService.checkPermission(calendarOwner, loggedInUser)
+        When("본인이 접근하면") {
+            val permission = permissionService.checkPermission(owner, owner)
 
-        // then
-        assertNotEquals(CalendarPermission.EDIT, calendarPermission)
+            Then("EDIT 권한을 가진다") {
+                permission shouldBe CalendarPermission.EDIT
+            }
+        }
+
+        When("팔로잉 요청이 수락된 팔로워가 접근하면") {
+            beforeTest {
+                every { followRepository.findStatusByToUserAndFromUser(eq(owner), eq(follower)) } returns Optional.of(Status.ACCEPT)
+            }
+
+            val permission by lazy {
+                permissionService.checkPermission(owner, follower)
+            }
+
+            Then("VIEW 권한을 가진다") {
+                permission shouldBe CalendarPermission.VIEW
+            }
+        }
+
+        When("팔로잉 요청이 수락되지 않은 제3자가 접근하면") {
+            beforeTest {
+                every { followRepository.findStatusByToUserAndFromUser(owner, stranger) } returns Optional.of(Status.NONE)
+            }
+
+            val permission by lazy {
+                permissionService.checkPermission(owner, stranger)
+            }
+
+            Then("어떠한 권한도 가지지 못한다") {
+                permission shouldBe CalendarPermission.NONE
+            }
+        }
     }
 
-    @Test
-    fun `오너라서 캘린더를 조회할 권한이 있다`() {
-        // when
-        val calendarPermission = permissionService.checkPermission(calendarOwner, calendarOwner)
+    Given("캘린더 소유자가 캘린더를 비공개로 설정한 경우") {
+        owner.calendarVisibility = CalendarVisibility.PRIVATE
 
-        // then
-        assertNotEquals(CalendarPermission.NONE, calendarPermission)
+        When("본인이 접근하면") {
+            val permission = permissionService.checkPermission(owner, owner)
+
+            Then("EDIT 권한을 가진다") {
+                permission shouldBe CalendarPermission.EDIT
+            }
+        }
+
+        When("팔로워가 접근하면") {
+            val permission = permissionService.checkPermission(owner, follower)
+
+            Then("어떠한 권한도 가지지 못한다") {
+                permission shouldBe CalendarPermission.NONE
+            }
+        }
+
+        When("제3자가 접근하면") {
+            val permission = permissionService.checkPermission(owner, follower)
+
+            Then("어떠한 권한도 가지지 못한다") {
+                permission shouldBe CalendarPermission.NONE
+            }
+        }
     }
-
-    @Test
-    fun `팔로워라서 팔로워 공개 캘린더를 조회할 권한이 있다`() {
-        // given
-        every { followRepository.findStatusByToUserAndFromUser(calendarOwner, loggedInUser) } returns Optional.of(Status.ACCEPT)
-
-        // when
-        val calendarPermission = permissionService.checkPermission(calendarOwner, loggedInUser)
-
-        // then
-        assertEquals(CalendarPermission.VIEW, calendarPermission)
-    }
-
-    @Test
-    fun `캘린더를 조회할 권한이 없다`() {
-        // given
-        every { followRepository.findStatusByToUserAndFromUser(calendarOwner, loggedInUser) } returns Optional.of(Status.NONE)
-
-        // when
-        val calendarPermission = permissionService.checkPermission(calendarOwner, loggedInUser)
-
-        // then
-        assertEquals(CalendarPermission.NONE, calendarPermission)
-    }
-}
+})
