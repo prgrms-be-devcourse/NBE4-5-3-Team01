@@ -17,16 +17,21 @@ const FollowPage = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        let loggedInUserId  = (await axios.get(`http://localhost:8080/api/v1/user/getUsers`, { withCredentials: true })).data.id
-        setCurrentUserId(loggedInUserId)
-        let userIdToUse = userId || loggedInUserId 
-        console.log(userIdToUse)
-        let response = null
-        if(currentUserId === userIdToUse && activeTab === "following") {
-          response = await axios.get(`http://localhost:8080/api/v1/follows/my`,
-          {
-            withCredentials: true
-          }
+        let loggedInUserId = (
+          await axios.get(`http://localhost:8080/api/v1/user/getUsers`, {
+            withCredentials: true,
+          })
+        ).data.data.id;
+        setCurrentUserId(loggedInUserId);
+        let userIdToUse = userId || loggedInUserId;
+        console.log(userIdToUse);
+        let response = null;
+        if (currentUserId === userIdToUse && activeTab === "following") {
+          response = await axios.get(
+            `http://localhost:8080/api/v1/follows/my`,
+            {
+              withCredentials: true,
+            }
           );
         } else if(currentUserId === userIdToUse && activeTab === "pending") {
           response = await axios.get(`http://localhost:8080/api/v1/follows/my/pending`,
