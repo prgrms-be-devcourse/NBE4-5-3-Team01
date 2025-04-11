@@ -36,9 +36,13 @@ class SpotifyConnectController(
     @GetMapping("/callback")
     fun connectSpotify(
         @RequestParam("code") code: String,
-        @RequestParam("state") jwt: String,
+        @RequestParam("state") state: String,
         response: HttpServletResponse
     ): RsData<Map<String, String>> {
+        val (jwt, redirectUrl) = state.split("::").let {
+            it[0] to (it.getOrNull(1) ?: "http://localhost:3000/user/profile")
+        }
+
         val userId = jwtTokenProvider.getUserIdFromToken(jwt)
         val user = spotifyLinkService.getUserById(userId)
 
@@ -46,7 +50,7 @@ class SpotifyConnectController(
             code = code,
             clientId = clientId,
             clientSecret = clientSecret,
-            redirectUri = "http://localhost:3000/user/spotify-callback",
+            redirectUri = "http://localhost:3000/user/spotify-callback", // 프론트 쪽 redirect URI와 일치
             tokenUri = tokenUri
         )
 
@@ -70,10 +74,10 @@ class SpotifyConnectController(
         val encodedJwt = URLEncoder.encode(newJwt, StandardCharsets.UTF_8)
         val encodedSpotify = URLEncoder.encode(accessToken, StandardCharsets.UTF_8)
 
-        response.setHeader("Set-Cookie", "accessToken=$encodedJwt; Path=/; HttpOnly")
+        response.addHeader("Set-Cookie", "accessToken=$encodedJwt; Path=/; HttpOnly")
         response.addHeader("Set-Cookie", "spotifyAccessToken=$encodedSpotify; Path=/; HttpOnly")
 
-        return RsData("200", "Spotify 연동 완료", mapOf("redirectUrl" to "http://localhost:3000/user/profile"))
+        return RsData("200", "Spotify 연동 완료", mapOf("redirectUrl" to redirectUrl))
     }
 
     @Operation(summary = "Spotify 연동 로그아웃", description = "Spotify로 로그인된 사용자의 인증 정보를 초기화하고 저장된 토큰 정리")

@@ -98,11 +98,10 @@ dependencies {
     implementation("nl.martijndwars:web-push:5.1.0")
 
     // Bouncy Castle Provider
-    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
 
     // SpringDoc Swagger
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 }
 
 tasks.test {

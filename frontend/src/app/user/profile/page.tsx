@@ -229,7 +229,6 @@ export default function ProfilePage() {
         return;
       }
 
-      // ✅ 프론트에서 처리할 redirect URI로 변경
       const redirectUri = encodeURIComponent(
         "http://localhost:3000/user/spotify-callback"
       );
@@ -237,14 +236,16 @@ export default function ProfilePage() {
       const scope =
         "user-read-email user-read-private playlist-read-private user-read-playback-state user-modify-playback-state streaming user-read-recently-played";
 
-      // ✅ Spotify 인증 요청 URL
+      // ✅ 리다이렉트 주소를 state에 포함
+      const redirectAfterLogin = encodeURIComponent("/user/profile");
+
       window.location.href =
         `https://accounts.spotify.com/authorize` +
         `?client_id=fadbee879e0e4575a2bb28abfe276934` +
         `&response_type=code` +
         `&redirect_uri=${redirectUri}` +
         `&scope=${encodeURIComponent(scope)}` +
-        `&state=${jwt}`; // 이건 accessToken (백엔드에서 다시 디코딩함)
+        `&state=${jwt}::${redirectAfterLogin}`; // ← state에 JWT와 redirectAfterLogin 포함
     }
   };
 

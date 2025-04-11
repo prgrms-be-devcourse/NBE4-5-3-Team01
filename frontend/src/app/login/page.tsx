@@ -1,15 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
 export default function LoginPage() {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(true); // 👈 로딩 상태 추가
   const router = useRouter();
 
-  // 일반 로그인 처리 (예시: API 호출 후 성공 시 콜백 페이지로 이동)
+  const getCookie = (name: string) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(";").shift();
+  };
+
+  useEffect(() => {
+    const token = getCookie("accessToken");
+    if (token) {
+      router.replace("/user/profile");
+    } else {
+      setIsLoading(false); // 👈 토큰 없을 때만 렌더링 시작
+    }
+  }, []);
+
   const handleNormalLogin = async () => {
     try {
       const response = await axios.post(
@@ -17,7 +32,6 @@ export default function LoginPage() {
         { loginId, password },
         { withCredentials: true }
       );
-      console.log("로그인", response);
 
       const accessToken = response.data.data.access_token;
       const refreshToken = response.data.data.refresh_token;
@@ -34,22 +48,22 @@ export default function LoginPage() {
     }
   };
 
-  // 스포티파이 로그인 처리
   const handleSpotifyLogin = () => {
     window.location.href =
       "http://localhost:8080/api/v1/oauth2/authorization/spotify";
   };
 
-  // 회원가입 페이지 이동
   const handleSignup = () => {
     router.push("/signup");
   };
+
+  // ✅ isLoading이 true일 땐 아무것도 렌더링하지 않음
+  if (isLoading) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
       <div className="bg-white p-8 rounded-lg shadow-lg text-center w-80">
         <h1 className="text-2xl font-bold mb-6">뮤직 캘린더</h1>
-        {/* 로그인/패스워드 입력 필드 */}
         <div className="space-y-4 mb-6">
           <input
             type="text"
@@ -66,16 +80,13 @@ export default function LoginPage() {
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>
-        {/* 버튼 그룹 */}
         <div className="space-y-4">
-          {/* 일반 로그인 버튼 */}
           <button
             onClick={handleNormalLogin}
             className="w-full bg-blue-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-600 transition-colors"
           >
             로그인
           </button>
-          {/* 스포티파이 로그인 버튼 */}
           <button
             onClick={handleSpotifyLogin}
             className="w-full bg-[#1DB954] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#1ed760] transition-colors flex items-center gap-2"
@@ -85,7 +96,6 @@ export default function LoginPage() {
             </svg>
             스포티파이로 로그인 하기
           </button>
-          {/* 회원가입 버튼 - 회색으로 변경 */}
           <button
             onClick={handleSignup}
             className="w-full bg-gray-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-gray-600 transition-colors"

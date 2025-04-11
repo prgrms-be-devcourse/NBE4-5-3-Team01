@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function SpotifyCallbackPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -15,10 +16,14 @@ export default function SpotifyCallbackPage() {
       return;
     }
 
+    const [jwt, encodedRedirect = "/user/profile"] = state.split("::");
+    const redirectAfterLogin = decodeURIComponent(encodedRedirect);
+    console.log("🔁 리다이렉트 경로:", redirectAfterLogin);
+
     const connectSpotify = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8080/api/v1/spotify/callback?code=${code}&state=${state}`,
+          `http://localhost:8080/api/v1/spotify/callback?code=${code}&state=${jwt}`,
           {
             method: "GET",
             credentials: "include",
@@ -26,8 +31,7 @@ export default function SpotifyCallbackPage() {
         );
         const result = await res.json();
         if (result.code === "200") {
-          const url = result.data.redirectUrl || "/user/profile";
-          window.location.href = url;
+          router.push(redirectAfterLogin);
         } else {
           alert("Spotify 연동 실패: " + result.msg);
         }
