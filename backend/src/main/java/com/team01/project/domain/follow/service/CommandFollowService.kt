@@ -2,6 +2,7 @@ package com.team01.project.domain.follow.service
 
 import com.team01.project.domain.follow.entity.Follow
 import com.team01.project.domain.follow.repository.FollowRepository
+import com.team01.project.domain.notification.event.NotificationFollowAcceptEvent
 import com.team01.project.domain.notification.event.NotificationFollowEvent
 import com.team01.project.domain.user.repository.UserRepository
 import com.team01.project.domain.user.repository.findByIdOrThrow
@@ -44,5 +45,7 @@ class CommandFollowService(
         val follow = followRepository.findByToUserAndFromUser(toUser, fromUser)
             .orElseThrow { IllegalArgumentException("팔로우를 찾을 수 없습니다.") }
         follow.accept()
+
+        eventPublisher.publishEvent(NotificationFollowAcceptEvent(this, LocalTime.now(), toUser, fromUser))
     }
 }

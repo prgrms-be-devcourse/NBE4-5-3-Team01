@@ -50,6 +50,18 @@ export default function CalendarRecordPage() {
     if (isFetched.current) return;
     isFetched.current = true;
 
+    const hasSpotifyToken = async () => {
+      const res = await axios.get(`${API_URL}/user/spotify-token`, {
+        withCredentials: true,
+      });
+      const token = res.data;
+
+      if (!token) {
+        alert("Spotify 연동 후에 기록 추가가 가능합니다!");
+        router.push("/calendar");
+      }
+    };
+
     const fetchUser = async () => {
       try {
         const membershipRes = await axios.get(`${API_URL}/membership/my`, {
@@ -89,6 +101,7 @@ export default function CalendarRecordPage() {
       }
     };
 
+    hasSpotifyToken();
     fetchInitialData();
     fetchUser();
   }, [trackId, id]);
@@ -381,12 +394,12 @@ export default function CalendarRecordPage() {
           <MusicList
             selectedTracks={selectedTracks}
             onRemoveTrack={handleRemoveTrack}
-            maxCount={membershipGrade === "premium" ? 50 : 20}
+            maxCount={MAX_TRACK_COUNT}
           />
           <MemoInput
             memo={memo}
             setMemo={setMemo}
-            maxLength={membershipGrade === "premium" ? 500 : 200}
+            maxLength={MAX_MEMO_LENGTH}
           />
 
           <div className="p-6">
