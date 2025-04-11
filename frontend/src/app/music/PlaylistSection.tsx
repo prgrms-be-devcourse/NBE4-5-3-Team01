@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Image from "next/image";
 import PlaylistTrackTable from "./PlaylistTrackTable";
@@ -30,9 +30,13 @@ export default function PlaylistSection() {
   const [selectedPlaylistId, setSelectedPlaylistId] = useState("");
   const [selectedPlaylistName, setSelectedPlaylistName] = useState("");
   const [membershipGrade, setMembershipGrade] = useState<string>("");
+  const isFetched = useRef(false);
   const { handleApiError } = useHandleApiError();
 
   useEffect(() => {
+    if (isFetched.current) return;
+    isFetched.current = true;
+
     fetchPlaylists();
   }, []);
 
@@ -53,9 +57,12 @@ export default function PlaylistSection() {
 
   const fetchTracks = async (playlistId: string, name: string) => {
     try {
-      const playlistRes = await axios.get(`${SPOTIFY_URL}/playlist/${playlistId}`, {
-        withCredentials: true,
-      });
+      const playlistRes = await axios.get(
+        `${SPOTIFY_URL}/playlist/${playlistId}`,
+        {
+          withCredentials: true,
+        }
+      );
 
       const memberRes = await axios.get(`${API_URL}/membership/my`, {
         withCredentials: true,
@@ -81,23 +88,36 @@ export default function PlaylistSection() {
       </div>
 
       <div className="flex flex-wrap gap-4">
-        {playlists.map((playlist) => (
-          <div
-            key={playlist.id}
-            className="cursor-pointer w-40"
-            onClick={() => fetchTracks(playlist.id, playlist.name)}
-          >
-            <Image
-              src={playlist.image || "/default.jpg"}
-              alt={playlist.name}
-              width={160}
-              height={160}
-              className="rounded-lg w-full h-40 object-cover"
-            />
-            <p className="mt-2 font-medium truncate">{playlist.name}</p>
-            <p className="text-sm text-gray-500">{playlist.trackCount}곡</p>
+        {playlists.length === 0 ? (
+          <div className="text-gray-500 bg-gray-100 p-6 rounded-lg w-full text-center">
+            아직 가져온 Spotify 플레이리스트가 없어요.
+            <br />
+            <a
+              className="font-medium text-blue-500"
+              href="https://open.spotify.com/"
+            >
+              Spotify에 새로운 플레이리스트 만들기
+            </a>
           </div>
-        ))}
+        ) : (
+          playlists.map((playlist) => (
+            <div
+              key={playlist.id}
+              className="cursor-pointer w-40"
+              onClick={() => fetchTracks(playlist.id, playlist.name)}
+            >
+              <Image
+                src={playlist.image || "/default.jpg"}
+                alt={playlist.name}
+                width={160}
+                height={160}
+                className="rounded-lg w-full h-40 object-cover"
+              />
+              <p className="mt-2 font-medium truncate">{playlist.name}</p>
+              <p className="text-sm text-gray-500">{playlist.trackCount}곡</p>
+            </div>
+          ))
+        )}
       </div>
 
       {selectedPlaylistId && (
