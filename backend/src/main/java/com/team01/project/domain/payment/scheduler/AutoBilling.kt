@@ -20,37 +20,34 @@ class AutoBilling(
     fun processAutoBilling() {
         val today = LocalDate.now()
 
-        val users = userRepository.findAll().filter {
-            val m = it.membership
-            m != null && m.autoRenew && m.billingKey != null && m.endDate?.isBefore(today) == true
-        }
+        userRepository.findAll().forEach { user ->
+            val membership = user.membership
+            val billingKey = membership?.billingKey
 
-        for (user in users) {
-            val membership = user.membership!!
-            val success = tossService.chargeBillingKey(
-                billingKey = membership.billingKey!!,
-                customerKey = user.customerKey!!,
-                amount = 1900,
-                orderName = "프리미엄 멤버십"
-            )
+            if (membership?.autoRenew == true &&
+                billingKey != null &&
+                membership.endDate?.isBefore(today) == true
+            ) {
+                val success = tossService.chargeBillingKey(user.id, billingKey, 1900, "정기 결제")
 
-            if (success) {
-                membership.endDate = today.plusMonths(1)
-                user.membership!!.count += 1
-                membership.failCount = 0
-                log.info("자동 결제 성공: userId=${user.id}, 다음 종료일=${membership.endDate}")
-            } else {
-                membership.failCount += 1
-                log.warn("자동 결제 실패: userId=${user.id}, 실패 횟수=${membership.failCount}")
+                membership.apply {
+                    if (success) {
+                        endDate = today.plusMonths(1)
+                        failCount = 0
+                        log.info("[INFO] ${user.name}(${user.id})의 자동 결제 성공. 종료일 연장됨 → $endDate")
+                    } else {
+                        failCount++
+                        log.info("[INFO] ${user.name}(${user.id})의 자동 결제 실패. 누적 실패 횟수: $failCount")
 
-                // ✅ 3회 이상 실패 시 자동 갱신 해제
-                if (membership.failCount >= 3) {
-                    membership.autoRenew = false
-                    log.warn("자동 갱신 해제: userId=${user.id}, 실패 3회 이상")
+                        if (failCount >= 3) {
+                            autoRenew = false
+                            log.info("[INFO] ${user.name}(${user.id})의 자동 결제 3회 실패로 autoRenew 해제")
+                        }
+                    }
                 }
             }
-
             userRepository.save(user)
         }
     }
+
 }
