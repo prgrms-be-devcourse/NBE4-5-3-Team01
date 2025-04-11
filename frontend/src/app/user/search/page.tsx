@@ -61,7 +61,9 @@ const SearchPage = () => {
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.user.id === userId
-            ? { ...user, isFollowing: !isFollowing }
+            ? { ...user,
+              isFollowing: isFollowing === "ACCEPT" || isFollowing === "PENDING" ? null : "PENDING", // 요청 상태로 변경
+            }
             : user
         )
       );

@@ -84,7 +84,9 @@ const FollowPage = () => {
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.user.id === userId
-            ? { ...user, isFollowing: !isFollowing } // 기존 isFollower 값 유지
+            ? { ...user, 
+              isFollowing: isFollowing === "ACCEPT" || isFollowing === "PENDING" ? null : "PENDING", // 요청 상태로 변경 
+            }
             : user
         )
       );
@@ -168,10 +170,20 @@ const FollowPage = () => {
             const isFollowing = user.isFollowing;
             const isFollower = user.isFollower;
             let buttonText = "팔로우";
+            let buttonColor = "bg-[#C8B6FF] text-white hover:bg-[#B8C0FF]"
 
-          if (isFollowing == "PENDING") buttonText = "요청함";
-          else if(isFollowing == "ACCEPT") buttonText = "팔로잉";
-          else if (isFollower == "ACCEPT") buttonText = "맞팔로우";
+          if (isFollowing == "PENDING") {
+            buttonText = "요청함"
+            buttonColor = "bg-[#BBD0FF] text-gray-800 hover:bg-[#B8C0FF]"
+          } 
+          else if(isFollowing == "ACCEPT") { 
+            buttonText = "팔로잉"
+            buttonColor = "bg-[#BBD0FF] text-gray-800 hover:bg-[#B8C0FF]"
+          }
+          else if (isFollower == "ACCEPT") { 
+            buttonText = "맞팔로우"
+            buttonColor = "bg-[#FFD6FF] text-gray-800 hover:bg-[#E7C6FF]"
+          }
 
             return (
             <div
@@ -208,7 +220,7 @@ const FollowPage = () => {
                 </div>
               ) : (
                 <button
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition ${isFollowing ? "bg-[#BBD0FF] text-gray-800 hover:bg-[#B8C0FF]" : isFollower ? "bg-[#FFD6FF] text-gray-800 hover:bg-[#E7C6FF]" : "bg-[#C8B6FF] text-white hover:bg-[#B8C0FF]"}`}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition ${buttonColor}`}
                   onClick={(e) => toggleFollow(e, user.user.id, isFollowing)}
                 >
                   {buttonText}
