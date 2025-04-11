@@ -49,5 +49,4 @@ class AutoBilling(
             userRepository.save(user)
         }
     }
-
 }
