@@ -24,10 +24,10 @@ class SwaggerConfig {
                 .bearerFormat("JWT")
         )
         return OpenAPI()
-            .components(Components()) // 초기 Components 인스턴스 (기본값)
+            .openapi("3.0.1")
             .info(apiInfo())
+            .components(components)
             .addSecurityItem(securityRequirement)
-            .components(components) // 실제 보안 스키마가 포함된 Components 설정
     }
 
     private fun apiInfo(): Info {

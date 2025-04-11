@@ -3,6 +3,7 @@ package com.team01.project.domain.user.controller
 import com.team01.project.domain.user.service.SpotifyLinkService
 import com.team01.project.global.dto.RsData
 import com.team01.project.global.security.JwtTokenProvider
+import io.swagger.v3.oas.annotations.Operation
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
@@ -31,6 +32,7 @@ class SpotifyConnectController(
 
     private val log = LoggerFactory.getLogger(SpotifyConnectController::class.java)
 
+    @Operation(summary = "Spotify 계정 연동 api", description = "Spotify OAuth 인증 후 토큰을 저장하고 프로필 페이지로 리디렉트")
     @GetMapping("/callback")
     fun connectSpotify(
         @RequestParam("code") code: String,
@@ -74,6 +76,7 @@ class SpotifyConnectController(
         return RsData("200", "Spotify 연동 완료", mapOf("redirectUrl" to "http://localhost:3000/user/profile"))
     }
 
+    @Operation(summary = "Spotify 연동 로그아웃", description = "Spotify로 로그인된 사용자의 인증 정보를 초기화하고 저장된 토큰 정리")
     @GetMapping("/logout")
     fun spotifyAwareLogout(
         request: HttpServletRequest,

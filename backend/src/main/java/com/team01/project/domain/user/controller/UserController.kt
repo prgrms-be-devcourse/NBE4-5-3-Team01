@@ -50,6 +50,7 @@ class UserController(
         return RsData("200-1", "로그인 성공", userService.validLogin(reqMap, response))
     }
 
+    @Operation(summary = "로그아웃 api", description = "토큰을 삭제하며 로그인 정보를 삭제")
     @ResponseBody
     @GetMapping("/logout")
     fun forceLogout(
