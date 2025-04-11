@@ -192,14 +192,26 @@ const FollowPage = () => {
               onClick={() => handleUserClick(user.user.id)}
             >
               <div className="flex items-center gap-4">
-                <Image 
-                  src={user.user.profileImg}
-                  alt="프로필 이미지"
-                  unoptimized
-                  width={60}
-                  height={60}
-                  className="rounded-full object-cover border-1 border-gray-300"
-                />
+                { user.user.profileImg ? 
+                  <Image 
+                    src={user.user.profileImg}
+                    alt="프로필 이미지"
+                    unoptimized
+                    width={60}
+                    height={60}
+                    className="rounded-full object-cover border-1 border-gray-300"
+                  /> :
+                  <div className="w-[60px] h-[60px] rounded-full bg-purple-100 flex items-center justify-center border border-gray-300">
+                    <svg
+                      className="w-3/3 h-3/3 text-purple-300"
+                      viewBox="0 0 36 36"
+                      fill="currentColor"
+                    >
+                      <path d="M18 0C8.06 0 0 8.06 0 18s8.06 18 18 18 18-8.06 18-18S27.94 0 18 0zm0 6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6 2.69-6 6-6zm0 25.2c-5 0-9.42-2.56-12-6.44.06-3.98 8-6.16 12-6.16 3.98 0 11.94 2.18 12 6.16-2.58 3.88-7 6.44-12 6.44z" />
+                    </svg>
+                  </div>
+                }
+                
                 <span className="text-lg font-medium text-gray-800">{user.user.name}</span>
               </div>
 
