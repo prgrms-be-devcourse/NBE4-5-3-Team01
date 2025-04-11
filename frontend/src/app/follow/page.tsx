@@ -84,7 +84,9 @@ const FollowPage = () => {
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.user.id === userId
-            ? { ...user, isFollowing: !isFollowing } // 기존 isFollower 값 유지
+            ? { ...user, 
+              isFollowing: isFollowing === "ACCEPT" || isFollowing === "PENDING" ? null : "PENDING", // 요청 상태로 변경 
+            }
             : user
         )
       );
@@ -168,10 +170,20 @@ const FollowPage = () => {
             const isFollowing = user.isFollowing;
             const isFollower = user.isFollower;
             let buttonText = "팔로우";
+            let buttonColor = "bg-[#C8B6FF] text-white hover:bg-[#B8C0FF]"
 
-          if (isFollowing == "PENDING") buttonText = "요청함";
-          else if(isFollowing == "ACCEPT") buttonText = "팔로잉";
-          else if (isFollower == "ACCEPT") buttonText = "맞팔로우";
+          if (isFollowing == "PENDING") {
+            buttonText = "요청함"
+            buttonColor = "bg-[#BBD0FF] text-gray-800 hover:bg-[#B8C0FF]"
+          } 
+          else if(isFollowing == "ACCEPT") { 
+            buttonText = "팔로잉"
+            buttonColor = "bg-[#BBD0FF] text-gray-800 hover:bg-[#B8C0FF]"
+          }
+          else if (isFollower == "ACCEPT") { 
+            buttonText = "맞팔로우"
+            buttonColor = "bg-[#FFD6FF] text-gray-800 hover:bg-[#E7C6FF]"
+          }
 
             return (
             <div
@@ -180,14 +192,26 @@ const FollowPage = () => {
               onClick={() => handleUserClick(user.user.id)}
             >
               <div className="flex items-center gap-4">
-                <Image 
-                  src={user.user.profileImg}
-                  alt="프로필 이미지"
-                  unoptimized
-                  width={60}
-                  height={60}
-                  className="rounded-full object-cover border-1 border-gray-300"
-                />
+                { user.user.profileImg ? 
+                  <Image 
+                    src={user.user.profileImg}
+                    alt="프로필 이미지"
+                    unoptimized
+                    width={60}
+                    height={60}
+                    className="rounded-full object-cover border-1 border-gray-300"
+                  /> :
+                  <div className="w-[60px] h-[60px] rounded-full bg-purple-100 flex items-center justify-center border border-gray-300">
+                    <svg
+                      className="w-3/3 h-3/3 text-purple-300"
+                      viewBox="0 0 36 36"
+                      fill="currentColor"
+                    >
+                      <path d="M18 0C8.06 0 0 8.06 0 18s8.06 18 18 18 18-8.06 18-18S27.94 0 18 0zm0 6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6 2.69-6 6-6zm0 25.2c-5 0-9.42-2.56-12-6.44.06-3.98 8-6.16 12-6.16 3.98 0 11.94 2.18 12 6.16-2.58 3.88-7 6.44-12 6.44z" />
+                    </svg>
+                  </div>
+                }
+                
                 <span className="text-lg font-medium text-gray-800">{user.user.name}</span>
               </div>
 
@@ -208,7 +232,7 @@ const FollowPage = () => {
                 </div>
               ) : (
                 <button
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition ${isFollowing ? "bg-[#BBD0FF] text-gray-800 hover:bg-[#B8C0FF]" : isFollower ? "bg-[#FFD6FF] text-gray-800 hover:bg-[#E7C6FF]" : "bg-[#C8B6FF] text-white hover:bg-[#B8C0FF]"}`}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition ${buttonColor}`}
                   onClick={(e) => toggleFollow(e, user.user.id, isFollowing)}
                 >
                   {buttonText}
