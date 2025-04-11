@@ -78,6 +78,9 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:5.9.0") // Kotest assertions
     testImplementation("io.kotest:kotest-property:5.9.0") // Optional: property-based testing
     testImplementation("io.mockk:mockk:1.13.10") // Mocking
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0") // MockWebServer
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 
     // OAuth, security
     implementation("org.springframework.boot:spring-boot-starter-security")

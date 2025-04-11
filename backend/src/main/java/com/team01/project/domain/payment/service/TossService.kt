@@ -59,7 +59,7 @@ class TossService {
     }
 
     fun processSubscription(request: TossSubscriptionRequest): TossSubscriptionResponse? {
-        val url = "https://api.tosspayments.com/v1/billing/authorizations/issue"
+        val url = "$baseUrl/v1/billing/authorizations/issue"
 
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
