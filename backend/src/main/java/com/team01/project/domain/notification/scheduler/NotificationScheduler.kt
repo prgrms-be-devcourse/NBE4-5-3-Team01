@@ -2,6 +2,7 @@ package com.team01.project.domain.notification.scheduler
 
 import com.team01.project.domain.calendardate.repository.CalendarDateRepository
 import com.team01.project.domain.notification.entity.Notification
+import com.team01.project.domain.notification.event.NotificationFollowAcceptEvent
 import com.team01.project.domain.notification.event.NotificationFollowEvent
 import com.team01.project.domain.notification.event.NotificationInitEvent
 import com.team01.project.domain.notification.event.NotificationRecordEvent
@@ -180,11 +181,23 @@ class NotificationScheduler(
     @EventListener
     fun handleNotificationAsync(event: NotificationFollowEvent) {
         println("🔔 새로운 팔로우 알림!")
-        scheduleNotificationFollowSending(
+        scheduleNotificationSending(
             event.time,
             event.toUser,
             "FOLLOWING",
-            "${event.fromUser.name}님이 회원님을 팔로우하기 시작했습니다."
+            "${event.fromUser.name}님이 회원님에게 팔로우 요청을 보냈습니다."
+        )
+    }
+
+    @Async
+    @EventListener
+    fun handleNotificationAsync(event: NotificationFollowAcceptEvent) {
+        println("🔔 팔로우 요청 수락 알림!")
+        scheduleNotificationSending(
+            event.time,
+            event.fromUser,
+            "FOLLOWING ACCEPTED",
+            "${event.toUser.name}님이 팔로우 요청을 수락했습니다."
         )
     }
 
@@ -192,7 +205,7 @@ class NotificationScheduler(
     @EventListener
     fun handleNotificationAsync(event: NotificationRecordEvent) {
         println("🔔 ${event.user.name}님의 새로운 음악 등록 알림!")
-        scheduleNotificationFollowSending(
+        scheduleNotificationSending(
             event.time,
             event.user,
             "SHARE MUSIC",
@@ -200,7 +213,7 @@ class NotificationScheduler(
         )
     }
 
-    private fun scheduleNotificationFollowSending(
+    private fun scheduleNotificationSending(
         notificationTime: LocalTime,
         user: User,
         title: String,

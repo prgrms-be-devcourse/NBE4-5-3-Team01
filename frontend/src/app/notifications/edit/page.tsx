@@ -81,7 +81,7 @@ const NotificationEdit = () => {
     "SHARE MUSIC": "음악을 캘린더에 기록했을 때 알림",
     "BUILD PLAYLIST": "플레이리스트를 만들어보길 추천하는 알림",
     "YEAR HISTORY": "작년 오늘 기록한 음악 알림",
-    FOLLOWING: "다른 사용자가 나를 팔로우하기 시작할 때 알림",
+    FOLLOWING: "다른 사용자가 나를 팔로우할 때 알림",
     "DAILY RECAP": "하루 기록 요약 알림",
   };
 
