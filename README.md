@@ -1,5 +1,5 @@
 # NBE4-5-3-Team01
-프로그래머스 백엔드 데브코스 4기 5회차 1팀 단단한 나뭇가지의 3차 팀 프로젝트입니다.
+프로그래머스 백엔드 데브코스 4기 5회차 1팀 단단한 나뭇가지의 3차 팀 프로젝트
 
 <br/>
 
@@ -41,8 +41,8 @@
 |이름|역할|
 |:---:|:---|
 |조정인|<ul><li>팀 리딩</li><li>음악 검색</li><li>음악 추천</li><li>멤버십 구독 및 결제</li><li>스포티파이 플레이리스트 연동</li><li>관리자 페이지</li></ul>|
-|강웅빈|<ul><li>팔로우 요청</li><li>팔로우 수락 및 거절</li><li>유저 검색</li><li>팔로잉, 팔로워 목록 조회</li><li>팔로잉 수, 팔로워 수 조회</li></ul>|
-|김지수|<ul><li>캘린더 조회</li><li>캘린더 생성</li><li>음악 기록 및 기록 수정</li><li>캘린더 공개 설정</li><li>캘린더 접근 제한</li></ul>|
+|강웅빈|<ul><li>회원 검색</li><li>팔로우 요청 수락 및 거절</li><li>팔로잉, 팔로워 목록 조회</li><li>팔로잉 수, 팔로워 수 조회</li></ul>|
+|김지수|<ul><li>캘린더 조회</li><li>캘린더 생성</li><li>음악 기록 생성 및 수정</li><li>캘린더 공개 설정</li><li>캘린더 접근 제한</li></ul>|
 |신우석|<ul><li>자체 로그인</li><li>스포티파이 계정 연동</li><li>소셜 로그인</li><li>회원 관리</li></ul>|
 |엄현수|<ul><li>이메일 알림 및 푸시 알림</li><li>알림 읽음 처리</li><li>받은 알림 목록 조회</li><li>음악 기록 통계 시각화</li><li>음악 재생</li><li>스포티파이 최근 재생 기록 연동</li></ul>|
 
@@ -57,7 +57,7 @@ git clone https://github.com/prgrms-be-devcourse/NBE4-5-3-Team01.git
 cd NBE4-5-3-Team01
 ```
 
-### 프론트엔드 설정 및 실행
+### 프론트엔드 실행
 ```bash
 cd frontend
 npm install
@@ -82,7 +82,7 @@ npm run dev
 ### 데이터베이스
 <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white"><img src="https://img.shields.io/badge/h2-09476B?style=for-the-badge&logo=h2database&logoColor=white">
 
-### IED 및 개발 도구
+### IDE 및 개발 도구
 <img src="https://img.shields.io/badge/intellij idea-000000?style=for-the-badge&logo=intellijidea&logoColor=white">
 
 ### 버전 관리 및 협업 도구
@@ -119,16 +119,16 @@ npm run dev
   - 각 팀원의 개발 브랜치
   - 모든 기능 개발은 이 브랜치에서 수행
 - 테스트가 완료되면, ```main``` 브랜치를 타겟으로 Pull Request를 생성하여 Review를 요청
-- Review가 완료되고, 피드백이 모두 반영되면 해당 ```feature``` 브랜치를 ```main```브랜치로 **Merge**
+- Review가 완료되고, 피드백이 모두 반영되면 해당 ```feature``` 브랜치를 ```main``` 브랜치로 **Merge**
 
 <br/>
 
 ## API 명세서
-[📝 API 명세서](https://github.com/prgrms-be-devcourse/NBE4-5-2-Team01/wiki/%F0%9F%93%9D-API-%EB%AA%85%EC%84%B8%EC%84%9C)
+[📝 API 명세서](https://github.com/prgrms-be-devcourse/NBE4-5-3-Team01/wiki/%F0%9F%93%9D-API-%EB%AA%85%EC%84%B8%EC%84%9C)
 <br/>
 <br/>
 
 ## 컨벤션
-[🎯 Commit Convention](https://github.com/prgrms-be-devcourse/NBE4-5-2-Team01/wiki/%F0%9F%93%8C-Git-Commit-Message-Convention)
+[🎯 Commit Convention](https://github.com/prgrms-be-devcourse/NBE4-5-3-Team01/wiki/%F0%9F%93%8C-Git-Commit-Message-Convention)
 <br/>
-[📌 Code Convention](https://github.com/prgrms-be-devcourse/NBE4-5-2-Team01/wiki/%F0%9F%93%8C-Code-Convention)
+[📌 Code Convention](https://github.com/prgrms-be-devcourse/NBE4-5-3-Team01/wiki/%F0%9F%93%8C-Code-Convention)
