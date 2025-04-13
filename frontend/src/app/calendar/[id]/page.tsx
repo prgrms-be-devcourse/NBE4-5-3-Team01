@@ -12,11 +12,13 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { MusicRecord } from "@/types/musicRecord";
 import { AxiosError } from "axios";
-import { useGlobalAlert } from "@/components/GlobalAlert";
 import { fetchMusicRecords } from "@/lib/api/musicRecord";
 import { getSpotifyAccessToken } from "@/app/utils/getSpotifyAccessToken";
+import {useModal} from "@/hooks/useModal";
 
 export default function MusicDetailPage() {
+  const { showAlert, ModalComponent } = useModal();
+
   const [musicRecord, setMusicRecord] = useState<MusicRecord>();
   const [currentYear, setCurrentYear] = useState<number>(
     new Date().getFullYear()
@@ -27,7 +29,6 @@ export default function MusicDetailPage() {
   const [currentDay, setCurrentDay] = useState<number>(new Date().getDay());
   const [calendarPermission, setCalendarPermission] = useState<string | null>();
   const [isPremium, setIsPremium] = useState<boolean | null>(null);
-  const { setAlert } = useGlobalAlert();
 
   const params = useParams();
   const router = useRouter();
@@ -47,14 +48,15 @@ export default function MusicDetailPage() {
         setCalendarPermission(musicRecord.calendarPermission);
       } catch (error) {
         if (error instanceof AxiosError)
-          setAlert({
-            code: error.response!.status.toString(),
-            message: error.response!.data.msg,
+          await showAlert({
+            title: error.response!.data.msg,
+            description: "확인 버튼을 누르면 내 캘린더로 이동합니다.",
+            confirmText: "확인",
+            onConfirm: () => {
+              router.push("/calendar");
+            },
           });
 
-        setTimeout(() => {
-          router.push("/calendar");
-        }, 2000); // 2초 대기 후 이동
         return;
       }
     }
@@ -174,6 +176,7 @@ export default function MusicDetailPage() {
           ▶️ Spotify에서 플레이리스트 듣기
         </button>
       )}
+      {ModalComponent}
     </div>
   );
 }
