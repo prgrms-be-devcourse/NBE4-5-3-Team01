@@ -33,7 +33,7 @@
 - 음악 검색, 기록, 추천 및 재생 🎵
 - 음악 기록 분석을 통한 주간, 월간, 장르별, 가수별 통계 시각화 📊
 - 이메일 알림 및 푸시 알림 🔔
-- 팔로우 및 팔로잉한 회원의 캘린더 조회 💘
+- 회원 검색 및 팔로우 💘
 
 <br/>
 
@@ -74,7 +74,7 @@ npm run dev
 
 ## 기술 스택
 ### 언어
-<img src="https://img.shields.io/badge/java 21-007396?style=for-the-badge&logo=java&logoColor=white"><img src="https://img.shields.io/badge/kotlin 1.9.25-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white"><img src="https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+<img src="https://img.shields.io/badge/java 21-007396?style=for-the-badge&logo=java&logoColor=white"><img src="https://img.shields.io/badge/kotlin 1.9.25-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white"><img src="https://img.shields.io/badge/typescript 5.8.2-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
 
 ### 프레임워크 및 라이브러리
 <img src="https://img.shields.io/badge/springboot 3.4.2-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"><img src="https://img.shields.io/badge/spring security-6DB33F?style=for-the-badge&logo=spring security&logoColor=white"><img src="https://img.shields.io/badge/Spring Data JPA-67C52A?style=for-the-badge&logo=springboot&logoColor=white"><img src="https://img.shields.io/badge/Spring WebFlux-9FE870?style=for-the-badge&logo=springboot&logoColor=white"><br/><img src="https://img.shields.io/badge/Spring OAuth2-569A31?style=for-the-badge&logo=springboot&logoColor=white"><img src="https://img.shields.io/badge/Spring Mail-6DA252?style=for-the-badge&logo=springboot&logoColor=white"><img src="https://img.shields.io/badge/next.js 15.2.4-000000?style=for-the-badge&logo=next.js&logoColor=white"><img src="https://img.shields.io/badge/react 19.0.0-61DAFB?style=for-the-badge&logo=react&logoColor=black"><img src="https://img.shields.io/badge/shadcn/ui-000000?style=for-the-badge&logo=shadcnui&logoColor=white">
