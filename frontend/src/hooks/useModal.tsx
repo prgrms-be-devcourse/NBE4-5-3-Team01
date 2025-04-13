@@ -7,6 +7,7 @@ type ModalOptions = {
   description?: string;
   confirmText?: string;
   cancelText?: string;
+  onConfirm?: () => void;
 };
 
 export const useModal = () => {
@@ -40,6 +41,10 @@ export const useModal = () => {
   };
 
   const handleConfirm = () => {
+    if (options.onConfirm) {
+      options.onConfirm();
+    }
+
     if (onResolve) {
       if (options.type === "confirm") {
         (onResolve as (result: boolean) => void)(true);
