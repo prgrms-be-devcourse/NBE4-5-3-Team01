@@ -55,6 +55,7 @@ export default function MusicDetailPage() {
             onConfirm: () => {
               router.push("/calendar");
             },
+            canClose: false,
           });
 
         return;

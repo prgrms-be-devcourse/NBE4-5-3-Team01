@@ -132,6 +132,7 @@ const Calendar: React.FC = () => {
             onConfirm: () => {
               router.push("/calendar");
             },
+            canClose: false,
           });
       }
     }

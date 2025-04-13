@@ -8,6 +8,7 @@ type ModalOptions = {
   confirmText?: string;
   cancelText?: string;
   onConfirm?: () => void;
+  canClose?: boolean;
 };
 
 export const useModal = () => {
@@ -65,6 +66,7 @@ export const useModal = () => {
       cancelText={options.cancelText}
       onClose={handleClose}
       onConfirm={handleConfirm}
+      canClose={options.canClose}
     />
   );
 
