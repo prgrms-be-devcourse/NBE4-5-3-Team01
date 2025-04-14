@@ -6,6 +6,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {cn} from "@/lib/utils";
 
 interface AlertModalProps {
   open: boolean;
@@ -16,6 +17,7 @@ interface AlertModalProps {
   cancelText?: string;
   onClose: () => void;
   onConfirm?: () => void;
+  canClose?: boolean;
 }
 
 export default function AlertModal({
@@ -27,12 +29,17 @@ export default function AlertModal({
   cancelText = "취소",
   onClose,
   onConfirm,
+  canClose = true,
 }: AlertModalProps) {
   const isConfirm = type === "confirm";
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm sm:max-w-md w-full p-6 rounded-xl bg-white shadow-xl z-50">
+      <DialogContent className={cn("max-w-sm sm:max-w-md w-full p-6 rounded-xl bg-white shadow-xl z-50",
+        !canClose && "[&>button[type=button]]:hidden")}
+        onEscapeKeyDown={!canClose ? (e) => e.preventDefault() : undefined}
+        onPointerDownOutside={!canClose ? (e) => e.preventDefault() : undefined}
+      >
         <DialogHeader className="bg-[#C8B6FF] -mx-6 -mt-6 px-6 py-4 rounded-t-xl">
           <DialogTitle className="text-lg font-bold">{title}</DialogTitle>
         </DialogHeader>

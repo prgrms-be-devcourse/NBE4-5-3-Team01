@@ -21,8 +21,11 @@ import { fetchFollowCount } from "@/lib/api/follow";
 import { fetchMonthlyData } from "@/lib/api/calendar";
 import "@/components/style/calendar.css";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { useModal } from "@/hooks/useModal";
 
 const Calendar: React.FC = () => {
+  const { showAlert, ModalComponent } = useModal();
+
   const [monthly, setMonthly] = useState<CalendarDate[]>([]);
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear()
@@ -122,16 +125,15 @@ const Calendar: React.FC = () => {
       } catch (error) {
         // 예외 처리
         if (error instanceof AxiosError)
-          setAlert({
-            code: error.response!.status.toString(),
-            message: error.response!.data.msg,
+          await showAlert({
+            title: error.response!.data.msg,
+            description: "확인 버튼을 누르면 내 캘린더로 이동합니다.",
+            confirmText: "확인",
+            onConfirm: () => {
+              router.push("/calendar");
+            },
+            canClose: false,
           });
-
-        setTimeout(() => {
-          router.push("/calendar");
-        }, 2000); // 2초 대기 후 이동
-
-        return;
       }
     }
 
@@ -315,6 +317,7 @@ const Calendar: React.FC = () => {
               showNonCurrentDates={false}
             />
           </div>
+          {ModalComponent}
         </div>
       )}
     </>
